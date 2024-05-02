@@ -7,7 +7,10 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "webpack serve --open --config ./webpack.config.js --env mode=dev",
     "build:dev": "webpack --config ./webpack.config.js --env mode=dev",
-    "build:prod": "webpack --config ./webpack.config.js --env mode=prod"
+    "build:prod": "webpack --config ./webpack.config.js --env mode=prod",
+    "format": "prettier --write ./src",
+    "ci:format": "prettier --check ./src",
+    "lint": "eslint src/ --ext .ts"
   },
   "keywords": [],
   "author": "",
