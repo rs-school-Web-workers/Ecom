@@ -1,6 +1,5 @@
-"node_modules/",
-"/dist"
+node_modules/,
+/dist
 webpack.config.js
 webpack.dev.config.js
 webpack.prod.config.js
-index.ts
