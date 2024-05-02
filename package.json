@@ -6,12 +6,14 @@
   "type": "module",
   "scripts": {
     "test": "jest",
+    "test:dev": "jest --watch",
+    "test:info": "jest --collectCoverage=true",
     "start": "webpack serve --open --config ./webpack.config.js --env mode=dev",
     "build:dev": "webpack --config ./webpack.config.js --env mode=dev",
     "build:prod": "webpack --config ./webpack.config.js --env mode=prod",
     "format": "prettier --write ./src",
     "ci:format": "prettier --check ./src",
-    "lint": "eslint src/ --ext .ts"
+    "lint": "eslint src/ --ext .ts",
     "prepare": "husky"
   },
   "keywords": [],
