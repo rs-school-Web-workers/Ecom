@@ -7,16 +7,16 @@ import {
   type HttpMiddlewareOptions, // Required for sending HTTP requests
 } from '@commercetools/sdk-client-v2';
 
-const projectKey = '{projectKey}';
-const scopes = ['{scope}'];
+const projectKey = 'web-workers';
+const scopes = ['manage_project:web-workers'];
 
 // Configure authMiddlewareOptions
 const authMiddlewareOptions: AuthMiddlewareOptions = {
-  host: 'https://auth.{region}.commercetools.com',
+  host: 'https://auth.europe-west1.gcp.commercetools.com',
   projectKey: projectKey,
   credentials: {
-    clientId: '{clientID}',
-    clientSecret: '{clientSecret}',
+    clientId: '7e-i03YTXvZQGGhyQ33wlP0q',
+    clientSecret: 'DCqr0HmJEr4J501e8geM_7z_tt4YKP84',
   },
   scopes,
   fetch,
@@ -24,7 +24,7 @@ const authMiddlewareOptions: AuthMiddlewareOptions = {
 
 // Configure httpMiddlewareOptions
 const httpMiddlewareOptions: HttpMiddlewareOptions = {
-  host: 'https://api.{region}.commercetools.com',
+  host: 'https://api.europe-west1.gcp.commercetools.com',
   fetch,
 };
 
