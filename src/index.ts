@@ -1,3 +1,3 @@
-import { test } from './test';
+import { App } from './App/App';
 
-console.log('index.ts', test);
+const app: App = new App();

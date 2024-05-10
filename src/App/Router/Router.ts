@@ -5,9 +5,12 @@ export class Router {
 
   constructor(pages: PageInfo[]) {
     this.pages = pages;
+    window.addEventListener('DOMContentLoaded', this.browserLineListener.bind(this));
+    window.addEventListener('popstate', this.browserLineListener.bind(this));
   }
 
   navigate(path: string) {
+    console.log(path);
     const pageInfo: PageInfo | undefined = this.pages.find((item) => item.pagePath === path);
     if (pageInfo) {
       pageInfo.callback();
@@ -21,5 +24,10 @@ export class Router {
     if (pageNotFound) {
       this.navigate(PagePath.NOT_FOUND);
     }
+  }
+
+  browserLineListener() {
+    const pagePath: string = window.location.pathname.slice(1);
+    this.navigate(pagePath);
   }
 }

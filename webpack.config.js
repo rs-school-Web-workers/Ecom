@@ -42,6 +42,7 @@ const commonConfig = {
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: 'index_bundle.js',
+    publicPath: '/',
   },
   devServer: {
     open: true,
