@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "description": "rs school stage 2 final project: e-commerce application",
   "main": "index.ts",
-  "type": "module",
   "scripts": {
     "test": "jest",
     "test:dev": "jest --watch",
@@ -22,6 +21,7 @@
   "devDependencies": {
     "@commitlint/cli": "^19.3.0",
     "@commitlint/config-conventional": "^19.2.2",
+    "@commitlint/types": "^19.0.3",
     "@types/jest": "^29.5.12",
     "@types/node-fetch": "^2.6.11",
     "@typescript-eslint/eslint-plugin": "^7.8.0",
