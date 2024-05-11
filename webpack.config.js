@@ -53,7 +53,7 @@ const commonConfig = {
     new HtmlWebpackPlugin({
       title: 'eCommerce-Application',
     }),
-    new EslintPlugin({ extensions: ['ts'] }),
+    new EslintPlugin({ extensions: ['.ts'] }),
   ],
 };
 
