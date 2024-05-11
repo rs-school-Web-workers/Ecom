@@ -1,5 +1,5 @@
 import { Router } from './Router/Router';
-import { PageInfo, PagePath } from './Router/types';
+import { ID_ELEMENT, PageInfo, PagePath, SECTION_NAME } from './Router/types';
 
 export class App {
   router: Router;
@@ -22,30 +22,34 @@ export class App {
 
   createNav() {
     const navContainer: HTMLElement = document.createElement('nav');
+    navContainer.addEventListener('click', (event) => this.buttonNavigateHandler(event));
     const mainButton: HTMLAnchorElement = document.createElement('a');
-    mainButton.href = `/${PagePath.MAIN}`;
+    mainButton.href = `${PagePath.MAIN}`;
     mainButton.textContent = 'Main';
-    mainButton.addEventListener('click', (event) => this.buttonNavigateHandler(event));
     const loginButton: HTMLAnchorElement = document.createElement('a');
-    loginButton.href = `/${PagePath.LOGIN}`;
+    loginButton.href = `${PagePath.LOGIN}`;
     loginButton.textContent = 'Login';
-    loginButton.addEventListener('click', (event) => this.buttonNavigateHandler(event));
     const registrationButton: HTMLAnchorElement = document.createElement('a');
-    registrationButton.href = `/${PagePath.REGISTRATION}`;
+    registrationButton.href = `${PagePath.REGISTRATION}`;
     registrationButton.textContent = 'Registration';
-    registrationButton.addEventListener('click', (event) => this.buttonNavigateHandler(event));
-    navContainer.append(mainButton, loginButton, registrationButton);
+    const productsButton: HTMLAnchorElement = document.createElement('a');
+    productsButton.href = `${PagePath.PRODUCTS}`;
+    productsButton.textContent = 'Products';
+    const productButton: HTMLAnchorElement = document.createElement('a');
+    productButton.href = `${PagePath.PRODUCTS}/t-shirts`;
+    productButton.textContent = 'T-shirts';
+    navContainer.append(mainButton, loginButton, registrationButton, productsButton, productButton);
     this.container.append(navContainer);
   }
 
   buttonNavigateHandler(event: Event) {
     event.preventDefault();
-    const targetElem: HTMLAnchorElement | null = <HTMLAnchorElement>event.currentTarget;
+    const targetElem: HTMLAnchorElement | null = <HTMLAnchorElement>event.target;
     if (targetElem) {
       const navigateLink: string | null = targetElem.getAttribute('href');
-      window.history.pushState({}, '', navigateLink);
       if (navigateLink) {
-        this.router.navigate(navigateLink.slice(1));
+        this.router.navigate(navigateLink);
+        this.router.renderPageView(navigateLink);
       }
     }
   }
@@ -53,32 +57,50 @@ export class App {
   initPages() {
     const pages: PageInfo[] = [
       {
-        pagePath: '',
-        callback: () => {
+        pagePath: '/',
+        render: () => {
           this.pageContainer.textContent = 'This is ' + PagePath.MAIN;
         },
       },
       {
         pagePath: PagePath.LOGIN,
-        callback: () => {
+        render: () => {
           this.pageContainer.textContent = 'This is ' + PagePath.LOGIN;
         },
       },
       {
         pagePath: PagePath.MAIN,
-        callback: () => {
+        render: () => {
           this.pageContainer.textContent = 'This is ' + PagePath.MAIN;
         },
       },
       {
         pagePath: PagePath.REGISTRATION,
-        callback: () => {
+        render: () => {
           this.pageContainer.textContent = 'This is ' + PagePath.REGISTRATION;
         },
       },
       {
+        pagePath: PagePath.PRODUCTS,
+        render: () => {
+          this.pageContainer.textContent = 'This is ' + PagePath.PRODUCTS;
+        },
+      },
+      {
+        pagePath: `${PagePath.PRODUCTS}/${SECTION_NAME}`,
+        render: (section_name: string = '') => {
+          this.pageContainer.textContent = 'This is ' + PagePath.PRODUCTS + `/${section_name}`;
+        },
+      },
+      {
+        pagePath: `${PagePath.PRODUCTS}/${SECTION_NAME}/${ID_ELEMENT}`,
+        render: (section_name: string = '', id: string = '') => {
+          this.pageContainer.textContent = 'This is ' + PagePath.PRODUCTS + `/${section_name}/${id}`;
+        },
+      },
+      {
         pagePath: PagePath.NOT_FOUND,
-        callback: () => {
+        render: () => {
           this.pageContainer.textContent = 'This is ' + PagePath.NOT_FOUND;
         },
       },

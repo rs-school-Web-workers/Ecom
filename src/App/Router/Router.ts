@@ -1,4 +1,4 @@
-import { PageInfo, PagePath } from './types';
+import { ID_ELEMENT, PageInfo, PagePath, SECTION_NAME, requestAdressBar } from './types';
 
 export class Router {
   pages: PageInfo[];
@@ -9,25 +9,46 @@ export class Router {
     window.addEventListener('popstate', this.browserLineListener.bind(this));
   }
 
-  navigate(path: string) {
-    console.log(path);
-    const pageInfo: PageInfo | undefined = this.pages.find((item) => item.pagePath === path);
+  renderPageView(path: string) {
+    const request: requestAdressBar = this.parsePath(path);
+    const pathForFind: string = this.parsePathForFind(request);
+    const pageInfo: PageInfo | undefined = this.pages.find((item) => item.pagePath === pathForFind);
     if (pageInfo) {
-      pageInfo.callback();
+      pageInfo.render(request.section_name, request.resource);
     } else {
-      this.redirectToPageNotFound();
+      this.renderPageView(PagePath.NOT_FOUND);
     }
   }
 
-  redirectToPageNotFound() {
-    const pageNotFound: PageInfo | undefined = this.pages.find((item) => item.pagePath === PagePath.NOT_FOUND);
-    if (pageNotFound) {
-      this.navigate(PagePath.NOT_FOUND);
+  parsePathForFind(request: requestAdressBar) {
+    console.log(request);
+    if (request.section_name !== '' && request.resource !== '') {
+      console.log(`/${request.page}/${SECTION_NAME}/${ID_ELEMENT}`);
+      return `/${request.page}/${SECTION_NAME}/${ID_ELEMENT}`;
+    } else if (request.section_name !== '') {
+      console.log(`/${request.page}/${SECTION_NAME}`);
+      return `/${request.page}/${SECTION_NAME}`;
     }
+    console.log(`/${request.page}`);
+    return `/${request.page}`;
+  }
+
+  navigate(url: string) {
+    window.history.pushState({}, '', url);
   }
 
   browserLineListener() {
-    const pagePath: string = window.location.pathname.slice(1);
-    this.navigate(pagePath);
+    const pagePath: string = window.location.pathname;
+    this.renderPageView(pagePath);
+  }
+
+  parsePath(url: string) {
+    const request: requestAdressBar = {
+      page: '',
+      section_name: '',
+      resource: '',
+    };
+    [request.page, request.section_name = '', request.resource = ''] = url.slice(1).split('/');
+    return request;
   }
 }
