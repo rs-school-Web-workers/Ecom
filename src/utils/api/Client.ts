@@ -46,3 +46,8 @@ export function getApiRoot(username?: string, password?: string) {
 export function destroyApiRoot() {
   inst = null;
 }
+
+export function isLogged() {
+  if (inst) return true;
+  return false;
+}
