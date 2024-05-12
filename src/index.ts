@@ -3,7 +3,7 @@ import { getApiRoot } from './utils/api/Client';
 
 console.log('index.ts', test);
 getApiRoot('asd@asd.asd', 'asd')
-  .customers()
+  .orders()
   .get()
   .execute()
   .then(({ body }) => {
