@@ -4,6 +4,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const CopyPlugin = require('copy-webpack-plugin');
 const EslintPlugin = require('eslint-webpack-plugin');
+const Dotenv = require('dotenv-webpack');
 
 const commonConfig = {
   entry: path.resolve(__dirname, './src/index.ts'),
@@ -54,6 +55,7 @@ const commonConfig = {
       title: 'eCommerce-Application',
     }),
     new EslintPlugin({ extensions: ['ts'] }),
+    new Dotenv(),
   ],
 };
 

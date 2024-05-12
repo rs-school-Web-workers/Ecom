@@ -1,4 +1,12 @@
 import { test } from './test';
-import './utils/api/Client';
+import { getApiRoot } from './utils/api/Client';
 
 console.log('index.ts', test);
+getApiRoot('asd@asd.asd', 'asd')
+  .customers()
+  .get()
+  .execute()
+  .then(({ body }) => {
+    console.log(JSON.stringify(body));
+  })
+  .catch(console.error);

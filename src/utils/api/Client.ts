@@ -1,16 +1,44 @@
-import { ctpClient } from './ClientBuilder';
-import { createApiBuilderFromCtpClient } from '@commercetools/platform-sdk';
+import { ByProjectKeyRequestBuilder, createApiBuilderFromCtpClient } from '@commercetools/platform-sdk';
+import { ClientBuilder } from '@commercetools/sdk-client-v2';
 
-// Create apiRoot from the imported ClientBuilder and include your Project key
-const apiRoot = createApiBuilderFromCtpClient(ctpClient).withProjectKey({ projectKey: 'web-workers' });
+let inst: ByProjectKeyRequestBuilder | null = null;
 
-// Example call to return Project information
-// This code has the same effect as sending a GET request to the commercetools Composable Commerce API without any endpoints.
-const getProject = () => {
-  return apiRoot.get().execute();
-};
+export function getApiRoot(username?: string, password?: string) {
+  const projectKey = process.env.PROJECT_KEY;
+  const host = process.env.HOST;
+  const clientId = process.env.CLIENT_ID;
+  const clientSecret = process.env.CLIENT_SECRET;
+  const clientScopes = process.env.CLIENT_SCOPES;
+  if (!projectKey || !host || !clientId || !clientSecret || !clientScopes) {
+    throw new Error('Env parameters are undefined');
+  }
+  const scopes = clientScopes.split(' ');
+  if (!inst) {
+    if (!username || !password) throw new Error('Empty credentials');
+    const ctpClient = new ClientBuilder()
+      .withPasswordFlow({
+        host,
+        projectKey,
+        credentials: {
+          clientId,
+          clientSecret,
+          user: {
+            username,
+            password,
+          },
+        },
+        scopes,
+        fetch,
+      })
+      .withHttpMiddleware({ host, fetch })
+      .withLoggerMiddleware() // надо додумать, чтобы только в девмоде было
+      .build();
 
-// Retrieve Project information and output the result to the log
-getProject().then(console.log).catch(console.error);
+    inst = createApiBuilderFromCtpClient(ctpClient).withProjectKey({ projectKey });
+  }
+  return inst as ByProjectKeyRequestBuilder;
+}
 
-console.log(apiRoot.shoppingLists());
+export function destroyApiRoot() {
+  inst = null;
+}
