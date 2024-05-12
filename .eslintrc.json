@@ -17,7 +17,7 @@
     "sourceType": "module",
     "project": ["tsconfig.json"]
   },
-  "noInlineConfig": true,
+  "noInlineConfig": false,
   "rules": {
     "prettier/prettier": "error",
     "@typescript-eslint/no-explicit-any": "error"

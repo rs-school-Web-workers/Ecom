@@ -9,7 +9,6 @@ export class App {
   pageContainer: HTMLDivElement;
 
   constructor() {
-    document.head.innerHTML += document.head.innerHTML + "<base href='" + document.location.href + "' />";
     this.container = document.body;
     this.pageContainer = document.createElement('div');
     const pages: PageInfo[] = this.initPages();
