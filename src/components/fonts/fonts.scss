@@ -1,0 +1,13 @@
+@mixin font-face($family, $file, $path, $weight: normal, $style: normal) {
+    @font-face {
+        font-family: $family;
+        src: url($path + $file + '.eot');
+        src: url($path + $file + '.eot?#iefix') format('embedded-opentype'), url($path + $file + '.woff') format('woff');
+        font-weight: $weight;
+        font-style: $style;
+    }
+}
+
+@include font-face('Satoshi', 'Satoshi-Regular', './Satoshi/Fonts/WEB/fonts/');
+@include font-face('Integral CF', 'IntegralCF-Bold', './IntegralCF/Fonts/WEB/');
+@include font-face('Integral CF', 'IntegralCF-Regular', './IntegralCF/Fonts/WEB/');

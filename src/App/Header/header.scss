@@ -1,0 +1,31 @@
+$headerBackground: white;
+$headerTextColor: black;
+$sideMargin: 100px;
+$verticalMargin: 24px;
+$linkGap: 24px;
+
+.header {
+    background-color: $headerBackground;
+    display: flex;
+    margin: $verticalMargin $sideMargin;
+    justify-content: space-between;
+    align-items: center;
+    color: $headerTextColor;
+}
+
+.nav-element {
+    display: flex;
+    gap: $linkGap;
+    font-family: Satoshi;
+    font-size: 16px;
+}
+
+.navigate-link {
+    text-decoration: none;
+    color: $headerTextColor;
+}
+
+.shop-name {
+    font-family: Integral CF;
+    font-size: 32px;
+}
