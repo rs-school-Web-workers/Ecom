@@ -3,6 +3,8 @@ import { ID_ELEMENT, PageInfo, PagePath, SECTION_NAME } from './Router/types';
 import '../components/css/normalize.css';
 import Header from './Header/Header';
 import Component from './utils/base-component';
+import { isNull } from './utils/base-methods';
+import Page from './Page/Page';
 
 export class App {
   router: Router;
@@ -33,7 +35,7 @@ export class App {
       {
         pagePath: '/',
         render: () => {
-          this.contentContainer.textContent = 'This is ' + PagePath.MAIN;
+          //this.contentContainer.textContent = 'This is ' + PagePath.MAIN;
         },
       },
       {
@@ -80,5 +82,12 @@ export class App {
       },
     ];
     return pages;
+  }
+
+  setView(page: Page) {
+    const pageContainer: HTMLDivElement | null = page.getContainer();
+    isNull(pageContainer);
+    this.contentContainer.replaceChildren();
+    this.contentContainer.append(pageContainer);
   }
 }

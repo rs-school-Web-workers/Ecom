@@ -6,9 +6,21 @@ export enum headerClassNames {
 }
 
 export enum headerLinkNames {
-  MENU = 'Menu',
+  MAIN = 'Main',
   LOGIN = 'Login',
   REGISTRATION = 'Register',
 }
 
+export const NAV_CONTAINER = 'nav-container';
+
 export const COMPANY_NAME = 'WW.CO';
+
+export const NAME_CONTAINER = 'name-container';
+
+export enum burgerClassNames {
+  BURGER = 'burger',
+  BURGER_LINE = 'burger__line',
+  ACTIVE = 'artive',
+  BURGER_ACTIVE = 'burger-active',
+  NO_SCROLL = 'no-scroll',
+}

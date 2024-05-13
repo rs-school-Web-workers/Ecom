@@ -1,31 +1,116 @@
 $headerBackground: white;
 $headerTextColor: black;
-$sideMargin: 100px;
-$verticalMargin: 24px;
+$sidePadding: 100px;
+$verticalPadding: 24px;
 $linkGap: 24px;
+$burgerLineGap: 4px;
 
 .header {
-    background-color: $headerBackground;
-    display: flex;
-    margin: $verticalMargin $sideMargin;
-    justify-content: space-between;
+  background-color: $headerBackground;
+  display: flex;
+  padding: $verticalPadding $sidePadding;
+  justify-content: space-between;
+  align-items: center;
+  color: $headerTextColor;
+
+  @media (max-width: 768px) {
+    padding: 30px;
+  }
+}
+
+.nav-container {
+  display: flex;
+
+  @media (max-width: 768px) {
+    position: fixed;
+    flex-direction: column;
+    top: 100px;
     align-items: center;
-    color: $headerTextColor;
+    width: 90%;
+    height: 90%;
+    padding: 10px;
+    right: -100%;
+    opacity: 1;
+    transform: translate(100%);
+    transition: all 2s;
+    z-index: 2;
+
+    &.active {
+      transform: translate(-110%);
+      transition: all 1s;
+    }
+  }
 }
 
 .nav-element {
-    display: flex;
-    gap: $linkGap;
-    font-family: Satoshi;
-    font-size: 16px;
+  display: flex;
+  gap: $linkGap;
+  font-family: Satoshi;
+  font-size: 16px;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    height: 100%;
+    align-items: center;
+    font-size: 32px;
+    gap: 60px;
+  }
 }
 
 .navigate-link {
-    text-decoration: none;
-    color: $headerTextColor;
+  text-decoration: none;
+  color: $headerTextColor;
+}
+
+.name-container {
+  display: flex;
+  align-items: center;
+  gap: $linkGap;
 }
 
 .shop-name {
-    font-family: Integral CF;
-    font-size: 32px;
+  font-family: Integral CF;
+  font-size: 32px;
+}
+
+.burger {
+  display: none;
+  flex-direction: column;
+  gap: $burgerLineGap;
+
+  &:hover {
+    cursor: pointer;
+  }
+
+  @media (max-width: 768px) {
+    display: flex;
+  }
+}
+
+.burger__line {
+  width: 24px;
+  background-color: $headerTextColor;
+  height: 2px;
+  border-radius: 50px;
+  transition: 0.5s;
+}
+
+.burger-active .burger__line:nth-child(1) {
+  transform: translateY(4px) rotate(45deg);
+}
+
+.burger-active .burger__line:nth-child(2) {
+  display: none;
+}
+
+.burger-active .burger__line:nth-child(3) {
+  transform: translateY(-2px) rotate(-45deg);
+}
+
+.active {
+  display: flex;
+}
+
+.no-scroll {
+  overflow-y: hidden;
 }
