@@ -5,6 +5,7 @@ import Header from './Header/Header';
 import Component from './utils/base-component';
 import { isNull } from './utils/base-methods';
 import Page from './Page/Page';
+import MainPage from './Page/MainPage/MainPage';
 
 export class App {
   router: Router;
@@ -35,7 +36,8 @@ export class App {
       {
         pagePath: '/',
         render: () => {
-          //this.contentContainer.textContent = 'This is ' + PagePath.MAIN;
+          const mainPage: MainPage = new MainPage();
+          this.setPage(mainPage);
         },
       },
       {
@@ -47,7 +49,8 @@ export class App {
       {
         pagePath: PagePath.MAIN,
         render: () => {
-          this.contentContainer.textContent = 'This is ' + PagePath.MAIN;
+          const mainPage: MainPage = new MainPage();
+          this.setPage(mainPage);
         },
       },
       {
@@ -84,7 +87,7 @@ export class App {
     return pages;
   }
 
-  setView(page: Page) {
+  setPage(page: Page) {
     const pageContainer: HTMLDivElement | null = page.getContainer();
     isNull(pageContainer);
     this.contentContainer.replaceChildren();

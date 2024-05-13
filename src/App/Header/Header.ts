@@ -76,6 +76,7 @@ export default class Header {
     if (targetElem) {
       const navigateLink: string | null = targetElem.getAttribute('href');
       if (navigateLink) {
+        this.hideNavigateBlock();
         this.router.navigate(navigateLink);
         this.router.renderPageView(navigateLink);
       }
@@ -85,6 +86,16 @@ export default class Header {
   burgerClickHandler(event: Event) {
     const element: HTMLDivElement = <HTMLDivElement>event.currentTarget;
     element.classList.toggle(burgerClassNames.BURGER_ACTIVE);
+    const navigateContainer: HTMLDivElement | null = document.querySelector<HTMLDivElement>(`.${NAV_CONTAINER}`);
+    isNull(navigateContainer);
+    navigateContainer.classList.toggle(burgerClassNames.ACTIVE);
+    document.body.classList.toggle(burgerClassNames.NO_SCROLL);
+  }
+
+  hideNavigateBlock() {
+    const burger: HTMLDivElement | null = document.querySelector<HTMLDivElement>(`.${burgerClassNames.BURGER}`);
+    isNull(burger);
+    burger.classList.toggle(burgerClassNames.BURGER_ACTIVE);
     const navigateContainer: HTMLDivElement | null = document.querySelector<HTMLDivElement>(`.${NAV_CONTAINER}`);
     isNull(navigateContainer);
     navigateContainer.classList.toggle(burgerClassNames.ACTIVE);

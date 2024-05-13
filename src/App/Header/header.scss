@@ -4,6 +4,7 @@ $sidePadding: 100px;
 $verticalPadding: 24px;
 $linkGap: 24px;
 $burgerLineGap: 4px;
+$gap-link-burger: 60px;
 
 .header {
   background-color: $headerBackground;
@@ -20,15 +21,15 @@ $burgerLineGap: 4px;
 
 .nav-container {
   display: flex;
+  background-color: $headerBackground;
 
   @media (max-width: 768px) {
     position: fixed;
     flex-direction: column;
     top: 100px;
     align-items: center;
-    width: 90%;
+    width: 100%;
     height: 90%;
-    padding: 10px;
     right: -100%;
     opacity: 1;
     transform: translate(100%);
@@ -36,7 +37,7 @@ $burgerLineGap: 4px;
     z-index: 2;
 
     &.active {
-      transform: translate(-110%);
+      transform: translate(-100%);
       transition: all 1s;
     }
   }
@@ -53,7 +54,7 @@ $burgerLineGap: 4px;
     height: 100%;
     align-items: center;
     font-size: 32px;
-    gap: 60px;
+    gap: $gap-link-burger;
   }
 }
 
@@ -71,6 +72,10 @@ $burgerLineGap: 4px;
 .shop-name {
   font-family: Integral CF;
   font-size: 32px;
+
+  @media (max-width: 768px) {
+    font-size: 26px;
+  }
 }
 
 .burger {

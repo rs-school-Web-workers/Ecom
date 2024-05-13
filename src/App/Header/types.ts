@@ -20,7 +20,7 @@ export const NAME_CONTAINER = 'name-container';
 export enum burgerClassNames {
   BURGER = 'burger',
   BURGER_LINE = 'burger__line',
-  ACTIVE = 'artive',
+  ACTIVE = 'active',
   BURGER_ACTIVE = 'burger-active',
   NO_SCROLL = 'no-scroll',
 }
