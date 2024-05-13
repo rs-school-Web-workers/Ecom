@@ -1,8 +1,4 @@
-import { test } from './test';
-import { getApiRoot } from './utils/api/Client';
+import { App } from './App/App';
 
-console.log('index.ts', test);
-getApiRoot('asd@asd.asd', 'asd').me().orders().get().execute().catch(console.error);
-getApiRoot().get().execute().then().catch(console.error);
-
-//signIn('asd1@asd.asd', 'test', 'testov', 'asd');
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const app: App = new App();

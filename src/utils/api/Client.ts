@@ -9,6 +9,14 @@ const clientSecret = process.env.CLIENT_SECRET;
 const clientScopes = process.env.CLIENT_SCOPES;
 const scopes = clientScopes?.split(' ');
 
+/**
+ * это синглтон, который логинит пользователя и возвращает дальше
+ * его же, вне зависимости от параметров, пока не будет уничтожен функцией destroyApiRoot
+ * @param username email пользователя
+ * @param password пароль
+ * @returns ApiBuilder, который позволяет строить запрос на подобие
+ * getApiRoot('asd@asd.asd', 'asd').me().orders().get().execute().catch(console.error);
+ */
 export function getApiRoot(username?: string, password?: string) {
   if (!projectKey || !region || !clientId || !clientSecret || !clientScopes) {
     throw new Error('Env parameters are undefined');
@@ -43,15 +51,24 @@ export function getApiRoot(username?: string, password?: string) {
   return inst as ByProjectKeyRequestBuilder;
 }
 
+/**
+ * удаляет залогиненого пользователя
+ */
 export function destroyApiRoot() {
   inst = null;
 }
 
+/**
+ * проверка существования пользователя
+ */
 export function isLogged() {
   if (inst) return true;
   return false;
 }
 
+/**
+ * создание нового пользователя
+ */
 export function signIn(email: string, firstName: string, lastName: string, password: string) {
   if (!projectKey || !region || !clientId || !clientSecret || !clientScopes) {
     throw new Error('Env parameters are undefined');
