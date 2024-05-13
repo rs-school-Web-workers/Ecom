@@ -22,7 +22,9 @@ export function getApiRoot(username?: string, password?: string) {
     throw new Error('Env parameters are undefined');
   }
   if (!inst) {
-    if (!username || !password) throw new Error('Empty credentials');
+    if (!username || !password) {
+      throw new Error('Empty credentials');
+    }
     let ctpClient = new ClientBuilder()
       .withPasswordFlow({
         host: `https://auth.${region}.gcp.commercetools.com`,
@@ -62,7 +64,9 @@ export function destroyApiRoot() {
  * проверка существования пользователя
  */
 export function isLogged() {
-  if (inst) return true;
+  if (inst) {
+    return true;
+  }
   return false;
 }
 
