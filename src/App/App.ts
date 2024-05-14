@@ -6,6 +6,7 @@ import Component from './utils/base-component';
 import { isNull } from './utils/base-methods';
 import Page from './Page/Page';
 import MainPage from './Page/MainPage/MainPage';
+import NotFoundPage from './Page/NotFoundPage/NotFoundPage';
 
 export class App {
   router: Router;
@@ -80,7 +81,8 @@ export class App {
       {
         pagePath: PagePath.NOT_FOUND,
         render: () => {
-          this.contentContainer.textContent = 'This is ' + PagePath.NOT_FOUND;
+          const notFoundPage: NotFoundPage = new NotFoundPage(this.router);
+          this.setPage(notFoundPage);
         },
       },
     ];

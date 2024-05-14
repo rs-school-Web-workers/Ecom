@@ -21,15 +21,11 @@ export class Router {
   }
 
   parsePathForFind(request: requestAdressBar) {
-    console.log(request);
     if (request.section_name !== '' && request.resource !== '') {
-      console.log(`/${request.page}/${SECTION_NAME}/${ID_ELEMENT}`);
       return `/${request.page}/${SECTION_NAME}/${ID_ELEMENT}`;
     } else if (request.section_name !== '') {
-      console.log(`/${request.page}/${SECTION_NAME}`);
       return `/${request.page}/${SECTION_NAME}`;
     }
-    console.log(`/${request.page}`);
     return `/${request.page}`;
   }
 
