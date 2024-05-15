@@ -1,9 +1,5 @@
-import { createInputView } from './components/input/inputComponent';
+import { createInputView, createInputCntrl } from './components/input/inputComponent';
 const validations = [
-  {
-    validate: `(value) => ${/^\S+@\S+\.\S+$/}.test(value.trim())`,
-    message: 'Invalid email address format',
-  },
   {
     validate: "(value) => !value.includes(' ')",
     message: 'Email address cannot contain spaces',
@@ -16,7 +12,12 @@ const validations = [
     validate: "(value) => value.split('@').length === 2 && value.split('@')[1].includes('.')",
     message: 'Email address must contain a valid domain',
   },
+  {
+    validate: `(value) => ${/^\S+@\S+\.\S+$/}.test(value.trim())`,
+    message: 'Invalid email address format',
+  },
 ];
 const inputElement = createInputView('email', ['email'], validations);
-console.log(inputElement);
-document.body.append(inputElement);
+const elem = createInputCntrl('email', validations);
+console.log(inputElement, elem);
+document.body.append(inputElement, elem);
