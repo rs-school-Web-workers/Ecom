@@ -47,7 +47,7 @@ class InputControl extends HTMLInputElement {
         return true;
       }
     });
-    if (document.querySelectorAll('.error-message.error').length === 0) {
+    if (!this.errMsg.classList.contains('error')) {
       this.classList.add('success');
       this.classList.remove('unsuccess');
     } else {
@@ -74,15 +74,6 @@ export function createInputView(
   wrapper.append(input);
   return wrapper;
 }
-
-const template = document.createElement('template');
-template.innerHTML = `
-      <style>
-        input {color: green}
-      </style>
-      <input is="input-control" type="password">
-    `;
-
 class InputCntrl extends HTMLElement {
   shadow: ShadowRoot;
   input: HTMLInputElement;
@@ -90,8 +81,38 @@ class InputCntrl extends HTMLElement {
     super();
     this.shadow = this.attachShadow({ mode: 'open' });
     this.input = document.createElement('input', { is: 'input-control' });
+    const style = document.createElement('style');
+    style.textContent = `
+      :host {
+        display: flex;
+        flex-direction: column;
+        width: 250px;
+          .input-field {
+            outline: none;
+            margin-bottom: 4px;
+            border: 2px solid;
+            padding: 8px;
+            border-radius: 8px;
+            font-size: 16px;
+            &.success {
+              border-color: #6fcf97;
+            }
+            &.unsuccess {
+              border-color: #ee5757;
+            }
+          }
+          .error-message {
+            color: red;
+            font-size: 8px;
+            padding-left: 3px;
+          }
+          .error {
+            margin-bottom: 4px;
+          }
+      }
+    `;
     this.input.classList.add('input-field');
-    this.shadow.append(this.input);
+    this.shadow.append(style, this.input);
   }
 
   connectedCallback() {
