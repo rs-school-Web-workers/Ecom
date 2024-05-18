@@ -1,8 +1,9 @@
-import { Router } from '../Router/Router';
-import { PagePath } from '../Router/types';
-import Component from '../utils/base-component';
+import { Router } from '../../Router/Router';
+import { PagePath } from '../../Router/types';
+import Component from '../../utils/base-component';
 import './header.scss';
-import '../../components/fonts/fonts.scss';
+import '../../../assets/fonts/fonts.scss';
+import { isNull } from '../../utils/base-methods';
 import {
   COMPANY_NAME,
   NAME_CONTAINER,
@@ -11,7 +12,6 @@ import {
   headerClassNames,
   headerLinkNames,
 } from './types';
-import { isNull } from '../utils/base-methods';
 
 export default class Header {
   router: Router;
