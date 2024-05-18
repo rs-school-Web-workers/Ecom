@@ -1,149 +1,66 @@
 import { InputType } from '../../types/types';
-import './inputComponent.scss';
+import { styles } from './inputСomponentStyles';
 
 interface Validation {
   validate: (value: string) => boolean;
   message: string;
 }
-
-class InputControl extends HTMLInputElement {
-  private errMsg: HTMLDivElement;
+class InputControl extends HTMLElement {
+  private errMsg = document.createElement('div');
+  private input = document.createElement('input');
 
   constructor() {
     super();
-    this.errMsg = document.createElement('div');
     this.errMsg.classList.add('error-message');
-  }
-  connectedCallback() {
-    const validations = this.getAttribute('validations');
-    if (validations) {
-      const validationArray: Validation[] = JSON.parse(validations);
-      this.parentNode?.append(this.errMsg);
-      this.addEventListener('input', this.validateInput.bind(this, validationArray));
-    }
-  }
-  disconnectedCallback() {
-    /* ... */
-  }
-  static get observedAttributes() {
-    return ['type', 'validations'];
-  }
-  attributeChangedCallback(/*name: string, oldValue: string, newValue: string*/) {
-    /* ... */
-  }
-  adoptedCallback() {
-    /* ... */
-  }
-
-  validateInput(validationType: Validation[]) {
-    validationType.some((validation) => {
-      const value = this.value;
-      const functionValidate = new Function('value', `return ${validation.validate}`);
-      this.errMsg.textContent = '';
-      this.errMsg.classList.remove('error');
-      if (!functionValidate()(value)) {
-        this.errMsg.textContent = validation.message;
-        this.errMsg.classList.add('error');
-        return true;
-      }
-    });
-    if (!this.errMsg.classList.contains('error')) {
-      this.classList.add('success');
-      this.classList.remove('unsuccess');
-    } else {
-      this.classList.add('unsuccess');
-      this.classList.remove('success');
-    }
-  }
-}
-
-customElements.define('input-control', InputControl, { extends: 'input' });
-
-export function createInputView(
-  type: InputType = 'text',
-  classes: string[] = [],
-  validationArray: { validate: string; message: string }[] = []
-) {
-  const wrapper = document.createElement('div');
-  const input = document.createElement('input', { is: 'input-control' });
-  input.type = type;
-  input.classList.add('input-field', ...classes);
-  if (validationArray) {
-    input.setAttribute('validations', JSON.stringify(validationArray));
-  }
-  wrapper.append(input);
-  return wrapper;
-}
-class InputCntrl extends HTMLElement {
-  shadow: ShadowRoot;
-  input: HTMLInputElement;
-  constructor() {
-    super();
-    this.shadow = this.attachShadow({ mode: 'open' });
-    this.input = document.createElement('input', { is: 'input-control' });
-    const style = document.createElement('style');
-    style.textContent = `
-      :host {
-        display: flex;
-        flex-direction: column;
-        width: 250px;
-          .input-field {
-            outline: none;
-            margin-bottom: 4px;
-            border: 2px solid;
-            padding: 8px;
-            border-radius: 8px;
-            font-size: 16px;
-            &.success {
-              border-color: #6fcf97;
-            }
-            &.unsuccess {
-              border-color: #ee5757;
-            }
-          }
-          .error-message {
-            color: red;
-            font-size: 8px;
-            padding-left: 3px;
-          }
-          .error {
-            margin-bottom: 4px;
-          }
-      }
-    `;
     this.input.classList.add('input-field');
-    this.shadow.append(style, this.input);
+    const shadow = this.attachShadow({ mode: 'open' });
+    const style = document.createElement('style');
+    style.textContent = styles;
+    shadow.append(style, this.input, this.errMsg);
   }
 
   connectedCallback() {
     const attrValidations = this.getAttribute('validations');
     const attrType = this.getAttribute('type');
-    if (attrValidations && attrType) {
-      this.input.setAttribute('validations', attrValidations);
-      this.input.type = attrType;
+    if (attrValidations) {
+      const validationArray: Validation[] = JSON.parse(attrValidations);
+      this.input.addEventListener('input', this.validateInput.bind(this, validationArray));
+      if (attrType) {
+        this.input.setAttribute('validations', attrValidations);
+        this.input.type = attrType;
+      }
     }
     this.removeAttribute('validations');
     this.removeAttribute('type');
   }
-
-  disconnectedCallback() {
-    /* ... */
-  }
-
   static get observedAttributes() {
     return ['validations', 'type'];
   }
-  attributeChangedCallback(/*name: string, oldValue: string, newValue: string*/) {
-    /* ... */
-  }
-  adoptedCallback() {
-    /* ... */
+  validateInput(validationType: Validation[]) {
+    for (const { validate, message } of validationType) {
+      const value = this.input.value;
+      const getFunctionValidate = new Function('value', `return ${validate}`);
+      this.errMsg.textContent = '';
+      this.errMsg.classList.remove('error');
+      if (!getFunctionValidate()(value)) {
+        this.errMsg.textContent = message;
+        this.errMsg.classList.add('error');
+        break;
+      }
+    }
+    if (!this.errMsg.classList.contains('error')) {
+      this.input.classList.add('success');
+      this.input.classList.remove('unsuccess');
+    } else {
+      this.input.classList.add('unsuccess');
+      this.input.classList.remove('success');
+    }
   }
 }
 
-customElements.define('input-element', InputCntrl);
+customElements.define('input-element', InputControl);
 
-export function createInputCntrl(
+export function createInputView(
   type: InputType = 'text',
   validationArray: { validate: string; message: string }[] = []
 ) {

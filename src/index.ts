@@ -1,4 +1,4 @@
-import { createInputView, createInputCntrl } from './components/input/inputComponent';
+import { createInputView } from './components/input/inputComponent';
 const validations = [
   {
     validate: "(value) => !value.includes(' ')",
@@ -17,7 +17,6 @@ const validations = [
     message: 'Invalid email address format',
   },
 ];
-const inputElement = createInputView('email', ['email'], validations);
-const elem = createInputCntrl('email', validations);
-console.log(inputElement, elem);
-document.body.append(inputElement, elem);
+const elem = createInputView('email', validations);
+console.log(elem);
+document.body.append(elem);
