@@ -35,6 +35,18 @@ const commonConfig = {
         use: ['json-loader'],
         type: 'javascript/auto',
       },
+      {
+        test: /\.mp4$/,
+        use: [
+          {
+            loader: 'file-loader',
+            options: {
+              name: '[name].[ext]',
+              outputPath: 'video',
+            },
+          },
+        ],
+      },
     ],
   },
   resolve: {
