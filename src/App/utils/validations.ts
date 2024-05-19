@@ -23,7 +23,7 @@ export const password = [
     message: 'Password cannot contain spaces',
   },
   {
-    validate: '(value) => value.length > 6',
-    message: 'Password must be at least 6 characters',
+    validate: '(value) => value.length > 2',
+    message: 'Password must be at least 3 characters',
   },
 ];

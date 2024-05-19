@@ -8,8 +8,8 @@ import { Router } from '../../Router/Router';
 import { PagePath } from '../../Router/types';
 
 export default class LoginPage extends Page {
-  private emailInput = createInputView('email', email, 'Email address', 'Enter your e-mail') as HTMLInputElement;
-  private passwordInput = createInputView('password', password, 'Password', 'Enter your password') as HTMLInputElement;
+  private emailInput = createInputView('email', email, 'Email address', 'Enter your e-mail');
+  private passwordInput = createInputView('password', password, 'Password', 'Enter your password');
   private btnSubmit = new Component('button', ['login__form-btn']);
   private wrapperForm = document.createElement('div');
   private containerImg = document.createElement('div');
@@ -55,7 +55,7 @@ export default class LoginPage extends Page {
     if (emailInputValue instanceof HTMLInputElement && passwordInputValue instanceof HTMLInputElement) {
       if (emailInputValue.classList.contains('success') && passwordInputValue.classList.contains('success')) {
         console.log('form submit');
-        await loginClient(this.emailInput.value, this.passwordInput.value);
+        await loginClient(emailInputValue.value, passwordInputValue.value);
         this.router.navigate(PagePath.MAIN);
         this.router.renderPageView(PagePath.MAIN);
       } else {

@@ -35,7 +35,7 @@ export function getAnonClient() {
   if (!projectKey || !region || !clientId || !clientSecret || !clientScopes) {
     throw new Error('Env parameters are undefined');
   }
-  let ctpClient = new ClientBuilder()
+  const ctpClient = new ClientBuilder()
     .withAnonymousSessionFlow({
       host: `https://auth.${region}.gcp.commercetools.com`,
       projectKey,
@@ -50,9 +50,6 @@ export function getAnonClient() {
       host: `https://api.${region}.gcp.commercetools.com`,
       fetch,
     });
-  if (process.env.NODE_ENV === 'development') {
-    ctpClient = ctpClient.withLoggerMiddleware();
-  }
   inst = createApiBuilderFromCtpClient(ctpClient.build()).withProjectKey({ projectKey });
   return inst;
 }
@@ -97,33 +94,43 @@ export async function loginClient(email: string, password: string) {
   if (!projectKey || !region || !clientId || !clientSecret || !clientScopes) {
     throw new Error('Env parameters are undefined');
   }
-  const ctpClient = new ClientBuilder()
-    .withPasswordFlow({
-      host: `https://auth.${region}.gcp.commercetools.com`,
-      projectKey,
-      credentials: {
-        clientId,
-        clientSecret,
-        user: {
-          username: email,
-          password,
-        },
-      },
-      tokenCache: token,
-      scopes,
-      fetch,
-    })
-    .withHttpMiddleware({
-      host: `https://api.${region}.gcp.commercetools.com`,
-      fetch,
-    });
-
-  inst = createApiBuilderFromCtpClient(ctpClient.build()).withProjectKey({ projectKey });
-  await inst
+  getAnonClient()
+    .me()
     .login()
-    .post({ body: { email: email, password: password } })
+    .post({ body: { email, password } })
     .execute()
-    .catch((err) => console.log(err));
+    .then(() => {
+      const ctpClient = new ClientBuilder()
+        .withPasswordFlow({
+          host: `https://auth.${region}.gcp.commercetools.com`,
+          projectKey,
+          credentials: {
+            clientId,
+            clientSecret,
+            user: {
+              username: email,
+              password,
+            },
+          },
+          tokenCache: token,
+          scopes,
+          fetch,
+        })
+        .withHttpMiddleware({
+          host: `https://api.${region}.gcp.commercetools.com`,
+          fetch,
+        });
+
+      inst = createApiBuilderFromCtpClient(ctpClient.build()).withProjectKey({ projectKey });
+      inst
+        .get()
+        .execute()
+        .catch((err) => console.log(err));
+    })
+    .catch((err) => {
+      inst = null;
+      console.log(err);
+    });
   return inst;
 }
 
