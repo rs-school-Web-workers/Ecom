@@ -55,7 +55,7 @@ const commonConfig = {
       template: path.resolve(__dirname, 'src/index.html'),
       filename: 'index.html',
     }),
-    new EslintPlugin({ extensions: ['ts'] }),
+    new EslintPlugin({ extensions: ['.ts'] }),
   ],
 };
 
