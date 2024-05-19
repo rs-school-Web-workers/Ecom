@@ -47,7 +47,7 @@ export default class LoginPage extends Page {
     footerLinkToPage.classList.add('login__footer-link');
     footerLinkToPage.textContent = 'Sign Up';
     footerLinkToPage.href = '/registration';
-    footer.innerHTML = `Don't have an account ${footerLinkToPage.outerHTML}`;
+    footer.innerHTML = `Don't have an account? ${footerLinkToPage.outerHTML}`;
     const form = document.createElement('form');
     form.classList.add('login__form');
     form.append(title, aboutText, this.emailInput, this.passwordInput, this.btnSubmit.getElement(), footer);

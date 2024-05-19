@@ -8,6 +8,7 @@ import Page from './Page/Page';
 import MainPage from './Page/MainPage/MainPage';
 import NotFoundPage from './Page/NotFoundPage/NotFoundPage';
 import LoginPage from './Page/Login/Login';
+import RegistrationPage from './Page/Registration/Registration';
 
 export class App {
   router: Router;
@@ -45,8 +46,8 @@ export class App {
       {
         pagePath: PagePath.LOGIN,
         render: () => {
-          const mainPage = new LoginPage();
-          this.setPage(mainPage);
+          const loginPage: LoginPage = new LoginPage();
+          this.setPage(loginPage);
         },
       },
       {
@@ -59,8 +60,8 @@ export class App {
       {
         pagePath: PagePath.REGISTRATION,
         render: () => {
-          const mainPage: MainPage = new MainPage();
-          this.setPage(mainPage);
+          const registrationPage: RegistrationPage = new RegistrationPage();
+          this.setPage(registrationPage);
         },
       },
       {

@@ -2,31 +2,31 @@ $buttonBackground: #3A5B22;
 $gapForm: 6px;
 $buttonColorFont: #FFFFFF;
 $linkColor: #0F3DDE;
-.login {
+.registration {
   display: flex;
   align-items: center;
   justify-content: center;
   height: 100vh;
-  .login-form-container {
+  .registration-form-container {
     display: flex;
     align-items: center;
     justify-content: center;
     flex: 1 1 auto;
     padding: 0px 40px;
-    .login__form {
+    .registration__form {
       display: flex;
       flex-direction: column;
       gap: $gapForm;
     }
-    .login__title {
+    .registration__title {
       margin-bottom: 10px;
       font-family: Integral CF;
     }
-    .login__about-text {
+    .registration__about-text {
       margin-bottom: 54px;
       font-family: Integral CF;
     }
-    .login__form-btn {
+    .registration__form-btn {
       padding: 6px 10px;
       font-size: 18px;
       font-weight: bold;
@@ -40,16 +40,16 @@ $linkColor: #0F3DDE;
       box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.4);
     }
 
-    .login__footer {
+    .registration__footer {
       text-align: center;
       font-family: Integral CF;
     }
-    .login__footer-link {
+    .registration__footer-link {
       text-decoration: none;
       color: $linkColor;
     }
   }
-  .login-img-wrapper {
+  .registration-img-wrapper {
     background-image: url(../../../assets/imgs/form-image.jpg);
     background-repeat: no-repeat;
     background-position: left center;
