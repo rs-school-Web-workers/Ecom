@@ -95,11 +95,11 @@ export default class Header {
   hideNavigateBlock() {
     const burger: HTMLDivElement | null = document.querySelector<HTMLDivElement>(`.${burgerClassNames.BURGER}`);
     isNull(burger);
-    burger.classList.toggle(burgerClassNames.BURGER_ACTIVE);
+    burger.classList.remove(burgerClassNames.BURGER_ACTIVE);
     const navigateContainer: HTMLDivElement | null = document.querySelector<HTMLDivElement>(`.${NAV_CONTAINER}`);
     isNull(navigateContainer);
-    navigateContainer.classList.toggle(burgerClassNames.ACTIVE);
-    document.body.classList.toggle(burgerClassNames.NO_SCROLL);
+    navigateContainer.classList.remove(burgerClassNames.ACTIVE);
+    document.body.classList.remove(burgerClassNames.NO_SCROLL);
   }
 
   createNavigateLink(linkName: string, path: string) {

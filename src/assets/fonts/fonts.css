@@ -1,21 +1,27 @@
 @font-face {
-  font-family: "Satoshi";
-  src: url("./Satoshi/Fonts/WEB/fonts/Satoshi-Regular.eot");
-  src: url("./Satoshi/Fonts/WEB/fonts/Satoshi-Regular.eot?#iefix") format("embedded-opentype"), url("./Satoshi/Fonts/WEB/fonts/Satoshi-Regular.woff") format("woff");
+  font-family: 'Satoshi';
+  src: url('./Satoshi/Fonts/WEB/fonts/Satoshi-Regular.eot');
+  src:
+    url('./Satoshi/Fonts/WEB/fonts/Satoshi-Regular.eot?#iefix') format('embedded-opentype'),
+    url('./Satoshi/Fonts/WEB/fonts/Satoshi-Regular.woff') format('woff');
   font-weight: normal;
   font-style: normal;
 }
 @font-face {
-  font-family: "Integral CF";
-  src: url("./IntegralCF/Fonts/WEB/IntegralCF-Bold.eot");
-  src: url("./IntegralCF/Fonts/WEB/IntegralCF-Bold.eot?#iefix") format("embedded-opentype"), url("./IntegralCF/Fonts/WEB/IntegralCF-Bold.woff") format("woff");
+  font-family: 'Integral CF';
+  src: url('./IntegralCF/Fonts/WEB/IntegralCF-Bold.eot');
+  src:
+    url('./IntegralCF/Fonts/WEB/IntegralCF-Bold.eot?#iefix') format('embedded-opentype'),
+    url('./IntegralCF/Fonts/WEB/IntegralCF-Bold.woff') format('woff');
   font-weight: normal;
   font-style: normal;
 }
 @font-face {
-  font-family: "Integral CF";
-  src: url("./IntegralCF/Fonts/WEB/IntegralCF-Regular.eot");
-  src: url("./IntegralCF/Fonts/WEB/IntegralCF-Regular.eot?#iefix") format("embedded-opentype"), url("./IntegralCF/Fonts/WEB/IntegralCF-Regular.woff") format("woff");
+  font-family: 'Integral CF';
+  src: url('./IntegralCF/Fonts/WEB/IntegralCF-Regular.eot');
+  src:
+    url('./IntegralCF/Fonts/WEB/IntegralCF-Regular.eot?#iefix') format('embedded-opentype'),
+    url('./IntegralCF/Fonts/WEB/IntegralCF-Regular.woff') format('woff');
   font-weight: normal;
   font-style: normal;
-}/*# sourceMappingURL=fonts.css.map */
+} /*# sourceMappingURL=fonts.css.map */

@@ -1,9 +1,5 @@
 export const email = [
   {
-    validate: `(value) => ${/^\S+@\S+\.\S+$/}.test(value.trim())`,
-    message: 'Invalid email address format',
-  },
-  {
     validate: "(value) => !value.includes(' ')",
     message: 'Email address cannot contain spaces',
   },
@@ -15,6 +11,10 @@ export const email = [
     validate: "(value) => value.split('@').length === 2 && value.split('@')[1].includes('.')",
     message: 'Email address must contain a valid domain',
   },
+  {
+    validate: `(value) => ${/^\S+@\S+\.\S+$/}.test(value.trim())`,
+    message: 'Invalid email address format',
+  },
 ];
 
 export const password = [
@@ -23,7 +23,7 @@ export const password = [
     message: 'Password cannot contain spaces',
   },
   {
-    validate: '(value) => value.length < 6',
+    validate: '(value) => value.length > 6',
     message: 'Password must be at least 6 characters',
   },
 ];
