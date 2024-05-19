@@ -4,6 +4,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const CopyPlugin = require('copy-webpack-plugin');
 const EslintPlugin = require('eslint-webpack-plugin');
+const Dotenv = require('dotenv-webpack');
 
 const commonConfig = {
   entry: path.resolve(__dirname, './src/index.ts'),
@@ -14,8 +15,29 @@ const commonConfig = {
         use: ['style-loader', 'css-loader'],
       },
       {
-        test: /\.s[ac]ss$/i,
+        test: /(?!.*\.module)^.*s[ac]ss$/i,
         use: ['style-loader', 'css-loader', 'sass-loader'],
+      },
+      {
+        test: /\.module.s[ac]ss$/,
+        use: [
+          { loader: 'style-loader' },
+          {
+            loader: '@teamsupercell/typings-for-css-modules-loader',
+          },
+          {
+            loader: 'css-loader',
+            options: {
+              esModule: true, // Говорим о том, что хотим использовать ES Modules
+              modules: {
+                namedExport: true, // Указываем, что предпочитаем именованый экспорт дефолтному
+              },
+            },
+          },
+          {
+            loader: 'sass-loader',
+          },
+        ],
       },
       {
         test: /\.(png|svg|jpg|jpeg|gif)$/i,
@@ -57,7 +79,7 @@ const commonConfig = {
     publicPath: '/',
   },
   devServer: {
-    open: true,
+    open: false,
     host: 'localhost',
     historyApiFallback: true,
   },
@@ -67,7 +89,8 @@ const commonConfig = {
       template: path.resolve(__dirname, 'src/index.html'),
       filename: 'index.html',
     }),
-    new EslintPlugin({ extensions: ['.ts'] }),
+    new EslintPlugin({ extensions: ['ts'] }),
+    new Dotenv(),
   ],
 };
 

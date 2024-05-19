@@ -1,4 +1,4 @@
-import { InputType } from '../../types/types';
+import { InputType } from '../../../types/types';
 import { styles } from './inputСomponentStyles';
 
 interface Validation {
@@ -8,15 +8,18 @@ interface Validation {
 class InputControl extends HTMLElement {
   private errMsg = document.createElement('div');
   private input = document.createElement('input');
+  private label = document.createElement('label');
 
   constructor() {
     super();
     this.errMsg.classList.add('error-message');
+    this.label.classList.add('label-input');
     this.input.classList.add('input-field');
     const shadow = this.attachShadow({ mode: 'open' });
     const style = document.createElement('style');
     style.textContent = styles;
-    shadow.append(style, this.input, this.errMsg);
+    this.label.append(this.input);
+    shadow.append(style, this.label, this.errMsg);
   }
 
   connectedCallback() {
@@ -62,9 +65,17 @@ customElements.define('input-element', InputControl);
 
 export function createInputView(
   type: InputType = 'text',
-  validationArray: { validate: string; message: string }[] = []
+  validationArray: { validate: string; message: string }[] = [],
+  labelName: string,
+  placeholder: string = ''
 ) {
   const input = document.createElement('input-element');
+  const label = input.shadowRoot?.children[1];
+  const inputField = label?.firstChild as HTMLInputElement;
+  inputField.placeholder = placeholder;
+  if (label) {
+    label.insertAdjacentHTML('afterbegin', `<span class="label-text">${labelName}</span>`);
+  }
   if (validationArray && type) {
     input.setAttribute('type', type);
     input.setAttribute('validations', JSON.stringify(validationArray));

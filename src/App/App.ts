@@ -1,12 +1,13 @@
 import { Router } from './Router/Router';
 import { ID_ELEMENT, PageInfo, PagePath, SECTION_NAME } from './Router/types';
-import '../components/css/normalize.css';
-import Header from './Header/Header';
+import '../assets/css/normalize.css';
+import Header from './components/header/Header';
 import Component from './utils/base-component';
 import { isNull } from './utils/base-methods';
 import Page from './Page/Page';
 import MainPage from './Page/MainPage/MainPage';
 import NotFoundPage from './Page/NotFoundPage/NotFoundPage';
+import LoginPage from './Page/Login/Login';
 
 export class App {
   router: Router;
@@ -44,7 +45,8 @@ export class App {
       {
         pagePath: PagePath.LOGIN,
         render: () => {
-          this.contentContainer.textContent = 'This is ' + PagePath.LOGIN;
+          const mainPage = new LoginPage();
+          this.setPage(mainPage);
         },
       },
       {
@@ -57,7 +59,8 @@ export class App {
       {
         pagePath: PagePath.REGISTRATION,
         render: () => {
-          this.contentContainer.textContent = 'This is ' + PagePath.REGISTRATION;
+          const mainPage: MainPage = new MainPage();
+          this.setPage(mainPage);
         },
       },
       {
