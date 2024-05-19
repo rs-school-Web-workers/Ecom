@@ -4,6 +4,8 @@ import './login.scss';
 import { createInputView } from '../../components/input/inputComponent';
 import { email, password } from '../../utils/validations';
 import { loginClient } from '../../utils/api/Client';
+import { Router } from '../../Router/Router';
+import { PagePath } from '../../Router/types';
 
 export default class LoginPage extends Page {
   private emailInput = createInputView('email', email, 'Email address', 'Enter your e-mail') as HTMLInputElement;
@@ -12,7 +14,7 @@ export default class LoginPage extends Page {
   private wrapperForm = document.createElement('div');
   private containerImg = document.createElement('div');
 
-  constructor() {
+  constructor(private router: Router) {
     super(['login']);
     this.btnSubmit.setTextContent('Login');
     this.wrapperForm.className = 'login-form-container';
@@ -46,14 +48,16 @@ export default class LoginPage extends Page {
     this.wrapperForm.append(form);
   }
 
-  handlerSubmit(e: Event) {
+  async handlerSubmit(e: Event) {
     e.preventDefault();
     const emailInputValue = this.emailInput.shadowRoot?.children[1].lastChild;
     const passwordInputValue = this.passwordInput.shadowRoot?.children[1].lastChild;
     if (emailInputValue instanceof HTMLInputElement && passwordInputValue instanceof HTMLInputElement) {
       if (emailInputValue.classList.contains('success') && passwordInputValue.classList.contains('success')) {
         console.log('form submit');
-        loginClient(this.emailInput.value, this.passwordInput.value);
+        await loginClient(this.emailInput.value, this.passwordInput.value);
+        this.router.navigate(PagePath.MAIN);
+        this.router.renderPageView(PagePath.MAIN);
       } else {
         console.log('complete all fields');
       }

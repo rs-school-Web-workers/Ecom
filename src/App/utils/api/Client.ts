@@ -65,9 +65,6 @@ export function autoLoginCLient() {
     throw new Error('no token is found in localstorage');
   }
   token.set(JSON.parse(localStorage.getItem('token')!));
-  console.log(token.get());
-  console.log(JSON.parse(localStorage.getItem('token')!));
-  console.log(`Bearer ${token.get().token}`);
   const ctpClient = new ClientBuilder()
     .withRefreshTokenFlow({
       host: `https://auth.${region}.gcp.commercetools.com`,
@@ -96,7 +93,7 @@ export function autoLoginCLient() {
  * @returns ApiBuilder, который позволяет строить запрос на подобие
  * getApiRoot('asd@asd.asd', 'asd').me().orders().get().execute().catch(console.error);
  */
-export function loginClient(email: string, password: string) {
+export async function loginClient(email: string, password: string) {
   if (!projectKey || !region || !clientId || !clientSecret || !clientScopes) {
     throw new Error('Env parameters are undefined');
   }
@@ -122,7 +119,7 @@ export function loginClient(email: string, password: string) {
     });
 
   inst = createApiBuilderFromCtpClient(ctpClient.build()).withProjectKey({ projectKey });
-  inst
+  await inst
     .login()
     .post({ body: { email: email, password: password } })
     .execute()
@@ -135,6 +132,11 @@ export function loginClient(email: string, password: string) {
  */
 export function destroyClient() {
   inst = null;
+  token.set({
+    token: '',
+    expirationTime: 0,
+  });
+  localStorage.removeItem('token');
 }
 
 /**
@@ -150,7 +152,7 @@ export function isLogged() {
 /**
  * создание нового пользователя
  */
-export function signinClient(
+export async function signinClient(
   email: string,
   firstName: string,
   lastName: string,
@@ -164,7 +166,7 @@ export function signinClient(
   if (!projectKey || !region || !clientId || !clientSecret || !clientScopes) {
     throw new Error('Env parameters are undefined');
   }
-  getAnonClient()
+  await getAnonClient()
     .customers()
     .post({
       body: {

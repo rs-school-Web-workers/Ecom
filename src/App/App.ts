@@ -8,7 +8,7 @@ import Page from './Page/Page';
 import MainPage from './Page/MainPage/MainPage';
 import NotFoundPage from './Page/NotFoundPage/NotFoundPage';
 import LoginPage from './Page/Login/Login';
-import { autoLoginCLient } from './utils/api/Client';
+import { autoLoginCLient, isLogged } from './utils/api/Client';
 import RegistrationPage from './Page/Registration/Registration';
 
 export class App {
@@ -48,8 +48,13 @@ export class App {
       {
         pagePath: PagePath.LOGIN,
         render: () => {
-          const loginPage: LoginPage = new LoginPage();
-          this.setPage(loginPage);
+          if (isLogged()) {
+            this.router.navigate(PagePath.MAIN);
+            this.router.renderPageView(PagePath.MAIN);
+          } else {
+            const loginPage: LoginPage = new LoginPage(this.router);
+            this.setPage(loginPage);
+          }
         },
       },
       {
@@ -62,8 +67,13 @@ export class App {
       {
         pagePath: PagePath.REGISTRATION,
         render: () => {
-          const registrationPage: RegistrationPage = new RegistrationPage();
-          this.setPage(registrationPage);
+          if (isLogged()) {
+            this.router.navigate(PagePath.MAIN);
+            this.router.renderPageView(PagePath.MAIN);
+          } else {
+            const registrationPage: RegistrationPage = new RegistrationPage(this.router);
+            this.setPage(registrationPage);
+          }
         },
       },
       {

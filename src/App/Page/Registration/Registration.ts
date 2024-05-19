@@ -1,3 +1,5 @@
+import { Router } from '../../Router/Router';
+import { PagePath } from '../../Router/types';
 import { createInputView } from '../../components/input/inputComponent';
 import { signinClient } from '../../utils/api/Client';
 import Component from '../../utils/base-component';
@@ -26,7 +28,7 @@ export default class RegistrationPage extends Page {
   private wrapperForm = document.createElement('div');
   private containerImg = document.createElement('div');
 
-  constructor() {
+  constructor(private router: Router) {
     super(['registration']);
     this.sCheckbox.type = 'checkbox';
     this.bCheckbox.type = 'checkbox';
@@ -83,7 +85,7 @@ export default class RegistrationPage extends Page {
     this.wrapperForm.append(form);
   }
 
-  handlerSubmit(e: Event) {
+  async handlerSubmit(e: Event) {
     e.preventDefault();
     const emailInputValue = this.emailInput.shadowRoot?.children[1].lastChild;
     const passwordInputValue = this.passwordInput.shadowRoot?.children[1].lastChild;
@@ -116,7 +118,7 @@ export default class RegistrationPage extends Page {
       bPostalCode instanceof HTMLInputElement
     ) {
       if (emailInputValue.classList.contains('success') && passwordInputValue.classList.contains('success')) {
-        signinClient(
+        await signinClient(
           emailInputValue.value,
           nameInputValue.value,
           surnameInputValue.value,
@@ -142,6 +144,8 @@ export default class RegistrationPage extends Page {
           this.bCheckbox.checked ? 1 : undefined,
           this.sCheckbox.checked ? 0 : undefined
         );
+        this.router.navigate(PagePath.MAIN);
+        this.router.renderPageView(PagePath.MAIN);
       } else {
         console.log('complete all fields');
       }
