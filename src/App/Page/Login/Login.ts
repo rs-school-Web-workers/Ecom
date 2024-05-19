@@ -2,7 +2,7 @@ import Component from '../../utils/base-component';
 import Page from '../Page';
 import { createInputView } from '../../components/input/inputComponent';
 import { email, password } from '../../utils/validations';
-import { getClient, isLogged, signinClient } from '../../utils/api/Client';
+import { getClient, isLogged } from '../../utils/api/Client';
 export default class LoginPage extends Page {
   constructor() {
     super(['login']);
@@ -19,13 +19,13 @@ export default class LoginPage extends Page {
           .get()
           .execute()
           .then((el) => console.log(el));
-      else
+      /* else
         signinClient('asdasd@asd.asd', 'qwe', 'qweqwe', 'asd')!
           .me()
           .orders()
           .get()
           .execute()
-          .then((el) => console.log(el));
+          .then((el) => console.log(el)); */
     });
     this.container?.append(emailInput, passwordInput, btn.getElement());
   }

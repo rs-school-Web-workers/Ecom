@@ -1,4 +1,4 @@
-import { ByProjectKeyRequestBuilder, createApiBuilderFromCtpClient } from '@commercetools/platform-sdk';
+import { BaseAddress, ByProjectKeyRequestBuilder, createApiBuilderFromCtpClient } from '@commercetools/platform-sdk';
 import { ClientBuilder, TokenCache, TokenStore } from '@commercetools/sdk-client-v2';
 
 let inst: ByProjectKeyRequestBuilder | null = null;
@@ -150,14 +150,35 @@ export function isLogged() {
 /**
  * создание нового пользователя
  */
-export function signinClient(email: string, firstName: string, lastName: string, password: string) {
+export function signinClient(
+  email: string,
+  firstName: string,
+  lastName: string,
+  password: string,
+  addresses: BaseAddress[],
+  billingAddresses: number[],
+  shippingAddresses: number[],
+  defaultBillingAddress: number,
+  defaultShippingAddress: number
+) {
   if (!projectKey || !region || !clientId || !clientSecret || !clientScopes) {
     throw new Error('Env parameters are undefined');
   }
   getAnonClient()
-    .me()
-    .signup()
-    .post({ body: { email, password, firstName, lastName } })
+    .customers()
+    .post({
+      body: {
+        email,
+        password,
+        firstName,
+        lastName,
+        addresses,
+        billingAddresses,
+        shippingAddresses,
+        defaultBillingAddress,
+        defaultShippingAddress,
+      },
+    })
     .execute()
     .then(() => {
       loginClient(email, password);
