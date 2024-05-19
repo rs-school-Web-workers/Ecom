@@ -8,6 +8,7 @@ import Page from './Page/Page';
 import MainPage from './Page/MainPage/MainPage';
 import NotFoundPage from './Page/NotFoundPage/NotFoundPage';
 import LoginPage from './Page/Login/Login';
+import { autoLoginCLient } from './utils/api/Client';
 
 export class App {
   router: Router;
@@ -19,6 +20,7 @@ export class App {
   contentContainer: HTMLDivElement;
 
   constructor() {
+    if (localStorage.getItem('token')) autoLoginCLient();
     this.container = document.body;
     this.contentContainer = document.createElement('div');
     const pages: PageInfo[] = this.initPages();

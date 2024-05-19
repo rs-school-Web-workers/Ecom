@@ -79,7 +79,7 @@ const commonConfig = {
     publicPath: '/',
   },
   devServer: {
-    open: false,
+    open: true,
     host: 'localhost',
     historyApiFallback: true,
   },
