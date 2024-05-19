@@ -1,0 +1,45 @@
+$commonBackground: #f2f0f1;
+$commonGap: 20px;
+
+.common-block {
+  display: flex;
+  flex-direction: column;
+  background-color: $commonBackground;
+  background-image: url(../../../components/imgs/common-block-background.jpg);
+  background-position: top right;
+  height: 663px;
+  background-size: 663px;
+  background-repeat: no-repeat;
+  padding: 100px;
+  gap: $commonGap;
+
+  @media (max-width: 768px) {
+    background-position: bottom center;
+    height: 853px;
+    background-size: 448px;
+    padding: 40px;
+  }
+}
+
+.slogan-block {
+  font-family: Integral CF;
+  font-size: 64px;
+  font-weight: 700;
+  width: 577px;
+
+  @media (max-width: 768px) {
+    font-size: 36px;
+    width: 315px;
+  }
+}
+
+.definition-block {
+  font-family: Satoshi;
+  font-size: 16px;
+  width: 545px;
+
+  @media (max-width: 768px) {
+    font-size: 14px;
+    width: 358px;
+  }
+}
