@@ -3,7 +3,6 @@ export const styles = `
   display: flex;
   flex-direction: column;
   font-family: Satoshi;
-  height: 93px;
     .label-input {
       display: flex;
       flex-direction: column;

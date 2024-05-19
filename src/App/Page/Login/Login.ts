@@ -3,10 +3,11 @@ import Page from '../Page';
 import './login.scss';
 import { createInputView } from '../../components/input/inputComponent';
 import { email, password } from '../../utils/validations';
+import { loginClient } from '../../utils/api/Client';
 
 export default class LoginPage extends Page {
-  private emailInput = createInputView('email', email, 'Email address', 'Enter your e-mail');
-  private passwordInput = createInputView('password', password, 'Password', 'Enter your password');
+  private emailInput = createInputView('email', email, 'Email address', 'Enter your e-mail') as HTMLInputElement;
+  private passwordInput = createInputView('password', password, 'Password', 'Enter your password') as HTMLInputElement;
   private btnSubmit = new Component('button', ['login__form-btn']);
   private wrapperForm = document.createElement('div');
   private containerImg = document.createElement('div');
@@ -16,14 +17,6 @@ export default class LoginPage extends Page {
     this.btnSubmit.setTextContent('Login');
     this.wrapperForm.className = 'login-form-container';
     this.containerImg.className = 'login-img-wrapper';
-    // btn
-    //   .getElement<HTMLElement>()
-    //   .addEventListener('click', () =>
-    //     getApiRoot(
-    //       (emailInput.children[0] as HTMLInputElement).value,
-    //       (passwordInput.children[0] as HTMLInputElement).value
-    //     )
-    //   );
     this.createForm();
     this.render();
   }
@@ -60,6 +53,7 @@ export default class LoginPage extends Page {
     if (emailInputValue instanceof HTMLInputElement && passwordInputValue instanceof HTMLInputElement) {
       if (emailInputValue.classList.contains('success') && passwordInputValue.classList.contains('success')) {
         console.log('form submit');
+        loginClient(this.emailInput.value, this.passwordInput.value);
       } else {
         console.log('complete all fields');
       }

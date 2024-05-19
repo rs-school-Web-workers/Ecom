@@ -158,8 +158,8 @@ export function signinClient(
   addresses: BaseAddress[],
   billingAddresses: number[],
   shippingAddresses: number[],
-  defaultBillingAddress: number,
-  defaultShippingAddress: number
+  defaultBillingAddress?: number,
+  defaultShippingAddress?: number
 ) {
   if (!projectKey || !region || !clientId || !clientSecret || !clientScopes) {
     throw new Error('Env parameters are undefined');
