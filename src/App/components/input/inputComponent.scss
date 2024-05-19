@@ -1,7 +1,4 @@
 div {
-  display: flex;
-  flex-direction: column;
-  width: 250px;
   .input-field {
     outline: none;
     margin-bottom: 4px;
@@ -9,10 +6,10 @@ div {
     padding: 8px;
     border-radius: 8px;
     &.success {
-      border-color: #6FCF97;
+      border-color: #6fcf97;
     }
     &.unsuccess {
-      border-color: #EE5757;
+      border-color: #ee5757;
     }
   }
   .error-message {
