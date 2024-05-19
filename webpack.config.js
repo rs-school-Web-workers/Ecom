@@ -42,6 +42,7 @@ const commonConfig = {
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: 'index_bundle.js',
+    publicPath: '/',
   },
   devServer: {
     open: true,
@@ -51,7 +52,8 @@ const commonConfig = {
   plugins: [
     new CleanWebpackPlugin(),
     new HtmlWebpackPlugin({
-      title: 'eCommerce-Application',
+      template: path.resolve(__dirname, 'src/index.html'),
+      filename: 'index.html',
     }),
     new EslintPlugin({ extensions: ['.ts'] }),
   ],
