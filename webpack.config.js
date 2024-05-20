@@ -88,6 +88,7 @@ const commonConfig = {
     new HtmlWebpackPlugin({
       template: path.resolve(__dirname, 'src/index.html'),
       filename: 'index.html',
+      favicon: path.join(__dirname, 'src/assets/imgs', 'favicon.png'),
     }),
     new EslintPlugin({ extensions: ['ts'] }),
     new Dotenv(),
