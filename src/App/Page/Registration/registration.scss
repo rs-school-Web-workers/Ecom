@@ -6,13 +6,13 @@ $linkColor: #0f3dde;
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 100vh;
+  max-height: 1042px;
   .registration-form-container {
     display: flex;
     align-items: center;
     justify-content: center;
     flex: 1 1 auto;
-    padding: 0px 40px;
+    padding: 0px 20px;
     .registration__form {
       display: flex;
       flex-direction: column;
@@ -26,6 +26,45 @@ $linkColor: #0f3dde;
       margin-bottom: 54px;
       font-family: Integral CF;
     }
+    .registration__btn-list-show {
+      padding: 6px 10px;
+      font-size: 18px;
+      font-weight: bold;
+      background-color: $buttonBackground;
+      font-family: Satoshi;
+      border: none;
+      color: $buttonColorFont;
+      border-radius: 100px;
+      cursor: pointer;
+      margin-bottom: 10px;
+      box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.4);
+      transition: opacity 0.3s;
+      &:hover {
+        opacity: 0.8;
+      }
+    }
+    .registration__list-shipping {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      column-gap: 4px;
+    }
+    .registration__list-billing {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      column-gap: 4px;
+    }
+    .registration__label {
+      display: inline-flex;
+      gap: 10px;
+      align-self: center;
+      font-family: Satoshi;
+      color: rgb(255, 0, 0);
+      margin-left: 10px;
+      .registration__input-check {
+        width: 20px;
+        height: 20px;
+      }
+    }
     .registration__form-btn {
       padding: 6px 10px;
       font-size: 18px;
@@ -38,6 +77,10 @@ $linkColor: #0f3dde;
       cursor: pointer;
       margin-bottom: 10px;
       box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.4);
+      transition: opacity 0.3s;
+      &:hover {
+        opacity: 0.8;
+      }
     }
 
     .registration__footer {
@@ -55,6 +98,6 @@ $linkColor: #0f3dde;
     background-position: left center;
     background-size: cover;
     flex: 1 1 auto;
-    height: inherit;
+    height: 1042px;
   }
 }
