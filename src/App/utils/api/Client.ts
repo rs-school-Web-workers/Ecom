@@ -80,6 +80,13 @@ export function autoLoginCLient() {
       fetch,
     });
   inst = createApiBuilderFromCtpClient(ctpClient.build()).withProjectKey({ projectKey });
+  inst
+    .get()
+    .execute()
+    .catch((err) => {
+      inst = null;
+      throw err;
+    });
   return inst;
 }
 
@@ -94,12 +101,12 @@ export async function loginClient(email: string, password: string) {
   if (!projectKey || !region || !clientId || !clientSecret || !clientScopes) {
     throw new Error('Env parameters are undefined');
   }
-  getAnonClient()
+  await getAnonClient()
     .me()
     .login()
     .post({ body: { email, password } })
     .execute()
-    .then(() => {
+    .then(async () => {
       const ctpClient = new ClientBuilder()
         .withPasswordFlow({
           host: `https://auth.${region}.gcp.commercetools.com`,
@@ -122,7 +129,7 @@ export async function loginClient(email: string, password: string) {
         });
 
       inst = createApiBuilderFromCtpClient(ctpClient.build()).withProjectKey({ projectKey });
-      inst
+      await inst
         .get()
         .execute()
         .catch((err) => {
