@@ -20,7 +20,7 @@ export const styles = `
       border: 2px solid #D9D9D9;
       padding: 12px;
       border-radius: 8px;
-      font-size: 16px;
+      font-size: clamp(0.8rem, 2vw, 1rem);
       font-family: Satoshi;
       &.success {
         border-color: #6fcf97;
