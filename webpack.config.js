@@ -79,7 +79,7 @@ const commonConfig = {
     publicPath: '/',
   },
   devServer: {
-    open: true,
+    open: false,
     host: 'localhost',
     historyApiFallback: true,
   },
@@ -91,6 +91,15 @@ const commonConfig = {
     }),
     new EslintPlugin({ extensions: ['ts'] }),
     new Dotenv(),
+    new CopyPlugin({
+      patterns: [
+        {
+          from: path.join(__dirname, '/src/_redirects'),
+          to: '_redirects',
+          toType: 'file',
+        },
+      ],
+    }),
   ],
 };
 
