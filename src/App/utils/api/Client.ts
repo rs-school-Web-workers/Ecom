@@ -125,11 +125,14 @@ export async function loginClient(email: string, password: string) {
       inst
         .get()
         .execute()
-        .catch((err) => console.log(err));
+        .catch((err) => {
+          inst = null;
+          throw err;
+        });
     })
     .catch((err) => {
       inst = null;
-      console.log(err);
+      throw err;
     });
   return inst;
 }
@@ -150,7 +153,7 @@ export function destroyClient() {
  * проверка существования пользователя
  */
 export function isLogged() {
-  if (inst) {
+  if (inst && token.get().token !== '') {
     return true;
   }
   return false;
@@ -192,6 +195,9 @@ export async function signinClient(
     .then(() => {
       loginClient(email, password);
     })
-    .catch((err) => console.log(err));
+    .catch((err) => {
+      inst = null;
+      throw err;
+    });
   return inst;
 }
