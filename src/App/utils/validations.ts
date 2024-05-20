@@ -88,3 +88,27 @@ export const streetValidator = [
     message: 'Street must contain at least one character',
   },
 ];
+export const dateOfBirthdayValidator = [
+  {
+    validate: `(value) => ${/^\d{2}\.\d{2}\.\d{4}$/}.test(value)`,
+    message: 'Invalid date format',
+  },
+  {
+    validate: `(value) => {
+      const today = new Date();
+      let reverseValue = value.replaceAll('.', '-').split('-').reverse().join('-')
+      const birthDate = new Date(reverseValue);
+      const minAgeLimit = 13;
+
+      let age = today.getFullYear() - birthDate.getFullYear();
+
+      if (today.getMonth() < birthDate.getMonth() ||
+          (today.getMonth() === birthDate.getMonth() && today.getDate() < birthDate.getDate())) {
+          age--;
+      }
+
+      return age >= minAgeLimit;
+    }`,
+    message: 'Must be over 13 years old',
+  },
+];

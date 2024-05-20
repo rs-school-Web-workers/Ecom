@@ -1,0 +1,92 @@
+import Component from '../../utils/base-component';
+import { styles } from './selectComponentStyles';
+
+interface Country {
+  id: string;
+  shortCountryName: string;
+  fullCountryName: string;
+}
+
+class SelectControl extends HTMLElement {
+  private component = new Component('div', ['select']);
+  constructor() {
+    super();
+    const shadow = this.attachShadow({ mode: 'open' });
+    const style = document.createElement('style');
+    style.textContent = styles;
+    shadow.append(style, this.component.getElement<HTMLDivElement>());
+  }
+  connectedCallback() {
+    const input = this.createInput();
+    const dropdown = this.showDropdown();
+    this.component.getElement<HTMLDivElement>().append(input, dropdown);
+  }
+  static get observedAttributes() {
+    return ['country'];
+  }
+  createInput() {
+    const input = document.createElement('div');
+    input.classList.add('select__value');
+    input.addEventListener('click', () => this.toggleDropdown());
+    const inputPlaceholder = document.createElement('div');
+    inputPlaceholder.classList.add('select__value-placeholder');
+    const placeholder = document.createElement('span');
+    placeholder.textContent = 'Select Country';
+    placeholder.classList.add('placeholder');
+    const chevron = document.createElement('span');
+    chevron.classList.add('chevron');
+    inputPlaceholder.append(placeholder, chevron);
+    input.appendChild(inputPlaceholder);
+    return input;
+  }
+  showDropdown() {
+    const structure = document.createElement('div');
+    structure.classList.add('select__list', 'hide');
+    const attrCountry = this.getAttribute('country');
+    this.removeAttribute('country');
+    if (attrCountry) {
+      const parsedAttr: Country[] = JSON.parse(attrCountry);
+      parsedAttr.forEach((country) => {
+        console.log(country);
+        const { id, shortCountryName, fullCountryName } = country;
+        const option = document.createElement('div');
+        option.classList.add('select__list-item');
+        option.addEventListener('click', () => this.selectOption(fullCountryName));
+        option.setAttribute('id', id);
+        const fullName = document.createElement('span');
+        fullName.classList.add('select__list-item_fullname');
+        fullName.textContent = fullCountryName;
+        const shortName = document.createElement('span');
+        shortName.classList.add('select__list-item_shortname');
+        shortName.textContent = `(${shortCountryName})`;
+        option.append(fullName, shortName);
+        structure.append(option);
+      });
+    }
+    return structure;
+  }
+  toggleDropdown() {
+    const dropdown = this.shadowRoot?.querySelector('.select__list');
+    const input = this.shadowRoot?.querySelector('.select__value');
+    const chevron = this.shadowRoot?.querySelector('.chevron');
+    dropdown?.classList.toggle('hide');
+    input?.classList.toggle('active');
+    chevron?.classList.toggle('active');
+  }
+  selectOption(name: string) {
+    const text = this.shadowRoot?.querySelector('.placeholder');
+    if (text) {
+      text.textContent = name;
+      text.classList.add('selected');
+      this.toggleDropdown();
+    }
+  }
+}
+
+customElements.define('select-element', SelectControl);
+
+export function createSelectView(countryArray: Country[]) {
+  const select = document.createElement('select-element');
+  select.setAttribute('country', JSON.stringify(countryArray));
+  return select;
+}

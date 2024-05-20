@@ -2,8 +2,10 @@ import { Router } from '../../Router/Router';
 import { PagePath } from '../../Router/types';
 import { showLogoutButton } from '../../components/header/Header';
 import { createInputView } from '../../components/input/inputComponent';
+import { createSelectView } from '../../components/select/selectComponent';
 import { signinClient } from '../../utils/api/Client';
 import Component from '../../utils/base-component';
+import { countries } from '../../utils/countries';
 import {
   emailValidator,
   passwordValidator,
@@ -11,6 +13,7 @@ import {
   surnameValidator,
   cityValidator,
   streetValidator,
+  dateOfBirthdayValidator,
 } from '../../utils/validations';
 import Page from '../Page';
 import './registration.scss';
@@ -20,6 +23,12 @@ export default class RegistrationPage extends Page {
   private passwordInput = createInputView('password', passwordValidator, 'Password', 'Enter your password');
   private nameInput = createInputView('text', nameValidator, 'Name', 'Enter your name');
   private surnameInput = createInputView('text', surnameValidator, 'Surname', 'Enter your surname');
+  private dateOfBirthday = createInputView(
+    'text',
+    dateOfBirthdayValidator,
+    'Date of birth',
+    'Enter your date of birth DD.MM.YYYY'
+  );
   private sStreet = createInputView('text', streetValidator, '', 'Shipping Street');
   private sStreetNumber = createInputView('text', [], '', 'Shipping StreetNumber');
   private sCity = createInputView('text', cityValidator, '', 'Shipping City');
@@ -30,6 +39,8 @@ export default class RegistrationPage extends Page {
   private bCity = createInputView('text', cityValidator, '', 'Billing City');
   private bCountry = createInputView('text', [], '', 'Billing Country');
   private bPostalCode = createInputView('text', [], '', 'Billing PostalCode');
+  private sSelectCountry = createSelectView(countries);
+  private bSelectCountry = createSelectView(countries);
   private sCheckbox = new Component('input', ['registration__input-check']).getElement<HTMLInputElement>();
   private bCheckbox = new Component('input', ['registration__input-check']).getElement<HTMLInputElement>();
   private btnSubmit = new Component('button', ['registration__form-btn']);
@@ -69,8 +80,22 @@ export default class RegistrationPage extends Page {
   render() {
     const templateShippingCheckbox = `<label class="registration__label">Default Shipping ${this.sCheckbox.outerHTML}</label>`;
     const templateBillingCheckbox = `<label class="registration__label">Default Billing ${this.bCheckbox.outerHTML}</label>`;
-    this.shippingList.append(this.sStreet, this.sStreetNumber, this.sCity, this.sCountry, this.sPostalCode);
-    this.billingList.append(this.bStreet, this.bStreetNumber, this.bCity, this.bCountry, this.bPostalCode);
+    this.shippingList.append(
+      this.sStreet,
+      this.sStreetNumber,
+      this.sCity,
+      this.sCountry,
+      this.sPostalCode,
+      this.sSelectCountry
+    );
+    this.billingList.append(
+      this.bStreet,
+      this.bStreetNumber,
+      this.bCity,
+      this.bCountry,
+      this.bPostalCode,
+      this.bSelectCountry
+    );
     this.sPostalCode.insertAdjacentHTML('afterend', templateShippingCheckbox);
     this.bPostalCode.insertAdjacentHTML('afterend', templateBillingCheckbox);
     this.btnShippingList.getElement<HTMLButtonElement>().onclick = (e) => this.toogleList(e);
@@ -101,6 +126,7 @@ export default class RegistrationPage extends Page {
       this.surnameInput,
       this.emailInput,
       this.passwordInput,
+      this.dateOfBirthday,
       this.btnShippingList.getElement<HTMLButtonElement>(),
       this.shippingList,
       this.btnBillingList.getElement<HTMLButtonElement>(),
