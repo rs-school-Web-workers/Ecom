@@ -64,6 +64,14 @@ $gap-link-burger: 60px;
   color: $headerTextColor;
 }
 
+.logout-button {
+  display: none;
+}
+
+.show-logout {
+  display: block;
+}
+
 .name-container {
   display: flex;
   align-items: center;

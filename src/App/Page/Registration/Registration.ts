@@ -1,5 +1,6 @@
 import { Router } from '../../Router/Router';
 import { PagePath } from '../../Router/types';
+import { showLogoutButton } from '../../components/header/Header';
 import { createInputView } from '../../components/input/inputComponent';
 import { signinClient } from '../../utils/api/Client';
 import Component from '../../utils/base-component';
@@ -146,6 +147,7 @@ export default class RegistrationPage extends Page {
         );
         this.router.navigate(PagePath.MAIN);
         this.router.renderPageView(PagePath.MAIN);
+        showLogoutButton();
       } else {
         console.log('complete all fields');
       }
