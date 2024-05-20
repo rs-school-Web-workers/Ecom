@@ -41,7 +41,9 @@ export default class LoginPage extends Page {
     footerLinkToPage.classList.add('login__footer-link');
     footerLinkToPage.textContent = 'Sign Up';
     footerLinkToPage.href = '/registration';
-    footer.innerHTML = `Don't have an account? ${footerLinkToPage.outerHTML}`;
+    footerLinkToPage.addEventListener('click', (event) => this.signupHandler(event));
+    footer.innerHTML = `Don't have an account? `;
+    footer.append(footerLinkToPage);
     const form = document.createElement('form');
     form.classList.add('login__form');
     form.append(title, aboutText, this.emailInput, this.passwordInput, this.btnSubmit.getElement(), footer);
@@ -62,6 +64,18 @@ export default class LoginPage extends Page {
         showLogoutButton();
       } else {
         console.log('complete all fields');
+      }
+    }
+  }
+
+  signupHandler(event: Event) {
+    event.preventDefault();
+    const targetElem: HTMLAnchorElement | null = <HTMLAnchorElement>event.target;
+    if (targetElem) {
+      const navigateLink: string | null = targetElem.getAttribute('href');
+      if (navigateLink) {
+        this.router.navigate(navigateLink);
+        this.router.renderPageView(navigateLink);
       }
     }
   }

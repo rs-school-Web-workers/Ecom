@@ -14,6 +14,7 @@ import {
 } from '../../utils/validations';
 import Page from '../Page';
 import './registration.scss';
+import { errorInvalidJSON } from './types';
 
 export default class RegistrationPage extends Page {
   private emailInput = createInputView('email', emailValidator, 'Email address', 'Enter your e-mail');
@@ -91,7 +92,9 @@ export default class RegistrationPage extends Page {
     footerLinkToPage.classList.add('registration__footer-link');
     footerLinkToPage.textContent = 'Sign In';
     footerLinkToPage.href = '/login';
-    footer.innerHTML = `Have an account? ${footerLinkToPage.outerHTML}`;
+    footerLinkToPage.addEventListener('click', (event) => this.signinHandler(event));
+    footer.innerHTML = `Have an account? `;
+    footer.append(footerLinkToPage);
     const form = document.createElement('form');
     form.classList.add('registration__form');
     form.append(
@@ -110,6 +113,18 @@ export default class RegistrationPage extends Page {
     );
     form.addEventListener('submit', this.handlerSubmit.bind(this));
     this.wrapperForm.append(form);
+  }
+
+  signinHandler(event: Event) {
+    event.preventDefault();
+    const targetElem: HTMLAnchorElement | null = <HTMLAnchorElement>event.target;
+    if (targetElem) {
+      const navigateLink: string | null = targetElem.getAttribute('href');
+      if (navigateLink) {
+        this.router.navigate(navigateLink);
+        this.router.renderPageView(navigateLink);
+      }
+    }
   }
 
   async handlerSubmit(e: Event) {
@@ -170,29 +185,38 @@ export default class RegistrationPage extends Page {
           [0],
           this.bCheckbox.checked ? 1 : undefined,
           this.sCheckbox.checked ? 0 : undefined
-        );
-        // this.router.navigate(PagePath.MAIN);
-        // this.router.renderPageView(PagePath.MAIN);
-        // showLogoutButton();
-        this.successRegister();
+        )
+          .then(() => this.successRegister(''))
+          .catch((msg) => {
+            if (msg.message === errorInvalidJSON.errorMsg) {
+              this.successRegister(errorInvalidJSON.showMsg);
+            } else {
+              this.successRegister(msg.message);
+            }
+          });
       } else {
         console.log('complete all fields');
       }
     }
   }
 
-  successRegister() {
+  successRegister(msg: string) {
     const registerContainer: HTMLDivElement | null = document.querySelector<HTMLDivElement>('.registration');
-    const msgContainer: Component = new Component('div', ['register-msg-container']);
+    const msgContainer: HTMLDivElement = new Component('div', ['register-msg-container']).getElement<HTMLDivElement>();
     const msgText: HTMLDivElement = new Component('div', ['register-msg-text']).getElement<HTMLDivElement>();
-    msgText.textContent = 'Registration completed successfully!';
     const msgButton: HTMLButtonElement = new Component('button', [
       'register-msg-button',
     ]).getElement<HTMLButtonElement>();
     msgButton.textContent = 'Ok';
-    msgButton.addEventListener('click', () => this.hideRegisterMsg());
-    msgContainer.setChildren(msgText, msgButton);
-    registerContainer?.append(msgContainer.getElement<HTMLDivElement>());
+    if (msg === '') {
+      msgText.textContent = 'Registration completed successfully!';
+      msgButton.addEventListener('click', () => this.hideRegisterMsg());
+    } else {
+      msgText.textContent = msg;
+      msgButton.addEventListener('click', () => msgContainer.remove());
+    }
+    msgContainer.append(msgText, msgButton);
+    registerContainer?.append(msgContainer);
   }
 
   hideRegisterMsg() {
