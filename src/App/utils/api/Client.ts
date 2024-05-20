@@ -199,8 +199,8 @@ export async function signinClient(
       },
     })
     .execute()
-    .then(() => {
-      loginClient(email, password);
+    .then(async () => {
+      await loginClient(email, password);
     })
     .catch((err) => {
       inst = null;
