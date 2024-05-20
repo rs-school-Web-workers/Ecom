@@ -1,12 +1,15 @@
 import { Router } from './Router/Router';
 import { ID_ELEMENT, PageInfo, PagePath, SECTION_NAME } from './Router/types';
-import '../components/css/normalize.css';
-import Header from './Header/Header';
+import '../assets/css/normalize.css';
+import Header, { showLogoutButton } from './components/header/Header';
 import Component from './utils/base-component';
 import { isNull } from './utils/base-methods';
 import Page from './Page/Page';
 import MainPage from './Page/MainPage/MainPage';
 import NotFoundPage from './Page/NotFoundPage/NotFoundPage';
+import LoginPage from './Page/Login/Login';
+import { autoLoginCLient, isLogged } from './utils/api/Client';
+import RegistrationPage from './Page/Registration/Registration';
 
 export class App {
   router: Router;
@@ -18,6 +21,7 @@ export class App {
   contentContainer: HTMLDivElement;
 
   constructor() {
+    if (localStorage.getItem('token')) autoLoginCLient();
     this.container = document.body;
     this.contentContainer = document.createElement('div');
     const pages: PageInfo[] = this.initPages();
@@ -30,6 +34,7 @@ export class App {
   initApp() {
     const header: HTMLElement = this.header.container;
     this.container.append(header, this.contentContainer);
+    showLogoutButton();
   }
 
   initPages() {
@@ -44,7 +49,13 @@ export class App {
       {
         pagePath: PagePath.LOGIN,
         render: () => {
-          this.contentContainer.textContent = 'This is ' + PagePath.LOGIN;
+          if (isLogged()) {
+            this.router.navigate(PagePath.MAIN);
+            this.router.renderPageView(PagePath.MAIN);
+          } else {
+            const loginPage: LoginPage = new LoginPage(this.router);
+            this.setPage(loginPage);
+          }
         },
       },
       {
@@ -57,7 +68,13 @@ export class App {
       {
         pagePath: PagePath.REGISTRATION,
         render: () => {
-          this.contentContainer.textContent = 'This is ' + PagePath.REGISTRATION;
+          if (isLogged()) {
+            this.router.navigate(PagePath.MAIN);
+            this.router.renderPageView(PagePath.MAIN);
+          } else {
+            const registrationPage: RegistrationPage = new RegistrationPage(this.router);
+            this.setPage(registrationPage);
+          }
         },
       },
       {
