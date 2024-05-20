@@ -1,7 +1,7 @@
 import { Router } from './Router/Router';
 import { ID_ELEMENT, PageInfo, PagePath, SECTION_NAME } from './Router/types';
 import '../assets/css/normalize.css';
-import Header from './components/header/Header';
+import Header, { showLogoutButton } from './components/header/Header';
 import Component from './utils/base-component';
 import { isNull } from './utils/base-methods';
 import Page from './Page/Page';
@@ -34,6 +34,7 @@ export class App {
   initApp() {
     const header: HTMLElement = this.header.container;
     this.container.append(header, this.contentContainer);
+    showLogoutButton();
   }
 
   initPages() {

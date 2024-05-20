@@ -3,12 +3,14 @@ export enum headerClassNames {
   SHOP_NAME = 'shop-name',
   NAV_ELEMENT = 'nav-element',
   NAVIGATE_LINK = 'navigate-link',
+  LOGOUT_BUTTON = 'logout-button',
 }
 
 export enum headerLinkNames {
   MAIN = 'Main',
   LOGIN = 'Login',
   REGISTRATION = 'Register',
+  LOGOUT = 'Logout',
 }
 
 export const NAV_CONTAINER = 'nav-container';

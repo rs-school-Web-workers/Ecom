@@ -6,6 +6,7 @@ import { email, password } from '../../utils/validations';
 import { loginClient } from '../../utils/api/Client';
 import { Router } from '../../Router/Router';
 import { PagePath } from '../../Router/types';
+import { showLogoutButton } from '../../components/header/Header';
 
 export default class LoginPage extends Page {
   private emailInput = createInputView('email', email, 'Email address', 'Enter your e-mail');
@@ -58,6 +59,7 @@ export default class LoginPage extends Page {
         await loginClient(emailInputValue.value, passwordInputValue.value);
         this.router.navigate(PagePath.MAIN);
         this.router.renderPageView(PagePath.MAIN);
+        showLogoutButton();
       } else {
         console.log('complete all fields');
       }

@@ -12,6 +12,7 @@ import {
   headerClassNames,
   headerLinkNames,
 } from './types';
+import { destroyClient, isLogged } from '../../utils/api/Client';
 
 export default class Header {
   router: Router;
@@ -65,7 +66,9 @@ export default class Header {
       headerLinkNames.REGISTRATION,
       PagePath.REGISTRATION
     );
-    navElement.setChildren(menuLink, loginLink, registrationLink);
+    const logoutLink: HTMLAnchorElement = this.createNavigateLink(headerLinkNames.LOGOUT, PagePath.LOGIN);
+    logoutLink.classList.add(headerClassNames.LOGOUT_BUTTON);
+    navElement.setChildren(menuLink, loginLink, registrationLink, logoutLink);
     navContainer.setChildren(navElement.getElement<HTMLElement>());
     return navContainer.getElement<HTMLDivElement>();
   }
@@ -74,6 +77,10 @@ export default class Header {
     event.preventDefault();
     const targetElem: HTMLAnchorElement | null = <HTMLAnchorElement>event.target;
     if (targetElem) {
+      if (targetElem.textContent === headerLinkNames.LOGOUT) {
+        destroyClient();
+        showLogoutButton();
+      }
       const navigateLink: string | null = targetElem.getAttribute('href');
       if (navigateLink) {
         this.hideNavigateBlock();
@@ -115,5 +122,16 @@ export default class Header {
     const logo: Component = new Component('h1', classes);
     logo.setTextContent(name);
     return logo.getElement<HTMLHeadingElement>();
+  }
+}
+
+export function showLogoutButton() {
+  const logout: HTMLAnchorElement | null = document.querySelector<HTMLAnchorElement>(
+    `.${headerClassNames.LOGOUT_BUTTON}`
+  );
+  if (isLogged()) {
+    logout?.classList.add('show-logout');
+  } else {
+    logout?.classList.remove('show-logout');
   }
 }
