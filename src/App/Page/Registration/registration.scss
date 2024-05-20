@@ -6,7 +6,7 @@ $linkColor: #0f3dde;
   display: flex;
   align-items: center;
   justify-content: center;
-  max-height: 1042px;
+  max-height: 750px;
   .registration-form-container {
     display: flex;
     align-items: center;
@@ -17,6 +17,7 @@ $linkColor: #0f3dde;
       display: flex;
       flex-direction: column;
       gap: $gapForm;
+      margin-bottom: 30px;
     }
     .registration__title {
       margin-bottom: 10px;
