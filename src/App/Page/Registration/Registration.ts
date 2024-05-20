@@ -145,12 +145,35 @@ export default class RegistrationPage extends Page {
           this.bCheckbox.checked ? 1 : undefined,
           this.sCheckbox.checked ? 0 : undefined
         );
-        this.router.navigate(PagePath.MAIN);
-        this.router.renderPageView(PagePath.MAIN);
-        showLogoutButton();
+        // this.router.navigate(PagePath.MAIN);
+        // this.router.renderPageView(PagePath.MAIN);
+        // showLogoutButton();
+        this.successRegister();
       } else {
         console.log('complete all fields');
       }
     }
+  }
+
+  successRegister() {
+    const registerContainer: HTMLDivElement | null = document.querySelector<HTMLDivElement>('.registration');
+    const msgContainer: Component = new Component('div', ['register-msg-container']);
+    const msgText: HTMLDivElement = new Component('div', ['register-msg-text']).getElement<HTMLDivElement>();
+    msgText.textContent = 'Registration completed successfully!';
+    const msgButton: HTMLButtonElement = new Component('button', [
+      'register-msg-button',
+    ]).getElement<HTMLButtonElement>();
+    msgButton.textContent = 'Ok';
+    msgButton.addEventListener('click', () => this.hideRegisterMsg());
+    msgContainer.setChildren(msgText, msgButton);
+    registerContainer?.append(msgContainer.getElement<HTMLDivElement>());
+  }
+
+  hideRegisterMsg() {
+    const msgContainer: HTMLDivElement | null = document.querySelector<HTMLDivElement>('.register-msg-container');
+    msgContainer?.remove();
+    this.router.navigate(PagePath.MAIN);
+    this.router.renderPageView(PagePath.MAIN);
+    showLogoutButton();
   }
 }

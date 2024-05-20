@@ -58,3 +58,29 @@ $linkColor: #0f3dde;
     height: inherit;
   }
 }
+
+.register-msg-container {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  top: 50%;
+  background-color: $buttonColorFont;
+  border: 2px solid black;
+  padding: 70px;
+  border-radius: 50px;
+}
+
+.register-msg-text {
+  font-family: Satoshi;
+}
+
+.register-msg-button {
+  font-family: Integral CF;
+  color: $buttonColorFont;
+  background-color: black;
+  border: 1px solid black;
+  padding: 10px;
+  width: 100%;
+  border-radius: 50px;
+}
