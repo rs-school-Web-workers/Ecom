@@ -153,6 +153,7 @@ export default class RegistrationPage extends Page {
     const bStreetNumber = this.bStreetNumber.shadowRoot?.children[1].lastChild;
     const bCity = this.bCity.shadowRoot?.children[1].lastChild;
     const bCountry = this.bCountry.shadowRoot?.children[1].lastChild;
+    console.log('');
     const bPostalCode = this.bPostalCode.shadowRoot?.children[1].lastChild;
     if (
       emailInputValue instanceof HTMLInputElement &&
@@ -202,6 +203,7 @@ export default class RegistrationPage extends Page {
         showLogoutButton();
       } else {
         console.log('complete all fields');
+        console.log(this.sSelectCountry.shadowRoot?.querySelector('.placeholder.selected'));
       }
     }
   }
