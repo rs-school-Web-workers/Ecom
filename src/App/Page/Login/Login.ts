@@ -2,15 +2,15 @@ import Component from '../../utils/base-component';
 import Page from '../Page';
 import './login.scss';
 import { createInputView } from '../../components/input/inputComponent';
-import { email, password } from '../../utils/validations';
+import { emailValidator, passwordValidator } from '../../utils/validations';
 import { loginClient } from '../../utils/api/Client';
 import { Router } from '../../Router/Router';
 import { PagePath } from '../../Router/types';
 import { showLogoutButton } from '../../components/header/Header';
 
 export default class LoginPage extends Page {
-  private emailInput = createInputView('email', email, 'Email address', 'Enter your e-mail');
-  private passwordInput = createInputView('password', password, 'Password', 'Enter your password');
+  private emailInput = createInputView('email', emailValidator, 'Email address', 'Enter your e-mail');
+  private passwordInput = createInputView('password', passwordValidator, 'Password', 'Enter your password');
   private btnSubmit = new Component('button', ['login__form-btn']);
   private wrapperForm = document.createElement('div');
   private containerImg = document.createElement('div');
@@ -41,7 +41,9 @@ export default class LoginPage extends Page {
     footerLinkToPage.classList.add('login__footer-link');
     footerLinkToPage.textContent = 'Sign Up';
     footerLinkToPage.href = '/registration';
-    footer.innerHTML = `Don't have an account? ${footerLinkToPage.outerHTML}`;
+    footerLinkToPage.addEventListener('click', (event) => this.signupHandler(event));
+    footer.innerHTML = `Don't have an account? `;
+    footer.append(footerLinkToPage);
     const form = document.createElement('form');
     form.classList.add('login__form');
     form.append(title, aboutText, this.emailInput, this.passwordInput, this.btnSubmit.getElement(), footer);
@@ -62,6 +64,18 @@ export default class LoginPage extends Page {
         showLogoutButton();
       } else {
         console.log('complete all fields');
+      }
+    }
+  }
+
+  signupHandler(event: Event) {
+    event.preventDefault();
+    const targetElem: HTMLAnchorElement | null = <HTMLAnchorElement>event.target;
+    if (targetElem) {
+      const navigateLink: string | null = targetElem.getAttribute('href');
+      if (navigateLink) {
+        this.router.navigate(navigateLink);
+        this.router.renderPageView(navigateLink);
       }
     }
   }
