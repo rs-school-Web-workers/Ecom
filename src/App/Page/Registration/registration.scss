@@ -6,7 +6,7 @@ $linkColor: #0f3dde;
   display: flex;
   align-items: center;
   justify-content: center;
-  max-height: 1042px;
+  max-height: 750px;
   .registration-form-container {
     display: flex;
     align-items: center;
@@ -17,6 +17,7 @@ $linkColor: #0f3dde;
       display: flex;
       flex-direction: column;
       gap: $gapForm;
+      margin-bottom: 30px;
     }
     .registration__title {
       margin-bottom: 10px;
@@ -100,4 +101,30 @@ $linkColor: #0f3dde;
     flex: 1 1 auto;
     height: 1042px;
   }
+}
+
+.register-msg-container {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  top: 50%;
+  background-color: $buttonColorFont;
+  border: 2px solid black;
+  padding: 70px;
+  border-radius: 50px;
+}
+
+.register-msg-text {
+  font-family: Satoshi;
+}
+
+.register-msg-button {
+  font-family: Integral CF;
+  color: $buttonColorFont;
+  background-color: black;
+  border: 1px solid black;
+  padding: 10px;
+  width: 100%;
+  border-radius: 50px;
 }

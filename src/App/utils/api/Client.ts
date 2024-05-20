@@ -80,6 +80,13 @@ export function autoLoginCLient() {
       fetch,
     });
   inst = createApiBuilderFromCtpClient(ctpClient.build()).withProjectKey({ projectKey });
+  inst
+    .get()
+    .execute()
+    .catch((err) => {
+      inst = null;
+      throw err;
+    });
   return inst;
 }
 
@@ -94,12 +101,12 @@ export async function loginClient(email: string, password: string) {
   if (!projectKey || !region || !clientId || !clientSecret || !clientScopes) {
     throw new Error('Env parameters are undefined');
   }
-  getAnonClient()
+  await getAnonClient()
     .me()
     .login()
     .post({ body: { email, password } })
     .execute()
-    .then(() => {
+    .then(async () => {
       const ctpClient = new ClientBuilder()
         .withPasswordFlow({
           host: `https://auth.${region}.gcp.commercetools.com`,
@@ -122,14 +129,17 @@ export async function loginClient(email: string, password: string) {
         });
 
       inst = createApiBuilderFromCtpClient(ctpClient.build()).withProjectKey({ projectKey });
-      inst
+      await inst
         .get()
         .execute()
-        .catch((err) => console.log(err));
+        .catch((err) => {
+          inst = null;
+          throw err;
+        });
     })
     .catch((err) => {
       inst = null;
-      console.log(err);
+      throw err;
     });
   return inst;
 }
@@ -150,7 +160,7 @@ export function destroyClient() {
  * проверка существования пользователя
  */
 export function isLogged() {
-  if (inst) {
+  if (inst && token.get().token !== '') {
     return true;
   }
   return false;
@@ -163,6 +173,7 @@ export async function signinClient(
   email: string,
   firstName: string,
   lastName: string,
+  dateOfBirth: string,
   password: string,
   addresses: BaseAddress[],
   billingAddresses: number[],
@@ -181,6 +192,7 @@ export async function signinClient(
         password,
         firstName,
         lastName,
+        dateOfBirth,
         addresses,
         billingAddresses,
         shippingAddresses,
@@ -189,9 +201,12 @@ export async function signinClient(
       },
     })
     .execute()
-    .then(() => {
-      loginClient(email, password);
+    .then(async () => {
+      await loginClient(email, password);
     })
-    .catch((err) => console.log(err));
+    .catch((err) => {
+      inst = null;
+      throw err;
+    });
   return inst;
 }

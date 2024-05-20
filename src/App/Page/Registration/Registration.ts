@@ -17,6 +17,7 @@ import {
 } from '../../utils/validations';
 import Page from '../Page';
 import './registration.scss';
+import { errorInvalidJSON } from './types';
 
 export default class RegistrationPage extends Page {
   private emailInput = createInputView('email', emailValidator, 'Email address', 'Enter your e-mail');
@@ -32,12 +33,10 @@ export default class RegistrationPage extends Page {
   private sStreet = createInputView('text', streetValidator, '', 'Shipping Street');
   private sStreetNumber = createInputView('text', [], '', 'Shipping StreetNumber');
   private sCity = createInputView('text', cityValidator, '', 'Shipping City');
-  private sCountry = createInputView('text', [], '', 'Shipping Country');
   private sPostalCode = createInputView('text', [], '', 'Shipping PostalCode');
   private bStreet = createInputView('text', streetValidator, '', 'Billing Street');
   private bStreetNumber = createInputView('text', [], '', 'Billing StreetNumber');
   private bCity = createInputView('text', cityValidator, '', 'Billing City');
-  private bCountry = createInputView('text', [], '', 'Billing Country');
   private bPostalCode = createInputView('text', [], '', 'Billing PostalCode');
   private sSelectCountry = createSelectView(countries);
   private bSelectCountry = createSelectView(countries);
@@ -80,22 +79,8 @@ export default class RegistrationPage extends Page {
   render() {
     const templateShippingCheckbox = `<label class="registration__label">Default Shipping ${this.sCheckbox.outerHTML}</label>`;
     const templateBillingCheckbox = `<label class="registration__label">Default Billing ${this.bCheckbox.outerHTML}</label>`;
-    this.shippingList.append(
-      this.sStreet,
-      this.sStreetNumber,
-      this.sCity,
-      this.sCountry,
-      this.sPostalCode,
-      this.sSelectCountry
-    );
-    this.billingList.append(
-      this.bStreet,
-      this.bStreetNumber,
-      this.bCity,
-      this.bCountry,
-      this.bPostalCode,
-      this.bSelectCountry
-    );
+    this.shippingList.append(this.sStreet, this.sStreetNumber, this.sCity, this.sPostalCode, this.sSelectCountry);
+    this.billingList.append(this.bStreet, this.bStreetNumber, this.bCity, this.bPostalCode, this.bSelectCountry);
     this.sPostalCode.insertAdjacentHTML('afterend', templateShippingCheckbox);
     this.bPostalCode.insertAdjacentHTML('afterend', templateBillingCheckbox);
     this.btnShippingList.getElement<HTMLButtonElement>().onclick = (e) => this.toogleList(e);
@@ -116,7 +101,9 @@ export default class RegistrationPage extends Page {
     footerLinkToPage.classList.add('registration__footer-link');
     footerLinkToPage.textContent = 'Sign In';
     footerLinkToPage.href = '/login';
-    footer.innerHTML = `Have an account? ${footerLinkToPage.outerHTML}`;
+    footerLinkToPage.addEventListener('click', (event) => this.signinHandler(event));
+    footer.innerHTML = `Have an account? `;
+    footer.append(footerLinkToPage);
     const form = document.createElement('form');
     form.classList.add('registration__form');
     form.append(
@@ -138,36 +125,53 @@ export default class RegistrationPage extends Page {
     this.wrapperForm.append(form);
   }
 
+  signinHandler(event: Event) {
+    event.preventDefault();
+    const targetElem: HTMLAnchorElement | null = <HTMLAnchorElement>event.target;
+    if (targetElem) {
+      const navigateLink: string | null = targetElem.getAttribute('href');
+      if (navigateLink) {
+        this.router.navigate(navigateLink);
+        this.router.renderPageView(navigateLink);
+      }
+    }
+  }
+
   async handlerSubmit(e: Event) {
     e.preventDefault();
     const emailInputValue = this.emailInput.shadowRoot?.children[1].lastChild;
     const passwordInputValue = this.passwordInput.shadowRoot?.children[1].lastChild;
     const nameInputValue = this.nameInput.shadowRoot?.children[1].lastChild;
     const surnameInputValue = this.surnameInput.shadowRoot?.children[1].lastChild;
+    const dateOfBirthdayValue = this.dateOfBirthday.shadowRoot?.children[1].lastChild;
     const sStreet = this.sStreet.shadowRoot?.children[1].lastChild;
     const sStreetNumber = this.sStreetNumber.shadowRoot?.children[1].lastChild;
     const sCity = this.sCity.shadowRoot?.children[1].lastChild;
-    const sCountry = this.sCountry.shadowRoot?.children[1].lastChild;
+    let sCountry = this.sSelectCountry.shadowRoot?.querySelector('.placeholder.selected')?.textContent;
     const sPostalCode = this.sPostalCode.shadowRoot?.children[1].lastChild;
     const bStreet = this.bStreet.shadowRoot?.children[1].lastChild;
     const bStreetNumber = this.bStreetNumber.shadowRoot?.children[1].lastChild;
     const bCity = this.bCity.shadowRoot?.children[1].lastChild;
-    const bCountry = this.bCountry.shadowRoot?.children[1].lastChild;
+    let bCountry = this.sSelectCountry.shadowRoot?.querySelector('.placeholder.selected')?.textContent;
     const bPostalCode = this.bPostalCode.shadowRoot?.children[1].lastChild;
+
+    const sCountryShort = countries.filter((country) => country.fullCountryName === sCountry);
+    const bCountryShort = countries.filter((country) => country.fullCountryName === bCountry);
+    sCountry = sCountryShort.length ? sCountryShort[0].shortCountryName : 'BY';
+    bCountry = bCountryShort.length ? bCountryShort[0].shortCountryName : 'BY';
     if (
       emailInputValue instanceof HTMLInputElement &&
       passwordInputValue instanceof HTMLInputElement &&
       nameInputValue instanceof HTMLInputElement &&
+      dateOfBirthdayValue instanceof HTMLInputElement &&
       surnameInputValue instanceof HTMLInputElement &&
       sStreet instanceof HTMLInputElement &&
       sStreetNumber instanceof HTMLInputElement &&
       sCity instanceof HTMLInputElement &&
-      sCountry instanceof HTMLInputElement &&
       sPostalCode instanceof HTMLInputElement &&
       bStreet instanceof HTMLInputElement &&
       bStreetNumber instanceof HTMLInputElement &&
       bCity instanceof HTMLInputElement &&
-      bCountry instanceof HTMLInputElement &&
       bPostalCode instanceof HTMLInputElement
     ) {
       if (emailInputValue.classList.contains('success') && passwordInputValue.classList.contains('success')) {
@@ -175,20 +179,21 @@ export default class RegistrationPage extends Page {
           emailInputValue.value,
           nameInputValue.value,
           surnameInputValue.value,
+          dateOfBirthdayValue.value,
           passwordInputValue.value,
           [
             {
               streetName: sStreet.value,
               streetNumber: sStreetNumber.value,
               city: sCity.value,
-              country: sCountry.value,
+              country: sCountry,
               postalCode: sPostalCode.value,
             },
             {
               streetName: bStreet.value,
               streetNumber: bStreetNumber.value,
               city: bCity.value,
-              country: bCountry.value,
+              country: bCountry,
               postalCode: bPostalCode.value,
             },
           ],
@@ -196,15 +201,48 @@ export default class RegistrationPage extends Page {
           [0],
           this.bCheckbox.checked ? 1 : undefined,
           this.sCheckbox.checked ? 0 : undefined
-        );
-        this.router.navigate(PagePath.MAIN);
-        this.router.renderPageView(PagePath.MAIN);
-        showLogoutButton();
+        )
+          .then(() => this.successRegister(''))
+          .catch((msg) => {
+            if (msg.message === errorInvalidJSON.errorMsg) {
+              this.successRegister(errorInvalidJSON.showMsg);
+            } else {
+              this.successRegister(msg.message);
+            }
+          });
       } else {
         console.log('complete all fields');
       }
     }
   }
+
+  successRegister(msg: string) {
+    const registerContainer: HTMLDivElement | null = document.querySelector<HTMLDivElement>('.registration');
+    const msgContainer: HTMLDivElement = new Component('div', ['register-msg-container']).getElement<HTMLDivElement>();
+    const msgText: HTMLDivElement = new Component('div', ['register-msg-text']).getElement<HTMLDivElement>();
+    const msgButton: HTMLButtonElement = new Component('button', [
+      'register-msg-button',
+    ]).getElement<HTMLButtonElement>();
+    msgButton.textContent = 'Ok';
+    if (msg === '') {
+      msgText.textContent = 'Registration completed successfully!';
+      msgButton.addEventListener('click', () => this.hideRegisterMsg());
+    } else {
+      msgText.textContent = msg;
+      msgButton.addEventListener('click', () => msgContainer.remove());
+    }
+    msgContainer.append(msgText, msgButton);
+    registerContainer?.append(msgContainer);
+  }
+
+  hideRegisterMsg() {
+    const msgContainer: HTMLDivElement | null = document.querySelector<HTMLDivElement>('.register-msg-container');
+    msgContainer?.remove();
+    this.router.navigate(PagePath.MAIN);
+    this.router.renderPageView(PagePath.MAIN);
+    showLogoutButton();
+  }
+
   toogleList(el: Event) {
     const { currentTarget } = el;
     if (currentTarget instanceof HTMLElement) {
