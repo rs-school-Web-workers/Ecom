@@ -92,8 +92,7 @@ export const dateOfBirthdayValidator = [
   {
     validate: `(value) => {
       const today = new Date();
-      let reverseValue = value.replaceAll('.', '-').split('-').reverse().join('-')
-      const birthDate = new Date(reverseValue);
+      const birthDate = new Date(value);
       const minAgeLimit = 13;
 
       let age = today.getFullYear() - birthDate.getFullYear();
