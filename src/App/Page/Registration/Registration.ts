@@ -156,13 +156,14 @@ export default class RegistrationPage extends Page {
     const sStreet = this.sStreet.shadowRoot?.children[1].lastChild;
     const sStreetNumber = this.sStreetNumber.shadowRoot?.children[1].lastChild;
     const sCity = this.sCity.shadowRoot?.children[1].lastChild;
-    let sCountry = this.sSelectCountry.shadowRoot?.querySelector('.placeholder.selected')?.textContent;
+    let sCountry = this.sSelectCountry.shadowRoot?.querySelector('.placeholder')?.textContent;
     const sPostalCode = this.sPostalCode?.shadowRoot?.children[1].lastChild;
     const bStreet = this.bStreet.shadowRoot?.children[1].lastChild;
     const bStreetNumber = this.bStreetNumber.shadowRoot?.children[1].lastChild;
     const bCity = this.bCity.shadowRoot?.children[1].lastChild;
-    let bCountry = this.sSelectCountry.shadowRoot?.querySelector('.placeholder.selected')?.textContent;
+    let bCountry = this.sSelectCountry.shadowRoot?.querySelector('.placeholder')?.textContent;
     const bPostalCode = this.bPostalCode?.shadowRoot?.children[1].lastChild;
+    console.log(sCountry, bCountry, this.bCheckbox, this.sCheckbox);
 
     const sCountryShort = countries.filter((country) => country.fullCountryName === sCountry);
     const bCountryShort = countries.filter((country) => country.fullCountryName === bCountry);
