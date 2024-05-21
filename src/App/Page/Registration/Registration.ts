@@ -15,6 +15,8 @@ import {
   streetValidator,
   dateOfBirthdayValidator,
   postalCodeBelarusValidator,
+  postalCodeRussiaValidator,
+  postalCodePolandValidator,
 } from '../../utils/validations';
 import Page from '../Page';
 import './registration.scss';
@@ -34,11 +36,11 @@ export default class RegistrationPage extends Page {
   private sStreet = createInputView('text', streetValidator, '', 'Shipping Street');
   private sStreetNumber = createInputView('text', [], '', 'Shipping StreetNumber');
   private sCity = createInputView('text', cityValidator, '', 'Shipping City');
-  private sPostalCode = createInputView('text', postalCodeBelarusValidator, '', 'Shipping PostalCode');
+  private sPostalCode?: HTMLElement;
   private bStreet = createInputView('text', streetValidator, '', 'Billing Street');
   private bStreetNumber = createInputView('text', [], '', 'Billing StreetNumber');
   private bCity = createInputView('text', cityValidator, '', 'Billing City');
-  private bPostalCode = createInputView('text', postalCodeBelarusValidator, '', 'Billing PostalCode');
+  private bPostalCode?: HTMLElement;
   private sSelectCountry = createSelectView(countries);
   private bSelectCountry = createSelectView(countries);
   private sCheckbox = new Component('input', ['registration__input-check']).getElement<HTMLInputElement>();
@@ -80,8 +82,12 @@ export default class RegistrationPage extends Page {
   render() {
     const templateShippingCheckbox = `<label class="registration__label">Default Shipping ${this.sCheckbox.outerHTML}</label>`;
     const templateBillingCheckbox = `<label class="registration__label">Default Billing ${this.bCheckbox.outerHTML}</label>`;
-    this.shippingList.append(this.sStreet, this.sStreetNumber, this.sCity, this.sSelectCountry, this.sPostalCode);
-    this.billingList.append(this.bStreet, this.bStreetNumber, this.bCity, this.bSelectCountry, this.bPostalCode);
+    this.shippingList.append(this.sStreet, this.sStreetNumber, this.sCity, this.sSelectCountry);
+    this.billingList.append(this.bStreet, this.bStreetNumber, this.bCity, this.bSelectCountry);
+    this.container?.addEventListener('selectValue', (e) => this.showPostalCode(e), {
+      capture: true,
+      passive: true,
+    });
     this.sCity.insertAdjacentHTML('afterend', templateShippingCheckbox);
     this.bCity.insertAdjacentHTML('afterend', templateBillingCheckbox);
     this.btnShippingList.getElement<HTMLButtonElement>().onclick = (e) => this.toogleList(e);
@@ -149,12 +155,12 @@ export default class RegistrationPage extends Page {
     const sStreetNumber = this.sStreetNumber.shadowRoot?.children[1].lastChild;
     const sCity = this.sCity.shadowRoot?.children[1].lastChild;
     let sCountry = this.sSelectCountry.shadowRoot?.querySelector('.placeholder.selected')?.textContent;
-    const sPostalCode = this.sPostalCode.shadowRoot?.children[1].lastChild;
+    const sPostalCode = this.sPostalCode?.shadowRoot?.children[1].lastChild;
     const bStreet = this.bStreet.shadowRoot?.children[1].lastChild;
     const bStreetNumber = this.bStreetNumber.shadowRoot?.children[1].lastChild;
     const bCity = this.bCity.shadowRoot?.children[1].lastChild;
     let bCountry = this.sSelectCountry.shadowRoot?.querySelector('.placeholder.selected')?.textContent;
-    const bPostalCode = this.bPostalCode.shadowRoot?.children[1].lastChild;
+    const bPostalCode = this.bPostalCode?.shadowRoot?.children[1].lastChild;
 
     const sCountryShort = countries.filter((country) => country.fullCountryName === sCountry);
     const bCountryShort = countries.filter((country) => country.fullCountryName === bCountry);
@@ -272,5 +278,51 @@ export default class RegistrationPage extends Page {
     }
   }
 
-  showPostalCode() {}
+  showPostalCode(e: Event) {
+    const path = e.composedPath();
+    const selectElement = path.find((node) => {
+      if (node instanceof HTMLElement) {
+        if (node.className === 'placeholder selected') {
+          return node;
+        }
+      }
+    }) as HTMLElement;
+    path.forEach((node) => {
+      if (node instanceof HTMLElement) {
+        if (node === this.shippingList) {
+          if (this.sPostalCode) this.sPostalCode.remove();
+          switch (selectElement.getAttribute('shortName')) {
+            case 'BY':
+              this.sPostalCode = createInputView('text', postalCodeBelarusValidator, '', 'Shipping PostalCode');
+              this.shippingList.append(this.sPostalCode);
+              break;
+            case 'RU':
+              this.sPostalCode = createInputView('text', postalCodeRussiaValidator, '', 'Shipping PostalCode');
+              this.shippingList.append(this.sPostalCode);
+              break;
+            case 'PL':
+              this.sPostalCode = createInputView('text', postalCodePolandValidator, '', 'Shipping PostalCode');
+              this.shippingList.append(this.sPostalCode);
+              break;
+          }
+        } else if (node === this.billingList) {
+          if (this.bPostalCode) this.bPostalCode.remove();
+          switch (selectElement.getAttribute('shortName')) {
+            case 'BY':
+              this.bPostalCode = createInputView('text', postalCodeBelarusValidator, '', 'Billing PostalCode');
+              this.billingList.append(this.bPostalCode);
+              break;
+            case 'RU':
+              this.bPostalCode = createInputView('text', postalCodeRussiaValidator, '', 'Billing PostalCode');
+              this.billingList.append(this.bPostalCode);
+              break;
+            case 'PL':
+              this.bPostalCode = createInputView('text', postalCodePolandValidator, '', 'Billing PostalCode');
+              this.billingList.append(this.bPostalCode);
+              break;
+          }
+        }
+      }
+    });
+  }
 }

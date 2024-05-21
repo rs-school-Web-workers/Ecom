@@ -2,14 +2,13 @@ export const styles = `
 :host {
   display: flex;
   justify-content: center;
-  align-items: center;
-  width: 100%
+  width: 100%;
 }
 .select {
+  margin-top: 2px;
   width: 100%;
   font-size: clamp(0.8rem, 2vw, 1rem);
   font-family: Satoshi;
-  margin-bottom: 3px;
 }
 .select__value {
   display: flex;

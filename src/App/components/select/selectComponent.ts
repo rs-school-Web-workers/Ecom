@@ -1,4 +1,5 @@
 import Component from '../../utils/base-component';
+import { selectValueEvent } from '../../utils/custom-event';
 import { styles } from './selectComponentStyles';
 
 interface Country {
@@ -50,7 +51,7 @@ class SelectControl extends HTMLElement {
         const { id, shortCountryName, fullCountryName } = country;
         const option = document.createElement('div');
         option.classList.add('select__list-item');
-        option.addEventListener('click', () => this.selectOption(fullCountryName));
+        option.addEventListener('click', () => this.selectOption(fullCountryName, shortCountryName));
         option.setAttribute('id', id);
         const fullName = document.createElement('span');
         fullName.classList.add('select__list-item_fullname');
@@ -72,12 +73,14 @@ class SelectControl extends HTMLElement {
     input?.classList.toggle('active');
     chevron?.classList.toggle('active');
   }
-  selectOption(name: string) {
+  selectOption(name: string, shortName: string) {
     const text = this.shadowRoot?.querySelector('.placeholder');
+    text?.setAttribute('shortName', shortName);
     if (text) {
-      text.textContent = name;
       text.classList.add('selected');
+      text.textContent = name;
       this.toggleDropdown();
+      text.dispatchEvent(selectValueEvent);
     }
   }
 }
