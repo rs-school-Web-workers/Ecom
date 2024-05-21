@@ -25,7 +25,7 @@ export default class RegistrationPage extends Page {
   private nameInput = createInputView('text', nameValidator, 'Name', 'Enter your name');
   private surnameInput = createInputView('text', surnameValidator, 'Surname', 'Enter your surname');
   private dateOfBirthday = createInputView(
-    'text',
+    'date',
     dateOfBirthdayValidator,
     'Date of birth',
     'Enter your date of birth DD.MM.YYYY'

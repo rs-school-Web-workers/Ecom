@@ -90,10 +90,6 @@ export const streetValidator = [
 ];
 export const dateOfBirthdayValidator = [
   {
-    validate: `(value) => ${/^\d{2}\.\d{2}\.\d{4}$/}.test(value)`,
-    message: 'Invalid date format',
-  },
-  {
     validate: `(value) => {
       const today = new Date();
       let reverseValue = value.replaceAll('.', '-').split('-').reverse().join('-')
