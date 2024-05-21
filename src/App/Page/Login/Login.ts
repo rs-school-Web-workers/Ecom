@@ -14,6 +14,7 @@ export default class LoginPage extends Page {
   private btnSubmit = new Component('button', ['login__form-btn']);
   private wrapperForm = document.createElement('div');
   private containerImg = document.createElement('div');
+  private eye = new Component('input', ['eye']).getElement<HTMLInputElement>();
 
   constructor(private router: Router) {
     super(['login']);
@@ -46,7 +47,23 @@ export default class LoginPage extends Page {
     footer.append(footerLinkToPage);
     const form = document.createElement('form');
     form.classList.add('login__form');
-    form.append(title, aboutText, this.emailInput, this.passwordInput, this.btnSubmit.getElement(), footer);
+    this.eye.type = 'checkbox';
+    this.eye.id = 'eye';
+    this.eye.addEventListener('change', () => this.togglePasswordHandler());
+    const label = new Component('label', ['eye-label']).getElement<HTMLLabelElement>();
+    label.setAttribute('for', 'eye');
+    label.textContent = 'toggle password';
+    const checkboxWrap = new Component('div', ['eye-wrap']).getElement<HTMLDivElement>();
+    checkboxWrap.append(this.eye, label);
+    form.append(
+      title,
+      aboutText,
+      this.emailInput,
+      this.passwordInput,
+      checkboxWrap,
+      this.btnSubmit.getElement(),
+      footer
+    );
     form.addEventListener('submit', this.handlerSubmit.bind(this));
     this.wrapperForm.append(form);
   }
@@ -65,6 +82,15 @@ export default class LoginPage extends Page {
       } else {
         console.log('complete all fields');
       }
+    }
+  }
+
+  togglePasswordHandler() {
+    const input = this.passwordInput.shadowRoot?.querySelector('.input-field') as HTMLInputElement;
+    if (input.type === 'password') {
+      input.type = 'text';
+    } else {
+      input.type = 'password';
     }
   }
 

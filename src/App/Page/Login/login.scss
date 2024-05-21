@@ -58,3 +58,13 @@ $linkColor: #0f3dde;
     height: inherit;
   }
 }
+
+.eye-wrap {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  justify-content: end;
+  .eye-label {
+    font-family: Satoshi;
+  }
+}
