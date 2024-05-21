@@ -80,16 +80,30 @@ export default class RegistrationPage extends Page {
   }
 
   render() {
-    const templateShippingCheckbox = `<label class="registration__label">Default Shipping ${this.sCheckbox.outerHTML}</label>`;
-    const templateBillingCheckbox = `<label class="registration__label">Default Billing ${this.bCheckbox.outerHTML}</label>`;
-    this.shippingList.append(this.sStreet, this.sStreetNumber, this.sCity, this.sSelectCountry);
-    this.billingList.append(this.bStreet, this.bStreetNumber, this.bCity, this.bSelectCountry);
+    const templateShippingCheckbox = new Component('label', ['registration__label']);
+    templateShippingCheckbox.setTextContent('Default Shipping');
+    templateShippingCheckbox.setChildren(this.sCheckbox);
+    const templateBillingCheckbox = new Component('label', ['registration__label']);
+    templateBillingCheckbox.setTextContent('Default Billing');
+    templateBillingCheckbox.setChildren(this.bCheckbox);
+    this.shippingList.append(
+      this.sStreet,
+      this.sStreetNumber,
+      this.sCity,
+      templateShippingCheckbox.getElement<HTMLLabelElement>(),
+      this.sSelectCountry
+    );
+    this.billingList.append(
+      this.bStreet,
+      this.bStreetNumber,
+      this.bCity,
+      templateBillingCheckbox.getElement<HTMLLabelElement>(),
+      this.bSelectCountry
+    );
     this.container?.addEventListener('selectValue', (e) => this.showPostalCode(e), {
       capture: true,
       passive: true,
     });
-    this.sCity.insertAdjacentHTML('afterend', templateShippingCheckbox);
-    this.bCity.insertAdjacentHTML('afterend', templateBillingCheckbox);
     this.btnShippingList.getElement<HTMLButtonElement>().onclick = (e) => this.toogleList(e);
     this.btnBillingList.getElement<HTMLButtonElement>().onclick = (e) => this.toogleList(e);
     this.container?.append(this.wrapperForm, this.containerImg);
@@ -157,13 +171,12 @@ export default class RegistrationPage extends Page {
     const sStreetNumber = this.sStreetNumber.shadowRoot?.children[1].lastChild;
     const sCity = this.sCity.shadowRoot?.children[1].lastChild;
     let sCountry = this.sSelectCountry.shadowRoot?.querySelector('.placeholder')?.textContent;
-    const sPostalCode = this.sPostalCode?.shadowRoot?.children[1].lastChild;
+    // const sPostalCode = this.sPostalCode?.shadowRoot?.children[1].lastChild;
     const bStreet = this.bStreet.shadowRoot?.children[1].lastChild;
     const bStreetNumber = this.bStreetNumber.shadowRoot?.children[1].lastChild;
     const bCity = this.bCity.shadowRoot?.children[1].lastChild;
     let bCountry = this.sSelectCountry.shadowRoot?.querySelector('.placeholder')?.textContent;
-    const bPostalCode = this.bPostalCode?.shadowRoot?.children[1].lastChild;
-    console.log(sCountry, bCountry, this.bCheckbox, this.sCheckbox);
+    // const bPostalCode = this.bPostalCode?.shadowRoot?.children[1].lastChild;
 
     const sCountryShort = countries.filter((country) => country.fullCountryName === sCountry);
     const bCountryShort = countries.filter((country) => country.fullCountryName === bCountry);
@@ -178,12 +191,13 @@ export default class RegistrationPage extends Page {
       sStreet instanceof HTMLInputElement &&
       sStreetNumber instanceof HTMLInputElement &&
       sCity instanceof HTMLInputElement &&
-      sPostalCode instanceof HTMLInputElement &&
+      // sPostalCode instanceof HTMLInputElement &&
       bStreet instanceof HTMLInputElement &&
       bStreetNumber instanceof HTMLInputElement &&
-      bCity instanceof HTMLInputElement &&
-      bPostalCode instanceof HTMLInputElement
+      bCity instanceof HTMLInputElement
+      // bPostalCode instanceof HTMLInputElement
     ) {
+      console.log('as');
       if (emailInputValue.classList.contains('success') && passwordInputValue.classList.contains('success')) {
         await signinClient(
           emailInputValue.value,
@@ -197,14 +211,14 @@ export default class RegistrationPage extends Page {
               streetNumber: sStreetNumber.value,
               city: sCity.value,
               country: sCountry,
-              postalCode: sPostalCode.value,
+              // postalCode: sPostalCode.value,
             },
             {
               streetName: bStreet.value,
               streetNumber: bStreetNumber.value,
               city: bCity.value,
               country: bCountry,
-              postalCode: bPostalCode.value,
+              // postalCode: bPostalCode.value,
             },
           ],
           [1],
@@ -222,6 +236,7 @@ export default class RegistrationPage extends Page {
           });
       } else {
         console.log('complete all fields');
+        console.log('bCheckBox:', this.bCheckbox.checked, 'sCheckBox:', this.sCheckbox.checked);
       }
     }
   }

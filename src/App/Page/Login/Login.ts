@@ -102,7 +102,6 @@ export default class LoginPage extends Page {
   }
 
   toggler() {
-    console.log('asd');
     const emailInputValue = this.emailInput.shadowRoot?.children[1].lastChild;
     const passwordInputValue = this.passwordInput.shadowRoot?.children[1].lastChild;
     if (
