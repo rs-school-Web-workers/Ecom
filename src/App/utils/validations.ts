@@ -114,19 +114,19 @@ export const dateOfBirthdayValidator = [
 ];
 export const postalCodePolandValidator = [
   {
-    validate: `(value) => !${/^\d{2}-\d{3}$/}.test(value)`,
+    validate: `(value) => ${/^\d{2}-\d{3}$/}.test(value)`,
     message: 'Must follow the format for the Poland(XX-XXX)',
   },
 ];
 export const postalCodeRussiaValidator = [
   {
-    validate: `(value) => !${/^\d{6}$/}.test(value)`,
+    validate: `(value) => ${/^\d{6}$/}.test(value)`,
     message: `Must follow the format for the Russia(XXXXXX) `,
   },
 ];
 export const postalCodeBelarusValidator = [
   {
-    validate: `(value) => !${/^\d{6}$/}.test(value)`,
+    validate: `(value) => ${/^\d{6}$/}.test(value)`,
     message: `Must follow the format for the Belarus(XXXXXX)`,
   },
 ];

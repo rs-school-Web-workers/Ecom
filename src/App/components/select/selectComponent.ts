@@ -47,7 +47,6 @@ class SelectControl extends HTMLElement {
     if (attrCountry) {
       const parsedAttr: Country[] = JSON.parse(attrCountry);
       parsedAttr.forEach((country) => {
-        console.log(country);
         const { id, shortCountryName, fullCountryName } = country;
         const option = document.createElement('div');
         option.classList.add('select__list-item');
