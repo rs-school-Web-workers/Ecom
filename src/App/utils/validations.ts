@@ -88,3 +88,41 @@ export const streetValidator = [
     message: 'Street must contain at least one character',
   },
 ];
+export const dateOfBirthdayValidator = [
+  {
+    validate: `(value) => {
+      const today = new Date();
+      let reverseValue = value.replaceAll('.', '-').split('-').reverse().join('-')
+      const birthDate = new Date(reverseValue);
+      const minAgeLimit = 13;
+
+      let age = today.getFullYear() - birthDate.getFullYear();
+
+      if (today.getMonth() < birthDate.getMonth() ||
+          (today.getMonth() === birthDate.getMonth() && today.getDate() < birthDate.getDate())) {
+          age--;
+      }
+
+      return age >= minAgeLimit;
+    }`,
+    message: 'Must be over 13 years old',
+  },
+];
+export const postalCodePolandValidator = [
+  {
+    validate: `(value) => ${/^\d{2}-\d{3}$/}.test(value)`,
+    message: 'Must follow the format for the Poland(XX-XXX)',
+  },
+];
+export const postalCodeRussiaValidator = [
+  {
+    validate: `(value) => ${/^\d{6}$/}.test(value)`,
+    message: `Must follow the format for the Russia(XXXXXX) `,
+  },
+];
+export const postalCodeBelarusValidator = [
+  {
+    validate: `(value) => ${/^\d{6}$/}.test(value)`,
+    message: `Must follow the format for the Belarus(XXXXXX)`,
+  },
+];

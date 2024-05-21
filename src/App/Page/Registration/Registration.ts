@@ -2,8 +2,10 @@ import { Router } from '../../Router/Router';
 import { PagePath } from '../../Router/types';
 import { showLogoutButton } from '../../components/header/Header';
 import { createInputView } from '../../components/input/inputComponent';
+import { createSelectView } from '../../components/select/selectComponent';
 import { signinClient } from '../../utils/api/Client';
 import Component from '../../utils/base-component';
+import { countries } from '../../utils/countries';
 import {
   emailValidator,
   passwordValidator,
@@ -11,6 +13,8 @@ import {
   surnameValidator,
   cityValidator,
   streetValidator,
+  dateOfBirthdayValidator,
+  postalCodeBelarusValidator,
 } from '../../utils/validations';
 import Page from '../Page';
 import './registration.scss';
@@ -21,16 +25,22 @@ export default class RegistrationPage extends Page {
   private passwordInput = createInputView('password', passwordValidator, 'Password', 'Enter your password');
   private nameInput = createInputView('text', nameValidator, 'Name', 'Enter your name');
   private surnameInput = createInputView('text', surnameValidator, 'Surname', 'Enter your surname');
+  private dateOfBirthday = createInputView(
+    'date',
+    dateOfBirthdayValidator,
+    'Date of birth',
+    'Enter your date of birth DD.MM.YYYY'
+  );
   private sStreet = createInputView('text', streetValidator, '', 'Shipping Street');
   private sStreetNumber = createInputView('text', [], '', 'Shipping StreetNumber');
   private sCity = createInputView('text', cityValidator, '', 'Shipping City');
-  private sCountry = createInputView('text', [], '', 'Shipping Country');
-  private sPostalCode = createInputView('text', [], '', 'Shipping PostalCode');
+  private sPostalCode = createInputView('text', postalCodeBelarusValidator, '', 'Shipping PostalCode');
   private bStreet = createInputView('text', streetValidator, '', 'Billing Street');
   private bStreetNumber = createInputView('text', [], '', 'Billing StreetNumber');
   private bCity = createInputView('text', cityValidator, '', 'Billing City');
-  private bCountry = createInputView('text', [], '', 'Billing Country');
-  private bPostalCode = createInputView('text', [], '', 'Billing PostalCode');
+  private bPostalCode = createInputView('text', postalCodeBelarusValidator, '', 'Billing PostalCode');
+  private sSelectCountry = createSelectView(countries);
+  private bSelectCountry = createSelectView(countries);
   private sCheckbox = new Component('input', ['registration__input-check']).getElement<HTMLInputElement>();
   private bCheckbox = new Component('input', ['registration__input-check']).getElement<HTMLInputElement>();
   private btnSubmit = new Component('button', ['registration__form-btn']);
@@ -70,10 +80,10 @@ export default class RegistrationPage extends Page {
   render() {
     const templateShippingCheckbox = `<label class="registration__label">Default Shipping ${this.sCheckbox.outerHTML}</label>`;
     const templateBillingCheckbox = `<label class="registration__label">Default Billing ${this.bCheckbox.outerHTML}</label>`;
-    this.shippingList.append(this.sStreet, this.sStreetNumber, this.sCity, this.sCountry, this.sPostalCode);
-    this.billingList.append(this.bStreet, this.bStreetNumber, this.bCity, this.bCountry, this.bPostalCode);
-    this.sPostalCode.insertAdjacentHTML('afterend', templateShippingCheckbox);
-    this.bPostalCode.insertAdjacentHTML('afterend', templateBillingCheckbox);
+    this.shippingList.append(this.sStreet, this.sStreetNumber, this.sCity, this.sSelectCountry, this.sPostalCode);
+    this.billingList.append(this.bStreet, this.bStreetNumber, this.bCity, this.bSelectCountry, this.bPostalCode);
+    this.sCity.insertAdjacentHTML('afterend', templateShippingCheckbox);
+    this.bCity.insertAdjacentHTML('afterend', templateBillingCheckbox);
     this.btnShippingList.getElement<HTMLButtonElement>().onclick = (e) => this.toogleList(e);
     this.btnBillingList.getElement<HTMLButtonElement>().onclick = (e) => this.toogleList(e);
     this.container?.append(this.wrapperForm, this.containerImg);
@@ -106,6 +116,7 @@ export default class RegistrationPage extends Page {
       this.surnameInput,
       this.emailInput,
       this.passwordInput,
+      this.dateOfBirthday,
       this.btnShippingList.getElement<HTMLButtonElement>(),
       this.shippingList,
       this.btnBillingList.getElement<HTMLButtonElement>(),
@@ -135,30 +146,35 @@ export default class RegistrationPage extends Page {
     const passwordInputValue = this.passwordInput.shadowRoot?.children[1].lastChild;
     const nameInputValue = this.nameInput.shadowRoot?.children[1].lastChild;
     const surnameInputValue = this.surnameInput.shadowRoot?.children[1].lastChild;
+    const dateOfBirthdayValue = this.dateOfBirthday.shadowRoot?.children[1].lastChild;
     const sStreet = this.sStreet.shadowRoot?.children[1].lastChild;
     const sStreetNumber = this.sStreetNumber.shadowRoot?.children[1].lastChild;
     const sCity = this.sCity.shadowRoot?.children[1].lastChild;
-    const sCountry = this.sCountry.shadowRoot?.children[1].lastChild;
+    let sCountry = this.sSelectCountry.shadowRoot?.querySelector('.placeholder.selected')?.textContent;
     const sPostalCode = this.sPostalCode.shadowRoot?.children[1].lastChild;
     const bStreet = this.bStreet.shadowRoot?.children[1].lastChild;
     const bStreetNumber = this.bStreetNumber.shadowRoot?.children[1].lastChild;
     const bCity = this.bCity.shadowRoot?.children[1].lastChild;
-    const bCountry = this.bCountry.shadowRoot?.children[1].lastChild;
+    let bCountry = this.sSelectCountry.shadowRoot?.querySelector('.placeholder.selected')?.textContent;
     const bPostalCode = this.bPostalCode.shadowRoot?.children[1].lastChild;
+
+    const sCountryShort = countries.filter((country) => country.fullCountryName === sCountry);
+    const bCountryShort = countries.filter((country) => country.fullCountryName === bCountry);
+    sCountry = sCountryShort.length ? sCountryShort[0].shortCountryName : 'BY';
+    bCountry = bCountryShort.length ? bCountryShort[0].shortCountryName : 'BY';
     if (
       emailInputValue instanceof HTMLInputElement &&
       passwordInputValue instanceof HTMLInputElement &&
       nameInputValue instanceof HTMLInputElement &&
+      dateOfBirthdayValue instanceof HTMLInputElement &&
       surnameInputValue instanceof HTMLInputElement &&
       sStreet instanceof HTMLInputElement &&
       sStreetNumber instanceof HTMLInputElement &&
       sCity instanceof HTMLInputElement &&
-      sCountry instanceof HTMLInputElement &&
       sPostalCode instanceof HTMLInputElement &&
       bStreet instanceof HTMLInputElement &&
       bStreetNumber instanceof HTMLInputElement &&
       bCity instanceof HTMLInputElement &&
-      bCountry instanceof HTMLInputElement &&
       bPostalCode instanceof HTMLInputElement
     ) {
       if (emailInputValue.classList.contains('success') && passwordInputValue.classList.contains('success')) {
@@ -166,20 +182,21 @@ export default class RegistrationPage extends Page {
           emailInputValue.value,
           nameInputValue.value,
           surnameInputValue.value,
+          dateOfBirthdayValue.value,
           passwordInputValue.value,
           [
             {
               streetName: sStreet.value,
               streetNumber: sStreetNumber.value,
               city: sCity.value,
-              country: sCountry.value,
+              country: sCountry,
               postalCode: sPostalCode.value,
             },
             {
               streetName: bStreet.value,
               streetNumber: bStreetNumber.value,
               city: bCity.value,
-              country: bCountry.value,
+              country: bCountry,
               postalCode: bPostalCode.value,
             },
           ],
@@ -263,4 +280,6 @@ export default class RegistrationPage extends Page {
       }
     }
   }
+
+  showPostalCode() {}
 }
