@@ -14,6 +14,7 @@ import {
   cityValidator,
   streetValidator,
   dateOfBirthdayValidator,
+  postalCodeBelarusValidator,
 } from '../../utils/validations';
 import Page from '../Page';
 import './registration.scss';
@@ -33,11 +34,11 @@ export default class RegistrationPage extends Page {
   private sStreet = createInputView('text', streetValidator, '', 'Shipping Street');
   private sStreetNumber = createInputView('text', [], '', 'Shipping StreetNumber');
   private sCity = createInputView('text', cityValidator, '', 'Shipping City');
-  private sPostalCode = createInputView('text', [], '', 'Shipping PostalCode');
+  private sPostalCode = createInputView('text', postalCodeBelarusValidator, '', 'Shipping PostalCode');
   private bStreet = createInputView('text', streetValidator, '', 'Billing Street');
   private bStreetNumber = createInputView('text', [], '', 'Billing StreetNumber');
   private bCity = createInputView('text', cityValidator, '', 'Billing City');
-  private bPostalCode = createInputView('text', [], '', 'Billing PostalCode');
+  private bPostalCode = createInputView('text', postalCodeBelarusValidator, '', 'Billing PostalCode');
   private sSelectCountry = createSelectView(countries);
   private bSelectCountry = createSelectView(countries);
   private sCheckbox = new Component('input', ['registration__input-check']).getElement<HTMLInputElement>();
@@ -79,10 +80,10 @@ export default class RegistrationPage extends Page {
   render() {
     const templateShippingCheckbox = `<label class="registration__label">Default Shipping ${this.sCheckbox.outerHTML}</label>`;
     const templateBillingCheckbox = `<label class="registration__label">Default Billing ${this.bCheckbox.outerHTML}</label>`;
-    this.shippingList.append(this.sStreet, this.sStreetNumber, this.sCity, this.sPostalCode, this.sSelectCountry);
-    this.billingList.append(this.bStreet, this.bStreetNumber, this.bCity, this.bPostalCode, this.bSelectCountry);
-    this.sPostalCode.insertAdjacentHTML('afterend', templateShippingCheckbox);
-    this.bPostalCode.insertAdjacentHTML('afterend', templateBillingCheckbox);
+    this.shippingList.append(this.sStreet, this.sStreetNumber, this.sCity, this.sSelectCountry, this.sPostalCode);
+    this.billingList.append(this.bStreet, this.bStreetNumber, this.bCity, this.bSelectCountry, this.bPostalCode);
+    this.sCity.insertAdjacentHTML('afterend', templateShippingCheckbox);
+    this.bCity.insertAdjacentHTML('afterend', templateBillingCheckbox);
     this.btnShippingList.getElement<HTMLButtonElement>().onclick = (e) => this.toogleList(e);
     this.btnBillingList.getElement<HTMLButtonElement>().onclick = (e) => this.toogleList(e);
     this.container?.append(this.wrapperForm, this.containerImg);
@@ -270,4 +271,6 @@ export default class RegistrationPage extends Page {
       }
     }
   }
+
+  showPostalCode() {}
 }

@@ -2,13 +2,14 @@ export const styles = `
 :host {
   display: flex;
   justify-content: center;
-  align-items: flex-start;
+  align-items: center;
   width: 100%
 }
 .select {
   width: 100%;
   font-size: clamp(0.8rem, 2vw, 1rem);
   font-family: Satoshi;
+  margin-bottom: 3px;
 }
 .select__value {
   display: flex;
@@ -42,6 +43,7 @@ export const styles = `
 
 .placeholder {
   color: grey;
+  padding: 1.80px;
 }
 
 .chevron.active::before {
