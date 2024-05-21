@@ -19,11 +19,11 @@ export const emailValidator = [
 
 export const passwordValidator = [
   {
-    validate: '(value) => /[A-Z]/.test(value)',
+    validate: '(value) => /[A-ZА-ЯЁ]/.test(value)',
     message: 'Password must contain at least 1 uppercase letter',
   },
   {
-    validate: '(value) => /[a-z]/.test(value)',
+    validate: '(value) => /[a-zа-яё]/.test(value)',
     message: 'Password must contain at least 1 lowercase letter',
   },
   {
@@ -42,7 +42,7 @@ export const passwordValidator = [
 
 export const nameValidator = [
   {
-    validate: `(value) => !${/[!"#$%&'()*+,-./:;<=>?@^_``{|}~]/}.test(value)`,
+    validate: `(value) => !${/[!"#$%&'()*+\-\\,.:;<=>?@^_``{|}~]/}.test(value)`,
     message: 'Name cannot contain special characters',
   },
   {
@@ -50,13 +50,13 @@ export const nameValidator = [
     message: 'Name cannot contain numbers',
   },
   {
-    validate: `(value) => ${/\w+/}.test(value)`,
+    validate: `(value) => ${/[А-Яа-яЁёa-zA-Z]+/}.test(value)`,
     message: 'Name must contain at least one letter',
   },
 ];
 export const surnameValidator = [
   {
-    validate: `(value) => !${/[!"#$%&'()*+,-./:;<=>?@^_``{|}~]/}.test(value)`,
+    validate: `(value) => !${/[!"#$%&'()*+\-\\,.:;<=>?@^_``{|}~]/}.test(value)`,
     message: 'Surname cannot contain special characters',
   },
   {
@@ -64,13 +64,13 @@ export const surnameValidator = [
     message: 'Surname cannot contain numbers',
   },
   {
-    validate: `(value) => ${/\w+/}.test(value)`,
+    validate: `(value) => ${/[А-Яа-яЁёa-zA-Z]+/}.test(value)`,
     message: 'Surame must contain at least one letter',
   },
 ];
 export const cityValidator = [
   {
-    validate: `(value) => !${/[!"#$%&'()*+,-./:;<=>?@^_``{|}~]/}.test(value)`,
+    validate: `(value) => !${/[!"#$%&'()*+\-\\,.:;<=>?@^_``{|}~]/}.test(value)`,
     message: 'City cannot contain special characters',
   },
   {
@@ -78,7 +78,7 @@ export const cityValidator = [
     message: 'City cannot contain numbers',
   },
   {
-    validate: `(value) => ${/\w+/}.test(value)`,
+    validate: `(value) => ${/[А-Яа-яЁёa-zA-Z]+/}.test(value)`,
     message: 'City must contain at least one letter',
   },
 ];
