@@ -93,6 +93,8 @@ export default class RegistrationPage extends Page {
     this.btnShippingList.getElement<HTMLButtonElement>().onclick = (e) => this.toogleList(e);
     this.btnBillingList.getElement<HTMLButtonElement>().onclick = (e) => this.toogleList(e);
     this.container?.append(this.wrapperForm, this.containerImg);
+    const modalBackground: HTMLDivElement = new Component('div', ['modal-background']).getElement<HTMLDivElement>();
+    this.container?.append(modalBackground);
   }
 
   createForm() {
@@ -225,6 +227,8 @@ export default class RegistrationPage extends Page {
 
   successRegister(msg: string) {
     const registerContainer: HTMLDivElement | null = document.querySelector<HTMLDivElement>('.registration');
+    const modalBackground: HTMLDivElement | null = document.querySelector<HTMLDivElement>('.modal-background');
+    modalBackground?.classList.add('modal-active');
     const msgContainer: HTMLDivElement = new Component('div', ['register-msg-container']).getElement<HTMLDivElement>();
     const msgText: HTMLDivElement = new Component('div', ['register-msg-text']).getElement<HTMLDivElement>();
     const msgButton: HTMLButtonElement = new Component('button', [
@@ -236,7 +240,10 @@ export default class RegistrationPage extends Page {
       msgButton.addEventListener('click', () => this.hideRegisterMsg());
     } else {
       msgText.textContent = msg;
-      msgButton.addEventListener('click', () => msgContainer.remove());
+      msgButton.addEventListener('click', () => {
+        msgContainer.remove();
+        modalBackground?.classList.remove('modal-active');
+      });
     }
     msgContainer.append(msgText, msgButton);
     registerContainer?.append(msgContainer);
@@ -244,7 +251,9 @@ export default class RegistrationPage extends Page {
 
   hideRegisterMsg() {
     const msgContainer: HTMLDivElement | null = document.querySelector<HTMLDivElement>('.register-msg-container');
+    const modalBackground: HTMLDivElement | null = document.querySelector<HTMLDivElement>('.modal-background');
     msgContainer?.remove();
+    modalBackground?.classList.remove('modal-active');
     this.router.navigate(PagePath.MAIN);
     this.router.renderPageView(PagePath.MAIN);
     showLogoutButton();
