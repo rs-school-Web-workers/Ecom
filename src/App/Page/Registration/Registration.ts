@@ -228,89 +228,90 @@ export default class RegistrationPage extends Page {
               }
             });
           }
-        } else {
+        }
+        if (
+          sStreet.classList.contains('success') &&
+          sStreetNumber.classList.contains('success') &&
+          sCity.classList.contains('success') &&
+          bStreet.classList.contains('success') &&
+          bStreetNumber.classList.contains('success') &&
+          bCity.classList.contains('success')
+        ) {
+          const sSelectCountryValue = this.sSelectCountry.shadowRoot?.querySelector('.select__value');
+          const bSelectCountryValue = this.bSelectCountry.shadowRoot?.querySelector('.select__value');
           if (
-            sStreet.classList.contains('success') &&
-            sStreetNumber.classList.contains('success') &&
-            sCity.classList.contains('success') &&
-            bStreet.classList.contains('success') &&
-            bStreetNumber.classList.contains('success') &&
-            bCity.classList.contains('success')
+            sSelectCountryValue?.classList.contains('success') &&
+            bSelectCountryValue?.classList.contains('success')
           ) {
-            const sSelectCountryValue = this.sSelectCountry.shadowRoot?.querySelector('.select__value');
-            const bSelectCountryValue = this.bSelectCountry.shadowRoot?.querySelector('.select__value');
-            if (
-              sSelectCountryValue?.classList.contains('success') &&
-              bSelectCountryValue?.classList.contains('success')
-            ) {
-              const sPostalCode = this.sPostalCode?.shadowRoot?.children[1].lastChild as HTMLInputElement;
-              const bPostalCode = this.bPostalCode?.shadowRoot?.children[1].lastChild as HTMLInputElement;
-              if (sPostalCode.classList.contains('success') && bPostalCode.classList.contains('success')) {
-                console.log('success Full Validations');
-                await signinClient(
-                  emailInputValue.value,
-                  nameInputValue.value,
-                  surnameInputValue.value,
-                  dateOfBirthdayValue.value,
-                  passwordInputValue.value,
-                  [
-                    {
-                      streetName: sStreet.value,
-                      streetNumber: sStreetNumber.value,
-                      city: sCity.value,
-                      country: sCountry,
-                      postalCode: sPostalCode.value,
-                    },
-                    {
-                      streetName: bStreet.value,
-                      streetNumber: bStreetNumber.value,
-                      city: bCity.value,
-                      country: bCountry,
-                      postalCode: bPostalCode.value,
-                    },
-                  ],
-                  [1],
-                  [0],
-                  this.bCheckbox.checked ? 1 : undefined,
-                  this.sCheckbox.checked ? 0 : undefined
-                )
-                  .then(() => this.successRegister(''))
-                  .catch((msg) => {
-                    if (msg.message === errorInvalidJSON.errorMsg) {
-                      this.successRegister(errorInvalidJSON.showMsg);
-                    } else {
-                      this.successRegister(msg.message);
-                    }
-                  });
-              } else {
-                const sPostalCode = this.sPostalCode?.shadowRoot?.children[1].lastChild as HTMLInputElement;
-                const bPostalCode = this.bPostalCode?.shadowRoot?.children[1].lastChild as HTMLInputElement;
-                [sPostalCode, bPostalCode].forEach((postalCode) => {
-                  if (postalCode) {
-                    if (!postalCode.classList.contains('success')) {
-                      postalCode.classList.add('unsuccess');
-                    }
+            const sPostalCode = this.sPostalCode?.shadowRoot?.children[1].lastChild as HTMLInputElement;
+            const bPostalCode = this.bPostalCode?.shadowRoot?.children[1].lastChild as HTMLInputElement;
+            if (sPostalCode.classList.contains('success') && bPostalCode.classList.contains('success')) {
+              console.log('success Full Validations');
+              const defaultBilling = this.bCheckbox.checked ? 1 : undefined;
+              const defaultShipping = this.sCheckbox.checked ? 0 : undefined;
+              await signinClient(
+                emailInputValue.value,
+                nameInputValue.value,
+                surnameInputValue.value,
+                dateOfBirthdayValue.value,
+                passwordInputValue.value,
+                [
+                  {
+                    streetName: sStreet.value,
+                    streetNumber: sStreetNumber.value,
+                    city: sCity.value,
+                    country: sCountry,
+                    postalCode: sPostalCode.value,
+                  },
+                  {
+                    streetName: this.сheckboxForBothAddresses.checked ? sStreet.value : bStreet.value,
+                    streetNumber: this.сheckboxForBothAddresses.checked ? sStreetNumber.value : bStreetNumber.value,
+                    city: this.сheckboxForBothAddresses.checked ? sCity.value : bCity.value,
+                    country: this.сheckboxForBothAddresses.checked ? sCountry : bCountry,
+                    postalCode: this.сheckboxForBothAddresses.checked ? sPostalCode.value : bPostalCode.value,
+                  },
+                ],
+                [1],
+                [0],
+                this.сheckboxForBothAddresses.checked ? defaultShipping : defaultBilling,
+                defaultShipping
+              )
+                .then(() => this.successRegister(''))
+                .catch((msg) => {
+                  if (msg.message === errorInvalidJSON.errorMsg) {
+                    this.successRegister(errorInvalidJSON.showMsg);
+                  } else {
+                    this.successRegister(msg.message);
                   }
                 });
-              }
             } else {
-              const sSelectCountryValue = this.sSelectCountry.shadowRoot?.querySelector('.select__value');
-              const bSelectCountryValue = this.bSelectCountry.shadowRoot?.querySelector('.select__value');
-              [sSelectCountryValue, bSelectCountryValue].forEach((selectValue) => {
-                if (selectValue) {
-                  if (!selectValue.classList.contains('success')) {
-                    selectValue.classList.add('unsuccess');
+              const sPostalCode = this.sPostalCode?.shadowRoot?.children[1].lastChild as HTMLInputElement;
+              const bPostalCode = this.bPostalCode?.shadowRoot?.children[1].lastChild as HTMLInputElement;
+              [sPostalCode, bPostalCode].forEach((postalCode) => {
+                if (postalCode) {
+                  if (!postalCode.classList.contains('success')) {
+                    postalCode.classList.add('unsuccess');
                   }
                 }
               });
             }
           } else {
-            [sStreet, sStreetNumber, sCity, bStreet, bStreetNumber, bCity].forEach((listElement) => {
-              if (!listElement.classList.contains('success')) {
-                listElement.classList.add('unsuccess');
+            const sSelectCountryValue = this.sSelectCountry.shadowRoot?.querySelector('.select__value');
+            const bSelectCountryValue = this.bSelectCountry.shadowRoot?.querySelector('.select__value');
+            [sSelectCountryValue, bSelectCountryValue].forEach((selectValue) => {
+              if (selectValue) {
+                if (!selectValue.classList.contains('success')) {
+                  selectValue.classList.add('unsuccess');
+                }
               }
             });
           }
+        } else {
+          [sStreet, sStreetNumber, sCity, bStreet, bStreetNumber, bCity].forEach((listElement) => {
+            if (!listElement.classList.contains('success')) {
+              listElement.classList.add('unsuccess');
+            }
+          });
         }
       } else {
         [nameInputValue, surnameInputValue, emailInputValue, passwordInputValue, dateOfBirthdayValue].forEach(
