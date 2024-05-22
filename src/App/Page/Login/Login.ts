@@ -85,18 +85,29 @@ export default class LoginPage extends Page {
         } catch (resp) {
           const err = (resp as ClientResponse).body as ErrorResponse;
           if ((err as ErrorResponse).errors?.filter((el) => el.code === 'InvalidCredentials')[0]) {
-            emailInputValue.classList.add('error');
+            emailInputValue.classList.add('unsuccess');
             emailInputValue.classList.add('crederror');
             emailInputValue.classList.remove('success');
             this.emailInput.shadowRoot!.querySelector('.error-message')!.textContent = 'Invalid email or password';
-            passwordInputValue.classList.add('error');
+            passwordInputValue.classList.add('unsuccess');
             passwordInputValue.classList.add('crederror');
             passwordInputValue.classList.remove('success');
             this.passwordInput.shadowRoot!.querySelector('.error-message')!.textContent = 'Invalid email or password';
           }
         }
       } else {
-        console.log('complete all fields');
+        if (!emailInputValue.classList.contains('success')) {
+          emailInputValue.classList.add('unsuccess');
+          emailInputValue.classList.add('crederror');
+          emailInputValue.classList.remove('success');
+          this.emailInput.shadowRoot!.querySelector('.error-message')!.textContent = 'Enter login';
+        }
+        if (!passwordInputValue.classList.contains('success')) {
+          passwordInputValue.classList.add('unsuccess');
+          passwordInputValue.classList.add('crederror');
+          passwordInputValue.classList.remove('success');
+          this.passwordInput.shadowRoot!.querySelector('.error-message')!.textContent = 'Enter password';
+        }
       }
     }
   }
