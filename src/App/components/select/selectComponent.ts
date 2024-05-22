@@ -75,11 +75,16 @@ class SelectControl extends HTMLElement {
   }
   selectOption(name: string, shortName: string) {
     const text = this.shadowRoot?.querySelector('.placeholder');
+    const selectValue = this.shadowRoot?.querySelector('.select__value');
     text?.setAttribute('shortName', shortName);
     if (text) {
       text.classList.add('selected');
       text.textContent = name;
       this.toggleDropdown();
+      if (selectValue?.classList.contains('unsuccess')) {
+        selectValue.classList.remove('unsuccess');
+      }
+      selectValue?.classList.add('success');
       text.dispatchEvent(selectValueEvent);
     }
   }

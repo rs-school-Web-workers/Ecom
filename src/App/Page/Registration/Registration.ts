@@ -27,12 +27,7 @@ export default class RegistrationPage extends Page {
   private passwordInput = createInputView('password', passwordValidator, 'Password', 'Enter your password');
   private nameInput = createInputView('text', nameValidator, 'Name', 'Enter your name');
   private surnameInput = createInputView('text', surnameValidator, 'Surname', 'Enter your surname');
-  private dateOfBirthday = createInputView(
-    'date',
-    dateOfBirthdayValidator,
-    'Date of birth',
-    'Enter your date of birth DD.MM.YYYY'
-  );
+  private dateOfBirthday = createInputView('date', dateOfBirthdayValidator, 'Date of birth');
   private sStreet = createInputView('text', streetValidator, '', 'Shipping Street');
   private sStreetNumber = createInputView('text', [], '', 'Shipping StreetNumber');
   private sCity = createInputView('text', cityValidator, '', 'Shipping City');
@@ -45,6 +40,9 @@ export default class RegistrationPage extends Page {
   private bSelectCountry = createSelectView(countries);
   private sCheckbox = new Component('input', ['registration__input-check']).getElement<HTMLInputElement>();
   private bCheckbox = new Component('input', ['registration__input-check']).getElement<HTMLInputElement>();
+  private сheckboxForBothAddresses = new Component('input', [
+    'registration__input-check',
+  ]).getElement<HTMLInputElement>();
   private btnSubmit = new Component('button', ['registration__form-btn']);
   private wrapperForm = document.createElement('div');
   private containerImg = document.createElement('div');
@@ -63,6 +61,7 @@ export default class RegistrationPage extends Page {
     super(['registration']);
     this.sCheckbox.type = 'checkbox';
     this.bCheckbox.type = 'checkbox';
+    this.сheckboxForBothAddresses.type = 'checkbox';
     this.btnSubmit.setTextContent('Sign Up');
     this.btnSubmit.getElement<HTMLButtonElement>().type = 'submit';
     this.btnShippingList.setTextContent('Shipping List Show');
@@ -75,6 +74,7 @@ export default class RegistrationPage extends Page {
     this.containerImg.className = 'registration-img-wrapper';
     this.shippingList.className = 'registration__list-shipping';
     this.billingList.className = 'registration__list-billing';
+    this.сheckboxForBothAddresses.addEventListener('change', this.useBothAddress.bind(this));
     this.createForm();
     this.render();
   }
@@ -129,6 +129,9 @@ export default class RegistrationPage extends Page {
     footer.append(footerLinkToPage);
     const form = document.createElement('form');
     form.classList.add('registration__form');
+    const templateForBothAddresses = new Component('label', ['registration__label']);
+    templateForBothAddresses.setTextContent('Use the same address for both shipping and billing');
+    templateForBothAddresses.setChildren(this.сheckboxForBothAddresses);
     form.append(
       title,
       aboutText,
@@ -137,6 +140,7 @@ export default class RegistrationPage extends Page {
       this.emailInput,
       this.passwordInput,
       this.dateOfBirthday,
+      templateForBothAddresses.getElement<HTMLLabelElement>(),
       this.btnShippingList.getElement<HTMLButtonElement>(),
       this.shippingList,
       this.btnBillingList.getElement<HTMLButtonElement>(),
@@ -171,13 +175,10 @@ export default class RegistrationPage extends Page {
     const sStreetNumber = this.sStreetNumber.shadowRoot?.children[1].lastChild;
     const sCity = this.sCity.shadowRoot?.children[1].lastChild;
     let sCountry = this.sSelectCountry.shadowRoot?.querySelector('.placeholder')?.textContent;
-    // const sPostalCode = this.sPostalCode?.shadowRoot?.children[1].lastChild;
     const bStreet = this.bStreet.shadowRoot?.children[1].lastChild;
     const bStreetNumber = this.bStreetNumber.shadowRoot?.children[1].lastChild;
     const bCity = this.bCity.shadowRoot?.children[1].lastChild;
     let bCountry = this.sSelectCountry.shadowRoot?.querySelector('.placeholder')?.textContent;
-    // const bPostalCode = this.bPostalCode?.shadowRoot?.children[1].lastChild;
-
     const sCountryShort = countries.filter((country) => country.fullCountryName === sCountry);
     const bCountryShort = countries.filter((country) => country.fullCountryName === bCountry);
     sCountry = sCountryShort.length ? sCountryShort[0].shortCountryName : 'BY';
@@ -191,54 +192,154 @@ export default class RegistrationPage extends Page {
       sStreet instanceof HTMLInputElement &&
       sStreetNumber instanceof HTMLInputElement &&
       sCity instanceof HTMLInputElement &&
-      // sPostalCode instanceof HTMLInputElement &&
       bStreet instanceof HTMLInputElement &&
       bStreetNumber instanceof HTMLInputElement &&
       bCity instanceof HTMLInputElement
-      // bPostalCode instanceof HTMLInputElement
     ) {
-      console.log('as');
-      if (emailInputValue.classList.contains('success') && passwordInputValue.classList.contains('success')) {
-        await signinClient(
-          emailInputValue.value,
-          nameInputValue.value,
-          surnameInputValue.value,
-          dateOfBirthdayValue.value,
-          passwordInputValue.value,
-          [
-            {
-              streetName: sStreet.value,
-              streetNumber: sStreetNumber.value,
-              city: sCity.value,
-              country: sCountry,
-              // postalCode: sPostalCode.value,
-            },
-            {
-              streetName: bStreet.value,
-              streetNumber: bStreetNumber.value,
-              city: bCity.value,
-              country: bCountry,
-              // postalCode: bPostalCode.value,
-            },
-          ],
-          [1],
-          [0],
-          this.bCheckbox.checked ? 1 : undefined,
-          this.sCheckbox.checked ? 0 : undefined
-        )
-          .then(() => this.successRegister(''))
-          .catch((msg) => {
-            if (msg.message === errorInvalidJSON.errorMsg) {
-              this.successRegister(errorInvalidJSON.showMsg);
+      if (
+        emailInputValue.classList.contains('success') &&
+        passwordInputValue.classList.contains('success') &&
+        nameInputValue.classList.contains('success') &&
+        dateOfBirthdayValue.classList.contains('success') &&
+        surnameInputValue.classList.contains('success')
+      ) {
+        if (this.сheckboxForBothAddresses.checked) {
+          if (
+            sStreet.classList.contains('success') &&
+            sStreetNumber.classList.contains('success') &&
+            sCity.classList.contains('success')
+          ) {
+            const sSelectCountryValue = this.sSelectCountry.shadowRoot?.querySelector('.select__value');
+
+            if (sSelectCountryValue?.classList.contains('success')) {
+              const sPostalCode = this.sPostalCode?.shadowRoot?.children[1].lastChild as HTMLInputElement;
+              if (sPostalCode.classList.contains('success')) {
+                console.log('success');
+              } else {
+                sPostalCode.classList.add('unsuccess');
+              }
             } else {
-              this.successRegister(msg.message);
+              sSelectCountryValue?.classList.add('unsuccess');
             }
-          });
+          } else {
+            [sStreet, sStreetNumber, sCity].forEach((listElement) => {
+              if (!listElement.classList.contains('success')) {
+                listElement.classList.add('unsuccess');
+              }
+            });
+          }
+        } else {
+          if (
+            sStreet.classList.contains('success') &&
+            sStreetNumber.classList.contains('success') &&
+            sCity.classList.contains('success') &&
+            bStreet.classList.contains('success') &&
+            bStreetNumber.classList.contains('success') &&
+            bCity.classList.contains('success')
+          ) {
+            const sSelectCountryValue = this.sSelectCountry.shadowRoot?.querySelector('.select__value');
+            const bSelectCountryValue = this.bSelectCountry.shadowRoot?.querySelector('.select__value');
+            if (
+              sSelectCountryValue?.classList.contains('success') &&
+              bSelectCountryValue?.classList.contains('success')
+            ) {
+              const sPostalCode = this.sPostalCode?.shadowRoot?.children[1].lastChild as HTMLInputElement;
+              const bPostalCode = this.bPostalCode?.shadowRoot?.children[1].lastChild as HTMLInputElement;
+              if (sPostalCode.classList.contains('success') && bPostalCode.classList.contains('success')) {
+                console.log('success Full Validations');
+                await signinClient(
+                  emailInputValue.value,
+                  nameInputValue.value,
+                  surnameInputValue.value,
+                  dateOfBirthdayValue.value,
+                  passwordInputValue.value,
+                  [
+                    {
+                      streetName: sStreet.value,
+                      streetNumber: sStreetNumber.value,
+                      city: sCity.value,
+                      country: sCountry,
+                      postalCode: sPostalCode.value,
+                    },
+                    {
+                      streetName: bStreet.value,
+                      streetNumber: bStreetNumber.value,
+                      city: bCity.value,
+                      country: bCountry,
+                      postalCode: bPostalCode.value,
+                    },
+                  ],
+                  [1],
+                  [0],
+                  this.bCheckbox.checked ? 1 : undefined,
+                  this.sCheckbox.checked ? 0 : undefined
+                )
+                  .then(() => this.successRegister(''))
+                  .catch((msg) => {
+                    if (msg.message === errorInvalidJSON.errorMsg) {
+                      this.successRegister(errorInvalidJSON.showMsg);
+                    } else {
+                      this.successRegister(msg.message);
+                    }
+                  });
+              } else {
+                const sPostalCode = this.sPostalCode?.shadowRoot?.children[1].lastChild as HTMLInputElement;
+                const bPostalCode = this.bPostalCode?.shadowRoot?.children[1].lastChild as HTMLInputElement;
+                [sPostalCode, bPostalCode].forEach((postalCode) => {
+                  if (postalCode) {
+                    if (!postalCode.classList.contains('success')) {
+                      postalCode.classList.add('unsuccess');
+                    }
+                  }
+                });
+              }
+            } else {
+              const sSelectCountryValue = this.sSelectCountry.shadowRoot?.querySelector('.select__value');
+              const bSelectCountryValue = this.bSelectCountry.shadowRoot?.querySelector('.select__value');
+              [sSelectCountryValue, bSelectCountryValue].forEach((selectValue) => {
+                if (selectValue) {
+                  if (!selectValue.classList.contains('success')) {
+                    selectValue.classList.add('unsuccess');
+                  }
+                }
+              });
+            }
+          } else {
+            [sStreet, sStreetNumber, sCity, bStreet, bStreetNumber, bCity].forEach((listElement) => {
+              if (!listElement.classList.contains('success')) {
+                listElement.classList.add('unsuccess');
+              }
+            });
+          }
+        }
       } else {
-        console.log('complete all fields');
-        console.log('bCheckBox:', this.bCheckbox.checked, 'sCheckBox:', this.sCheckbox.checked);
+        [nameInputValue, surnameInputValue, emailInputValue, passwordInputValue, dateOfBirthdayValue].forEach(
+          (formElements) => {
+            if (!formElements.classList.contains('success')) {
+              formElements.classList.add('unsuccess');
+            }
+          }
+        );
       }
     }
+    /** ЕСЛИ НАДО ПРОВЕРКА ЧТО
+     * emailInputValue instanceof HTMLInputElement &&
+      passwordInputValue instanceof HTMLInputElement &&
+      nameInputValue instanceof HTMLInputElement &&
+      dateOfBirthdayValue instanceof HTMLInputElement &&
+      surnameInputValue instanceof HTMLInputElement &&
+      sStreet instanceof HTMLInputElement &&
+      sStreetNumber instanceof HTMLInputElement &&
+      sCity instanceof HTMLInputElement &&
+      bStreet instanceof HTMLInputElement &&
+      bStreetNumber instanceof HTMLInputElement &&
+      bCity instanceof HTMLInputElement
+
+      то добавь else {
+        ''
+      }
+      выше этой записи
+    */
   }
 
   successRegister(msg: string) {
@@ -349,5 +450,21 @@ export default class RegistrationPage extends Page {
         }
       }
     });
+  }
+  useBothAddress(e: Event) {
+    const { checked } = e.target as HTMLInputElement;
+    const buttonBillingList = this.btnBillingList.getElement<HTMLButtonElement>();
+    if (checked) {
+      buttonBillingList.style.display = 'none';
+      this.billingList.style.display = 'none';
+    } else {
+      buttonBillingList.style.display = 'block';
+      this.billingList.style.display = 'none';
+      buttonBillingList.style.opacity = '';
+      buttonBillingList.textContent = 'Billing List Show';
+      this.bSelectCountry.shadowRoot?.querySelector('.select__value')?.classList.remove('active');
+      this.bSelectCountry.shadowRoot?.querySelector('.select__list')?.classList.add('hide');
+      this.bSelectCountry.shadowRoot?.querySelector('.chevron')?.classList.remove('active');
+    }
   }
 }

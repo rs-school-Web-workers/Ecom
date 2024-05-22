@@ -19,8 +19,11 @@ export const styles = `
   background-color: white;
   border: 2px solid #D9D9D9;
 }
-.select__value:has(.select__value-placeholder):has(.placeholder.selected) {
+.select__value.success {
   border-color: #6fcf97;
+}
+.select__value.unsuccess {
+  border-color: #ee5757;
 }
 
 .select__value.active {
