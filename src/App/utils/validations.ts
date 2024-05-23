@@ -12,7 +12,7 @@ export const emailValidator = [
     message: 'Email address must contain a valid domain',
   },
   {
-    validate: `(value) => ${/^\S+@\S+\.\S+$/}.test(value.trim())`,
+    validate: `(value) => ${/^\w+@\w+\.\w+$/}.test(value.trim())`,
     message: 'Invalid email address format',
   },
 ];
