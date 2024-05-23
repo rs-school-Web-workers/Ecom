@@ -233,19 +233,23 @@ export default class RegistrationPage extends Page {
           sStreet.classList.contains('success') &&
           sStreetNumber.classList.contains('success') &&
           sCity.classList.contains('success') &&
-          bStreet.classList.contains('success') &&
-          bStreetNumber.classList.contains('success') &&
-          bCity.classList.contains('success')
+          (this.сheckboxForBothAddresses.checked ||
+            (bStreet.classList.contains('success') &&
+              bStreetNumber.classList.contains('success') &&
+              bCity.classList.contains('success')))
         ) {
           const sSelectCountryValue = this.sSelectCountry.shadowRoot?.querySelector('.select__value');
           const bSelectCountryValue = this.bSelectCountry.shadowRoot?.querySelector('.select__value');
           if (
             sSelectCountryValue?.classList.contains('success') &&
-            bSelectCountryValue?.classList.contains('success')
+            (this.сheckboxForBothAddresses.checked || bSelectCountryValue?.classList.contains('success'))
           ) {
             const sPostalCode = this.sPostalCode?.shadowRoot?.children[1].lastChild as HTMLInputElement;
             const bPostalCode = this.bPostalCode?.shadowRoot?.children[1].lastChild as HTMLInputElement;
-            if (sPostalCode.classList.contains('success') && bPostalCode.classList.contains('success')) {
+            if (
+              sPostalCode.classList.contains('success') &&
+              (this.сheckboxForBothAddresses.checked || bPostalCode.classList.contains('success'))
+            ) {
               console.log('success Full Validations');
               const defaultBilling = this.bCheckbox.checked ? 1 : undefined;
               const defaultShipping = this.sCheckbox.checked ? 0 : undefined;
