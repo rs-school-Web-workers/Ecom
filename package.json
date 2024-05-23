@@ -39,6 +39,7 @@
     "html-webpack-plugin": "^5.6.0",
     "husky": "^9.0.11",
     "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
     "json-loader": "^0.5.7",
     "lint-staged": "^15.2.2",
     "prettier": "3.2.5",
@@ -55,10 +56,12 @@
     "webpack-dev-server": "^5.0.4"
   },
   "dependencies": {
+    "@babel/core": "^7.24.5",
     "@commercetools/history-sdk": "^4.3.0",
     "@commercetools/importapi-sdk": "^5.4.0",
     "@commercetools/platform-sdk": "^7.8.0",
     "@commercetools/sdk-client-v2": "^2.5.0",
+    "babel-jest": "^29.7.0",
     "webpack-merge": "^5.10.0"
   }
 }

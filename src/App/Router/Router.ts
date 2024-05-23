@@ -31,6 +31,7 @@ export class Router {
 
   navigate(url: string) {
     window.history.pushState({}, '', url);
+    return url;
   }
 
   browserLineListener() {
