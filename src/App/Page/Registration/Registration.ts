@@ -253,29 +253,32 @@ export default class RegistrationPage extends Page {
               console.log('success Full Validations');
               const defaultBilling = this.bCheckbox.checked ? 1 : undefined;
               const defaultShipping = this.sCheckbox.checked ? 0 : undefined;
+              const address = [
+                {
+                  streetName: sStreet.value,
+                  streetNumber: sStreetNumber.value,
+                  city: sCity.value,
+                  country: sCountry,
+                  postalCode: sPostalCode.value,
+                },
+              ];
+              if (!this.сheckboxForBothAddresses.checked) {
+                address.push({
+                  streetName: bStreet.value,
+                  streetNumber: bStreetNumber.value,
+                  city: bCity.value,
+                  country: bCountry,
+                  postalCode: bPostalCode.value,
+                });
+              }
               await signinClient(
                 emailInputValue.value,
                 nameInputValue.value,
                 surnameInputValue.value,
                 dateOfBirthdayValue.value,
                 passwordInputValue.value,
-                [
-                  {
-                    streetName: sStreet.value,
-                    streetNumber: sStreetNumber.value,
-                    city: sCity.value,
-                    country: sCountry,
-                    postalCode: sPostalCode.value,
-                  },
-                  {
-                    streetName: this.сheckboxForBothAddresses.checked ? sStreet.value : bStreet.value,
-                    streetNumber: this.сheckboxForBothAddresses.checked ? sStreetNumber.value : bStreetNumber.value,
-                    city: this.сheckboxForBothAddresses.checked ? sCity.value : bCity.value,
-                    country: this.сheckboxForBothAddresses.checked ? sCountry : bCountry,
-                    postalCode: this.сheckboxForBothAddresses.checked ? sPostalCode.value : bPostalCode.value,
-                  },
-                ],
-                [1],
+                address,
+                this.сheckboxForBothAddresses.checked ? [0] : [1],
                 [0],
                 this.сheckboxForBothAddresses.checked ? defaultShipping : defaultBilling,
                 defaultShipping
