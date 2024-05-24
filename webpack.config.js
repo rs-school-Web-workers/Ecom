@@ -28,9 +28,8 @@ const commonConfig = {
           {
             loader: 'css-loader',
             options: {
-              esModule: true, // Говорим о том, что хотим использовать ES Modules
               modules: {
-                namedExport: true, // Указываем, что предпочитаем именованый экспорт дефолтному
+                localIdentName: '[name]__[local]--[hash:base64:5]',
               },
             },
           },
