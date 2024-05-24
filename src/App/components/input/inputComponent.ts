@@ -27,7 +27,8 @@ class InputControl extends HTMLElement {
     const attrType = this.getAttribute('type');
     if (attrValidations) {
       const validationArray: Validation[] = JSON.parse(attrValidations);
-      this.input.addEventListener('input', this.validateInput.bind(this, validationArray));
+      this.input.addEventListener('input', () => this.validateInput(validationArray));
+      this.input.addEventListener('validate', () => this.validateInput(validationArray));
       if (attrType) {
         this.input.setAttribute('validations', attrValidations);
         this.input.type = attrType;

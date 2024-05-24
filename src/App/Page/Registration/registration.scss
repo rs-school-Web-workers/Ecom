@@ -6,7 +6,7 @@ $linkColor: #0f3dde;
   display: flex;
   align-items: center;
   justify-content: center;
-  max-height: 750px;
+  height: 100%;
   .registration-form-container {
     display: flex;
     align-items: center;
@@ -104,15 +104,23 @@ $linkColor: #0f3dde;
 }
 
 .register-msg-container {
-  position: absolute;
+  position: fixed;
   display: flex;
   flex-direction: column;
   gap: 30px;
   top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   background-color: $buttonColorFont;
   border: 2px solid black;
   padding: 70px;
   border-radius: 50px;
+  z-index: 3;
+
+  @media (max-width: 600px) {
+    padding: 70px 20px;
+    min-width: 300px;
+  }
 }
 
 .register-msg-text {
@@ -127,4 +135,26 @@ $linkColor: #0f3dde;
   padding: 10px;
   width: 100%;
   border-radius: 50px;
+  cursor: pointer;
+}
+
+.modal-background {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  visibility: hidden;
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  z-index: 2;
+  height: 100%;
+  width: 100%;
+  background: rgb(51%, 61%, 52%, 0.7);
+  opacity: 0;
+  transition: 0.5s;
+}
+
+.modal-active {
+  visibility: visible;
+  opacity: 1;
 }

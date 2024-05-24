@@ -7,6 +7,7 @@ import { loginClient } from '../../utils/api/Client';
 import { Router } from '../../Router/Router';
 import { PagePath } from '../../Router/types';
 import { showLogoutButton } from '../../components/header/Header';
+import type { ClientResponse, ErrorResponse } from '@commercetools/platform-sdk';
 
 export default class LoginPage extends Page {
   private emailInput = createInputView('email', emailValidator, 'Email address', 'Enter your e-mail');
@@ -23,6 +24,8 @@ export default class LoginPage extends Page {
     this.containerImg.className = 'login-img-wrapper';
     this.createForm();
     this.render();
+    this.emailInput.addEventListener('focus', () => this.toggler());
+    this.passwordInput.addEventListener('focus', () => this.toggler());
   }
 
   render() {
@@ -74,14 +77,54 @@ export default class LoginPage extends Page {
     const passwordInputValue = this.passwordInput.shadowRoot?.children[1].lastChild;
     if (emailInputValue instanceof HTMLInputElement && passwordInputValue instanceof HTMLInputElement) {
       if (emailInputValue.classList.contains('success') && passwordInputValue.classList.contains('success')) {
-        console.log('form submit');
-        await loginClient(emailInputValue.value, passwordInputValue.value);
-        this.router.navigate(PagePath.MAIN);
-        this.router.renderPageView(PagePath.MAIN);
-        showLogoutButton();
+        try {
+          await loginClient(emailInputValue.value, passwordInputValue.value);
+          this.router.navigate(PagePath.MAIN);
+          this.router.renderPageView(PagePath.MAIN);
+          showLogoutButton();
+        } catch (resp) {
+          const err = (resp as ClientResponse).body as ErrorResponse;
+          if ((err as ErrorResponse).errors?.filter((el) => el.code === 'InvalidCredentials')[0]) {
+            emailInputValue.classList.add('unsuccess');
+            emailInputValue.classList.add('crederror');
+            emailInputValue.classList.remove('success');
+            this.emailInput.shadowRoot!.querySelector('.error-message')!.textContent = 'Invalid email or password';
+            passwordInputValue.classList.add('unsuccess');
+            passwordInputValue.classList.add('crederror');
+            passwordInputValue.classList.remove('success');
+            this.passwordInput.shadowRoot!.querySelector('.error-message')!.textContent = 'Invalid email or password';
+          }
+        }
       } else {
-        console.log('complete all fields');
+        if (!emailInputValue.classList.contains('success')) {
+          emailInputValue.classList.add('unsuccess');
+          emailInputValue.classList.add('crederror');
+          emailInputValue.classList.remove('success');
+          this.emailInput.shadowRoot!.querySelector('.error-message')!.textContent = 'Enter login';
+        }
+        if (!passwordInputValue.classList.contains('success')) {
+          passwordInputValue.classList.add('unsuccess');
+          passwordInputValue.classList.add('crederror');
+          passwordInputValue.classList.remove('success');
+          this.passwordInput.shadowRoot!.querySelector('.error-message')!.textContent = 'Enter password';
+        }
       }
+    }
+  }
+
+  toggler() {
+    const emailInputValue = this.emailInput.shadowRoot?.children[1].lastChild;
+    const passwordInputValue = this.passwordInput.shadowRoot?.children[1].lastChild;
+    if (
+      emailInputValue instanceof HTMLInputElement &&
+      passwordInputValue instanceof HTMLInputElement &&
+      emailInputValue.classList.contains('crederror') &&
+      passwordInputValue.classList.contains('crederror')
+    ) {
+      emailInputValue.dispatchEvent(new Event('validate'));
+      passwordInputValue.dispatchEvent(new Event('validate'));
+      emailInputValue.classList.remove('crederror');
+      passwordInputValue.classList.remove('crederror');
     }
   }
 
