@@ -19,3 +19,5 @@ export enum PagePathTest {
   PRODUCTS = '/products',
   OTHER_NOT_FOUND = '/not-found-example',
 }
+
+export const ContentClassesHeaderArrayTest = ['main-page', 'login', 'registration', 'login'];
