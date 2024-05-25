@@ -21,3 +21,7 @@ export enum PagePathTest {
 }
 
 export const ContentClassesHeaderArrayTest = ['main-page', 'login', 'registration', 'login'];
+
+export const SOME_ID = 'some-id';
+
+export const SOME_TEXT = 'some-text';
