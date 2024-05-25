@@ -1,10 +1,13 @@
 import { BaseAddress, ByProjectKeyRequestBuilder, createApiBuilderFromCtpClient } from '@commercetools/platform-sdk';
 import { ClientBuilder, TokenCache, TokenStore } from '@commercetools/sdk-client-v2';
-import dotenv from 'dotenv';
-
-dotenv.config({ path: '.env' });
 
 let inst: ByProjectKeyRequestBuilder | null = null;
+const projectKey = process.env.PROJECT_KEY;
+const region = process.env.REGION;
+const clientId = process.env.CLIENT_ID;
+const clientSecret = process.env.CLIENT_SECRET;
+const clientScopes = process.env.CLIENT_SCOPES;
+const scopes = clientScopes?.split(' ');
 
 class MyTokenCache implements TokenCache {
   myCaсhe: TokenStore = {
@@ -29,12 +32,6 @@ export function getClient() {
 }
 
 export function getAnonClient() {
-  const projectKey = process.env.PROJECT_KEY;
-  const region = process.env.REGION;
-  const clientId = process.env.CLIENT_ID;
-  const clientSecret = process.env.CLIENT_SECRET;
-  const clientScopes = process.env.CLIENT_SCOPES;
-  const scopes = clientScopes?.split(' ');
   if (!projectKey || !region || !clientId || !clientSecret || !clientScopes) {
     throw new Error('Env parameters are undefined');
   }
@@ -58,11 +55,6 @@ export function getAnonClient() {
 }
 
 export function autoLoginCLient() {
-  const projectKey = process.env.PROJECT_KEY;
-  const region = process.env.REGION;
-  const clientId = process.env.CLIENT_ID;
-  const clientSecret = process.env.CLIENT_SECRET;
-  const clientScopes = process.env.CLIENT_SCOPES;
   if (!projectKey || !region || !clientId || !clientSecret || !clientScopes) {
     throw new Error('Env parameters are undefined');
   }
@@ -106,12 +98,6 @@ export function autoLoginCLient() {
  * getApiRoot('asd@asd.asd', 'asd').me().orders().get().execute().catch(console.error);
  */
 export async function loginClient(email: string, password: string) {
-  const projectKey = process.env.PROJECT_KEY;
-  const region = process.env.REGION;
-  const clientId = process.env.CLIENT_ID;
-  const clientSecret = process.env.CLIENT_SECRET;
-  const clientScopes = process.env.CLIENT_SCOPES;
-  const scopes = clientScopes?.split(' ');
   if (!projectKey || !region || !clientId || !clientSecret || !clientScopes) {
     throw new Error('Env parameters are undefined');
   }
@@ -195,11 +181,6 @@ export async function signinClient(
   defaultBillingAddress?: number,
   defaultShippingAddress?: number
 ) {
-  const projectKey = process.env.PROJECT_KEY;
-  const region = process.env.REGION;
-  const clientId = process.env.CLIENT_ID;
-  const clientSecret = process.env.CLIENT_SECRET;
-  const clientScopes = process.env.CLIENT_SCOPES;
   if (!projectKey || !region || !clientId || !clientSecret || !clientScopes) {
     throw new Error('Env parameters are undefined');
   }
