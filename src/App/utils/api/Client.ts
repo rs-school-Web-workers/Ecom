@@ -229,7 +229,3 @@ export async function signinClient(
     });
   return inst;
 }
-
-module.exports = {
-  getAnonClient,
-};
