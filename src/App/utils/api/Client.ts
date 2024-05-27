@@ -35,6 +35,9 @@ export function getAnonClient() {
   if (!projectKey || !region || !clientId || !clientSecret || !clientScopes) {
     throw new Error('Env parameters are undefined');
   }
+  if (inst !== null) {
+    return inst;
+  }
   const ctpClient = new ClientBuilder()
     .withAnonymousSessionFlow({
       host: `https://auth.${region}.gcp.commercetools.com`,
@@ -209,4 +212,15 @@ export async function signinClient(
       throw err;
     });
   return inst;
+}
+
+export async function getProducts() {
+  if (inst === null) {
+    throw new Error('client instance not found');
+  }
+  return await inst.products().get().execute();
+}
+
+export function getUserProfile() {
+  throw new Error('not implemented');
 }
