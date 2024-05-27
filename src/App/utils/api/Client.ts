@@ -221,6 +221,29 @@ export async function getProducts() {
   return await inst.products().get().execute();
 }
 
+export async function searchProducts(limit?: number, offset?: number) {
+  if (inst === null) {
+    throw new Error('client instance not found');
+  }
+  return await inst
+    .products()
+    .search()
+    .post({
+      body: {
+        query: {
+          fullText: {
+            field: 'name',
+            language: 'en-GB',
+            value: 'Aria Rug',
+          },
+        },
+        limit,
+        offset,
+      },
+    })
+    .execute();
+}
+
 export function getUserProfile() {
   throw new Error('not implemented');
 }
