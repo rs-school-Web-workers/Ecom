@@ -248,3 +248,193 @@ export async function getUserProfile() {
   }
   return await inst.me().get().execute();
 }
+
+export async function passwordReset(version: number, currentPassword: string, newPassword: string) {
+  if (inst === null) {
+    throw new Error('client instance not found');
+  }
+  return await inst.me().password().post({ body: { version, currentPassword, newPassword } }).execute();
+}
+
+export async function changeUserProfile(
+  version: number,
+  firstName: string,
+  lastName: string,
+  email: string,
+  dateOfBirth: string
+) {
+  if (inst === null) {
+    throw new Error('client instance not found');
+  }
+  return await inst
+    .me()
+    .post({
+      body: {
+        version,
+        actions: [
+          { action: 'setFirstName', firstName },
+          { action: 'setLastName', lastName },
+          { action: 'changeEmail', email },
+          { action: 'setDateOfBirth', dateOfBirth },
+        ],
+      },
+    })
+    .execute();
+}
+
+export async function addAddress(version: number, address: BaseAddress) {
+  if (inst === null) {
+    throw new Error('client instance not found');
+  }
+  return await inst
+    .me()
+    .post({
+      body: {
+        version,
+        actions: [{ action: 'addAddress', address }],
+      },
+    })
+    .execute();
+}
+
+export async function changeAddress(version: number, address: BaseAddress, addressId?: string, addressKey?: string) {
+  if (inst === null) {
+    throw new Error('client instance not found');
+  }
+  if (typeof addressId === 'undefined' && typeof addressKey === 'undefined') {
+    throw new Error('id or key must be specified');
+  }
+  return await inst
+    .me()
+    .post({
+      body: {
+        version,
+        actions: [{ action: 'changeAddress', addressId, addressKey, address }],
+      },
+    })
+    .execute();
+}
+
+export async function removeAddress(version: number, addressId?: string, addressKey?: string) {
+  if (inst === null) {
+    throw new Error('client instance not found');
+  }
+  if (typeof addressId === 'undefined' && typeof addressKey === 'undefined') {
+    throw new Error('id or key must be specified');
+  }
+  return await inst
+    .me()
+    .post({
+      body: {
+        version,
+        actions: [{ action: 'removeAddress', addressId, addressKey }],
+      },
+    })
+    .execute();
+}
+
+export async function setDefaultBillingAddress(version: number, addressId?: string, addressKey?: string) {
+  if (inst === null) {
+    throw new Error('client instance not found');
+  }
+  if (typeof addressId === 'undefined' && typeof addressKey === 'undefined') {
+    throw new Error('id or key must be specified');
+  }
+  return await inst
+    .me()
+    .post({
+      body: {
+        version,
+        actions: [{ action: 'setDefaultBillingAddress', addressId, addressKey }],
+      },
+    })
+    .execute();
+}
+
+export async function addBillingAddress(version: number, addressId?: string, addressKey?: string) {
+  if (inst === null) {
+    throw new Error('client instance not found');
+  }
+  if (typeof addressId === 'undefined' && typeof addressKey === 'undefined') {
+    throw new Error('id or key must be specified');
+  }
+  return await inst
+    .me()
+    .post({
+      body: {
+        version,
+        actions: [{ action: 'addBillingAddressId', addressId, addressKey }],
+      },
+    })
+    .execute();
+}
+export async function removeBillingAddress(version: number, addressId?: string, addressKey?: string) {
+  if (inst === null) {
+    throw new Error('client instance not found');
+  }
+  if (typeof addressId === 'undefined' && typeof addressKey === 'undefined') {
+    throw new Error('id or key must be specified');
+  }
+  return await inst
+    .me()
+    .post({
+      body: {
+        version,
+        actions: [{ action: 'removeBillingAddressId', addressId, addressKey }],
+      },
+    })
+    .execute();
+}
+
+export async function setDefaultShippingAddress(version: number, addressId?: string, addressKey?: string) {
+  if (inst === null) {
+    throw new Error('client instance not found');
+  }
+  if (typeof addressId === 'undefined' && typeof addressKey === 'undefined') {
+    throw new Error('id or key must be specified');
+  }
+  return await inst
+    .me()
+    .post({
+      body: {
+        version,
+        actions: [{ action: 'setDefaultShippingAddress', addressId, addressKey }],
+      },
+    })
+    .execute();
+}
+
+export async function addShippingAddress(version: number, addressId?: string, addressKey?: string) {
+  if (inst === null) {
+    throw new Error('client instance not found');
+  }
+  if (typeof addressId === 'undefined' && typeof addressKey === 'undefined') {
+    throw new Error('id or key must be specified');
+  }
+  return await inst
+    .me()
+    .post({
+      body: {
+        version,
+        actions: [{ action: 'addShippingAddressId', addressId, addressKey }],
+      },
+    })
+    .execute();
+}
+export async function removeShippingAddress(version: number, addressId?: string, addressKey?: string) {
+  if (inst === null) {
+    throw new Error('client instance not found');
+  }
+  if (typeof addressId === 'undefined' && typeof addressKey === 'undefined') {
+    throw new Error('id or key must be specified');
+  }
+  return await inst
+    .me()
+    .post({
+      body: {
+        version,
+        actions: [{ action: 'removeShippingAddressId', addressId, addressKey }],
+      },
+    })
+    .execute();
+}
