@@ -7,11 +7,13 @@ $commonGap: 20px;
   background-color: $commonBackground;
   background-image: url(../../../assets/imgs/common-block-background.webp);
   background-position: top right;
+  background-size: cover;
   height: 663px;
   background-size: 663px;
   background-repeat: no-repeat;
   padding: 100px;
   gap: $commonGap;
+  max-width: 1440px;
 
   @media (max-width: 768px) {
     background-position: bottom center;

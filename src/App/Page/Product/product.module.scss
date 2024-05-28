@@ -1,0 +1,233 @@
+$background-color: white;
+$border-bottom-color: rgb(0, 0, 0, 0.1);
+$text-color: rgb(0, 0, 0, 0.6);
+$button-color: #F0F0F0;
+$price-color: rgb(0, 0, 0, 0.3);
+$discountBackground: rgb(255, 0, 0, 0.3);
+$max-width: 1240px;
+
+.product {
+  background-color: $background-color;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+}
+
+.product_detail {
+  max-width: $max-width;
+  display: flex;
+  gap: 20px;
+}
+
+.img_container {
+  width: 50%;
+  height: 530px;
+  display: flex;
+  gap: 5px;
+}
+
+.small_imgs_container {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 25%;
+}
+
+.main_img_container {
+  width: 75%;
+  border-radius: 20px;
+  cursor: pointer;
+}
+
+.small_img {
+  height: 167px;
+  border-radius: 20px;
+  cursor: pointer;
+}
+
+.product_definition {
+  max-width: 600px;
+  width: 50%;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.product_name {
+  font-family: Integral CF;
+  font-size: 40px;
+  font-weight: 700;
+}
+
+.product_text_definition {
+  font-family: Satoshi;
+  font-weight: 400;
+  font-size: 16px;
+  padding: 15px;
+  border-bottom: 1px solid $border-bottom-color;
+  color: $text-color;
+}
+
+.product_colors,
+.product_sizes {
+  padding: 15px;
+  border-bottom: 1px solid $border-bottom-color;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.product_colors_name,
+.product_sizes_name {
+  font-family: Satoshi;
+  font-weight: 400;
+  font-size: 16px;
+  color: $text-color;
+}
+
+.product_select_colors {
+  display: flex;
+  gap: 16px;
+}
+
+.color_box {
+  width: 37px;
+  height: 37px;
+  border-radius: 50%;
+  cursor: pointer;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.color_checkbox {
+  background-color: white;
+  border-radius: 50%;
+  width: 10px;
+  height: 10px;
+  opacity: 0;
+}
+
+.active_colorBox .color_checkbox {
+  opacity: 1;
+}
+
+.product_select_sizes {
+  display: flex;
+  gap: 12px;
+}
+
+.size_box {
+  border-radius: 62px;
+  background-color: $button-color;
+  font-family: Satoshi;
+  border: 1px solid $button-color;
+  padding: 12px 24px;
+  color: $text-color;
+  cursor: pointer;
+}
+
+.active_sizebox {
+  background-color: black;
+  color: white;
+}
+
+.product_button_container {
+  display: flex;
+  gap: 20px;
+}
+
+.cart_amount_container {
+  width: 170px;
+  display: flex;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background-color: $button-color;
+  border-radius: 62px;
+  font-family: Satoshi;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.add_to_cart_button {
+  padding: 16px 54px;
+  background-color: black;
+  color: white;
+  border-radius: 62px;
+  font-family: Satoshi;
+  font-weight: 500;
+  font-size: 16px;
+  width: 400px;
+  cursor: pointer;
+}
+
+.minus_amount,
+.plus_amount {
+  cursor: pointer;
+}
+
+.chain_container {
+  display: flex;
+  width: 100%;
+  align-items: flex-start;
+  justify-content: flex-start;
+  font-family: Satoshi;
+  color: $text-color;
+  gap: 5px;
+  max-width: $max-width;
+}
+
+.chain_link_container {
+  display: flex;
+  gap: 5px;
+}
+
+.chain_link {
+  font-family: Satoshi;
+  font-weight: 400;
+  font-size: 16px;
+  color: $text-color;
+  text-decoration: none;
+}
+
+.chain_link:hover {
+  color: black;
+}
+
+.price_container {
+  display: flex;
+  gap: 10px;
+}
+
+.current_price {
+  color: black;
+  font-family: Satoshi;
+  font-weight: 700;
+  font-size: 32px;
+}
+
+.all_price {
+  color: $price-color;
+  font-family: Satoshi;
+  font-weight: 700;
+  font-size: 32px;
+  text-decoration: line-through;
+}
+
+.discount_container {
+  background-color: $discountBackground;
+  border-radius: 30px;
+  padding: 6px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.discount_text {
+  color: red;
+  font-family: Satoshi;
+  font-weight: 500;
+  font-size: 16px;
+}
