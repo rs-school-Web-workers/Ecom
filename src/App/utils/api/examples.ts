@@ -3,7 +3,9 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 require('dotenv').config();
 const util = require('util');
-import { getProducts, loginClient, searchProducts } from './Client';
+import { getProductById, getProducts, getUserProfile, loginClient, searchProducts } from './Client';
+
+/* to run this file npx ts-node src/App/utils/api/examples.ts */
 
 const localStorageMock = (function () {
   let store: { [str: string]: string } = {};
@@ -38,8 +40,17 @@ const show = (key: any) => {
       console.log(product);
     }); */
 
-    const elems2 = await searchProducts();
+    const elems2 = await searchProducts(
+      { fullText: { field: 'name', language: 'en-US', value: 'Chair', caseInsensitive: false, mustMatch: 'any' } },
+      [{ field: 'name', language: 'en-US', order: 'asc' }]
+    );
     show(elems2);
+
+    const elems3 = await getProductById(elems2.body.results[0].id);
+    show(elems3);
+
+    const elems4 = await getUserProfile();
+    show(elems4);
   } catch (err) {
     console.log(err);
   }

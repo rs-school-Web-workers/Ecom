@@ -1,5 +1,6 @@
 import { BaseAddress, ByProjectKeyRequestBuilder, createApiBuilderFromCtpClient } from '@commercetools/platform-sdk';
 import { ClientBuilder, TokenCache, TokenStore } from '@commercetools/sdk-client-v2';
+import type { SearchQuery, SearchSorting } from '@commercetools/platform-sdk';
 
 let inst: ByProjectKeyRequestBuilder | null = null;
 const projectKey = process.env.PROJECT_KEY;
@@ -221,7 +222,14 @@ export async function getProducts() {
   return await inst.products().get().execute();
 }
 
-export async function searchProducts(limit?: number, offset?: number) {
+export async function getProductById(id: string) {
+  if (inst === null) {
+    throw new Error('client instance not found');
+  }
+  return await inst.products().withId({ ID: id }).get().execute();
+}
+
+export async function searchProducts(query?: SearchQuery, sort?: SearchSorting[], limit?: number, offset?: number) {
   if (inst === null) {
     throw new Error('client instance not found');
   }
@@ -229,21 +237,14 @@ export async function searchProducts(limit?: number, offset?: number) {
     .products()
     .search()
     .post({
-      body: {
-        query: {
-          fullText: {
-            field: 'name',
-            language: 'en-GB',
-            value: 'Aria Rug',
-          },
-        },
-        limit,
-        offset,
-      },
+      body: { query, sort, limit, offset },
     })
     .execute();
 }
 
-export function getUserProfile() {
-  throw new Error('not implemented');
+export async function getUserProfile() {
+  if (inst === null) {
+    throw new Error('client instance not found');
+  }
+  return await inst.me().get().execute();
 }
