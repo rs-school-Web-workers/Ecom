@@ -1,0 +1,160 @@
+$buttonBackground: #3a5b22;
+$gapForm: 6px;
+$buttonColorFont: #ffffff;
+$linkColor: #0f3dde;
+.registration {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  .registration-form-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 1 1 auto;
+    padding: 0px 20px;
+    .registration__form {
+      display: flex;
+      flex-direction: column;
+      gap: $gapForm;
+      margin-bottom: 30px;
+    }
+    .registration__title {
+      margin-bottom: 10px;
+      font-family: Integral CF;
+    }
+    .registration__about-text {
+      margin-bottom: 54px;
+      font-family: Integral CF;
+    }
+    .registration__btn-list-show {
+      padding: 6px 10px;
+      font-size: 18px;
+      font-weight: bold;
+      background-color: $buttonBackground;
+      font-family: Satoshi;
+      border: none;
+      color: $buttonColorFont;
+      border-radius: 100px;
+      cursor: pointer;
+      margin-bottom: 10px;
+      box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.4);
+      transition: opacity 0.3s;
+      &:hover {
+        opacity: 0.8;
+      }
+    }
+    .registration__list-shipping {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      column-gap: 4px;
+    }
+    .registration__list-billing {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      column-gap: 4px;
+    }
+    .registration__label {
+      display: inline-flex;
+      gap: 10px;
+      align-self: center;
+      font-family: Satoshi;
+      color: rgb(255, 0, 0);
+      margin-left: 10px;
+      .registration__input-check {
+        width: 20px;
+        height: 20px;
+      }
+    }
+    .registration__form-btn {
+      padding: 6px 10px;
+      font-size: 18px;
+      font-weight: bold;
+      background-color: $buttonBackground;
+      font-family: Satoshi;
+      border: none;
+      color: $buttonColorFont;
+      border-radius: 100px;
+      cursor: pointer;
+      margin-bottom: 10px;
+      box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.4);
+      transition: opacity 0.3s;
+      &:hover {
+        opacity: 0.8;
+      }
+    }
+
+    .registration__footer {
+      text-align: center;
+      font-family: Integral CF;
+    }
+    .registration__footer-link {
+      text-decoration: none;
+      color: $linkColor;
+    }
+  }
+  .registration-img-wrapper {
+    background-image: url(../../../assets/imgs/form-image.webp);
+    background-repeat: no-repeat;
+    background-position: left center;
+    background-size: cover;
+    flex: 1 1 auto;
+    height: 1042px;
+  }
+}
+
+.register-msg-container {
+  position: fixed;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: $buttonColorFont;
+  border: 2px solid black;
+  padding: 70px;
+  border-radius: 50px;
+  z-index: 3;
+
+  @media (max-width: 600px) {
+    padding: 70px 20px;
+    min-width: 300px;
+  }
+}
+
+.register-msg-text {
+  font-family: Satoshi;
+}
+
+.register-msg-button {
+  font-family: Integral CF;
+  color: $buttonColorFont;
+  background-color: black;
+  border: 1px solid black;
+  padding: 10px;
+  width: 100%;
+  border-radius: 50px;
+  cursor: pointer;
+}
+
+.modal-background {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  visibility: hidden;
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  z-index: 2;
+  height: 100%;
+  width: 100%;
+  background: rgb(51%, 61%, 52%, 0.7);
+  opacity: 0;
+  transition: 0.5s;
+}
+
+.modal-active {
+  visibility: visible;
+  opacity: 1;
+}
