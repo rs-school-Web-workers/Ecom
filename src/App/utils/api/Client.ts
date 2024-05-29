@@ -1,6 +1,7 @@
 import { BaseAddress, ByProjectKeyRequestBuilder, createApiBuilderFromCtpClient } from '@commercetools/platform-sdk';
 import { ClientBuilder, TokenCache, TokenStore } from '@commercetools/sdk-client-v2';
-import type { SearchQuery, SearchSorting } from '@commercetools/platform-sdk';
+import type { /* SearchQuery, */ SearchSorting } from '@commercetools/platform-sdk';
+import type { QueryExpression, SearchQuery } from './types.ts';
 
 let inst: ByProjectKeyRequestBuilder | null = null;
 const projectKey = process.env.PROJECT_KEY;
@@ -229,7 +230,26 @@ export async function getProductById(id: string) {
   return await inst.products().withId({ ID: id }).get().execute();
 }
 
-export async function searchProducts(query?: SearchQuery, sort?: SearchSorting[], limit?: number, offset?: number) {
+/**
+ * https://docs.commercetools.com/api/search-query-language#query-fields
+ * exact	  Performs exact match on values of a specified field.
+ * fullText Performs full-text search on a specified field.
+ * prefix	  Searches for values starting with a specified prefix.
+ * range	  Searches for values within a specified range.
+ * wildcard Searches  for values with specified wildcards.
+ * exists   Checks whether a specified field has a non-null value.
+ * @param query
+ * @param sort
+ * @param limit сколько данных вернуть с сервера
+ * @param offset смещение в общем массиве данных относительно начала
+ * @returns
+ */
+export async function searchProducts(
+  query?: SearchQuery | QueryExpression,
+  sort?: SearchSorting[],
+  limit?: number,
+  offset?: number
+) {
   if (inst === null) {
     throw new Error('client instance not found');
   }

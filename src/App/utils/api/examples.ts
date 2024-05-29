@@ -45,14 +45,19 @@ const show = (key: any) => {
     /* const elems1 = await getProducts();
     show(elems1.body.results[0].masterData.current.name); */
 
-    /* const elems2 = await searchProducts(
-      { fullText: { field: 'name', language: 'en-US', value: 'Chair', caseInsensitive: false, mustMatch: 'any' } },
-      [{ field: 'name', language: 'en-US', order: 'asc' }]
+    // sort: [{ field: 'name', language: 'en-US', order: 'asc' }]
+    const elems2 = await searchProducts(
+      // поиск по незаконченному имени
+      // { wildcard: { field: 'name', language: 'en-US', value: 'tshirt*', caseInsensitive: false } }
+      { fullText: { field: 'name', language: 'en-US', value: 'test', caseInsensitive: false, mustMatch: 'any' } }
+      /* { fullText: { field: 'name', language: 'en-US', value: 'ASD', caseInsensitive: false, mustMatch: 'any' } } */
     );
-    show(elems2); */
+    show(elems2);
+    show(await getProductById(elems2.body.results[0].id));
 
-    /* const elems3 = await getProductById(elems2.body.results[0].id);
-    show(elems3); */
+    /* for (let i = 0; i < elems2.body.results.length; i++) {
+      show(await getProductById(elems2.body.results[i].id));
+    } */
 
     /* const elems4 = await getUserProfile();
     show(elems4); */
@@ -62,9 +67,9 @@ const show = (key: any) => {
     changeUserProfile(elems5.body.version, 'REQUESTTEST', 'REQUESTTEST', 'asd@asd.asd', '2000-10-21');
     show(await getUserProfile()); */
 
-    const elems6 = await getUserProfile();
+    /* const elems6 = await getUserProfile();
     show(elems6);
-    passwordReset(elems6.body.version, 'ASDasdasd1', 'ASDASDasd1');
+    passwordReset(elems6.body.version, 'ASDasdasd1', 'ASDASDasd1'); */
   } catch (err) {
     console.log(err);
   }
