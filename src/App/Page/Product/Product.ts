@@ -30,7 +30,9 @@ export default class ProductPage extends Page {
 
   createProductDetail() {
     const container: HTMLDivElement = new Component('div', [style.product_detail]).getElement<HTMLDivElement>();
-    container.append(this.createImgContainer(), this.createProductDefinition());
+    const infoContainer: HTMLDivElement = new Component('div', [style.product_info]).getElement<HTMLDivElement>();
+    infoContainer.append(this.createImgContainer(), this.createProductDefinition());
+    container.append(this.createPathChain(), infoContainer);
     this.container?.append(container);
   }
 
@@ -46,15 +48,15 @@ export default class ProductPage extends Page {
     this.product?.images.forEach((img) => {
       const imgBox: HTMLImageElement = new Component('img', [style.small_img]).getElement<HTMLImageElement>();
       imgBox.src = `https://raw.githubusercontent.com/rolling-scopes-school/rss-puzzle-data/main/images/${img}`;
+      imgBox.addEventListener('click', (event: Event) => this.clickSmallImgHandler(event, mainImgContainer));
       smallImgsContainer.append(imgBox);
     });
-    smallImgsContainer.addEventListener('click', (event: Event) => this.clickSmallImgHandler(event, mainImgContainer));
     container.append(smallImgsContainer, mainImgContainer);
     return container;
   }
 
   clickSmallImgHandler(event: Event, mainImg: HTMLImageElement) {
-    const elem: HTMLImageElement = <HTMLImageElement>event.target;
+    const elem: HTMLImageElement = <HTMLImageElement>event.currentTarget;
     mainImg.src = elem.src;
   }
 
@@ -126,7 +128,7 @@ export default class ProductPage extends Page {
         false
       )
     );
-    this.container?.append(chainContainer);
+    return chainContainer;
   }
 
   createChainLink(nameLink: string, path: string, label: boolean) {
