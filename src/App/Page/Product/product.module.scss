@@ -92,6 +92,7 @@ $max-width: 1240px;
   cursor: pointer;
   object-fit: cover;
   overflow: hidden;
+  border: 2px solid transparent;
 
   @media (max-width: 767px) {
     width: 30%;
@@ -102,6 +103,10 @@ $max-width: 1240px;
     min-width: 111px;
     min-height: 106px;
   }
+}
+
+.active_small_img {
+  border: 2px solid black;
 }
 
 .product_definition {

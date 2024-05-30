@@ -21,6 +21,10 @@ $commonGap: 20px;
     background-size: 448px;
     padding: 40px;
   }
+
+  @media (max-width: 420px) {
+    padding: 15px;
+  }
 }
 
 .slogan-block {
@@ -33,6 +37,8 @@ $commonGap: 20px;
     font-size: 36px;
     width: 315px;
   }
+
+
 }
 
 .definition-block {

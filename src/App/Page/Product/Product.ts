@@ -20,6 +20,7 @@ export default class ProductPage extends Page {
   }
 
   initProductInfo() {
+    // запрос информации продукта
     this.product = data.products[0];
   }
 
@@ -45,19 +46,28 @@ export default class ProductPage extends Page {
       style.main_img_container,
     ]).getElement<HTMLImageElement>();
     mainImgContainer.src = `https://raw.githubusercontent.com/rolling-scopes-school/rss-puzzle-data/main/images/${this.product?.images[0]}`;
-    this.product?.images.forEach((img) => {
+    this.product?.images.forEach((img, index) => {
       const imgBox: HTMLImageElement = new Component('img', [style.small_img]).getElement<HTMLImageElement>();
       imgBox.src = `https://raw.githubusercontent.com/rolling-scopes-school/rss-puzzle-data/main/images/${img}`;
-      imgBox.addEventListener('click', (event: Event) => this.clickSmallImgHandler(event, mainImgContainer));
+      imgBox.addEventListener('click', (event: Event) =>
+        this.clickSmallImgHandler(event, mainImgContainer, smallImgsContainer)
+      );
+      if (index === 0) {
+        imgBox.classList.add(style.active_small_img);
+      }
       smallImgsContainer.append(imgBox);
     });
     container.append(smallImgsContainer, mainImgContainer);
     return container;
   }
 
-  clickSmallImgHandler(event: Event, mainImg: HTMLImageElement) {
+  clickSmallImgHandler(event: Event, mainImg: HTMLImageElement, container: HTMLDivElement) {
     const elem: HTMLImageElement = <HTMLImageElement>event.currentTarget;
+    const pastActiveElem: HTMLButtonElement | null = container.querySelector(`.${style.active_small_img}`);
     mainImg.src = elem.src;
+    isNull(pastActiveElem);
+    pastActiveElem.classList.remove(style.active_small_img);
+    elem.classList.add(style.active_small_img);
   }
 
   createProductDefinition() {
@@ -69,11 +79,6 @@ export default class ProductPage extends Page {
       style.product_text_definition,
     ]).getElement<HTMLDivElement>();
     textDefinition.textContent = this.product.definition;
-    // const colorsContainer: HTMLDivElement = new Component('div', ['product_colors']).getElement<HTMLDivElement>();
-    // const sizeContainer: HTMLDivElement = new Component('div', ['size_container']).getElement<HTMLDivElement>();
-    // const buttonContainer: HTMLDivElement = new Component('div', [
-    //   'product_button_container',
-    // ]).getElement<HTMLDivElement>();
     container.append(
       name,
       this.createPriceContainer(),
