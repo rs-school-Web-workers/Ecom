@@ -15,6 +15,8 @@ export default class ProductPage extends Page {
 
   shift: number = 0;
 
+  startTouch: number = 0;
+
   constructor(router: Router) {
     super([style.product]);
     this.router = router;
@@ -72,6 +74,10 @@ export default class ProductPage extends Page {
       if (index === 0) {
         imgContainer.classList.add(style.active_small_img);
         smallImgsContainer.dataset.slide = this.currentSlide.toString();
+        smallImgsContainer.addEventListener('touchstart', (event) => this.touchStartHandler(event));
+        smallImgsContainer.addEventListener('touchend', (event) =>
+          this.touchEndHandler(event, imgContainer, smallImgsContainer)
+        );
         arrow_left.addEventListener('click', () => this.clickPrevHandler(imgContainer, smallImgsContainer));
         arrow_right.addEventListener('click', () => this.clickNextHandler(imgContainer, smallImgsContainer));
       }
@@ -90,6 +96,20 @@ export default class ProductPage extends Page {
     isNull(pastActiveElem);
     pastActiveElem.classList.remove(style.active_small_img);
     elem.classList.add(style.active_small_img);
+  }
+
+  touchStartHandler(event: TouchEvent) {
+    this.startTouch = event.changedTouches[0].clientX;
+  }
+
+  touchEndHandler(event: TouchEvent, slide: HTMLDivElement, container: HTMLDivElement) {
+    const endTouch: number = event.changedTouches[0].clientX;
+    const distance: number = endTouch - this.startTouch;
+    if (distance > 0) {
+      this.clickPrevHandler(slide, container);
+    } else {
+      this.clickNextHandler(slide, container);
+    }
   }
 
   clickNextHandler(slide: HTMLDivElement, container: HTMLDivElement) {
