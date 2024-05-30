@@ -230,6 +230,13 @@ export async function getProductById(id: string) {
   return await inst.products().withId({ ID: id }).get().execute();
 }
 
+export async function getCategorieById(id: string) {
+  if (inst === null) {
+    throw new Error('client instance not found');
+  }
+  return await inst.categories().withId({ ID: id }).get().execute();
+}
+
 /**
  * https://docs.commercetools.com/api/search-query-language#query-fields
  * exact	  Performs exact match on values of a specified field.
