@@ -2,12 +2,16 @@ import { QueryExpression, SearchQuery } from './types';
 
 type KeyExpr = 'and' | 'or' | 'not' | 'filter';
 
-export class QueryBuilder {
-  private obj: SearchQuery;
+export default class QueryBuilder {
+  private obj: SearchQuery | undefined;
   private arr: (QueryExpression | SearchQuery)[];
-  constructor(expr: KeyExpr) {
-    this.obj = { [expr]: [] };
-    this.arr = this.obj[`${expr}`]!;
+  constructor(expr?: KeyExpr) {
+    if (expr) {
+      this.obj = { [expr]: [] };
+      this.arr = this.obj[`${expr}`]!;
+    } else {
+      this.arr = [];
+    }
   }
 
   fullText(field: string, language: string, value: string, mustMatch: 'all' | 'any' = 'all') {
@@ -37,11 +41,15 @@ export class QueryBuilder {
     this.arr.push({ exist: { field } });
     return this;
   }
-  expr(obj: SearchQuery) {
+  expression(obj: SearchQuery) {
     this.arr.push(obj);
     return this;
   }
   get() {
-    return this.obj;
+    if (this.obj) {
+      return this.obj;
+    } else {
+      return this.arr[0];
+    }
   }
 }

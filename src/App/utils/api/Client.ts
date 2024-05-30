@@ -230,6 +230,13 @@ export async function getProductById(id: string) {
   return await inst.products().withId({ ID: id }).get().execute();
 }
 
+export async function getCategories() {
+  if (inst === null) {
+    throw new Error('client instance not found');
+  }
+  return await inst.categories().get().execute();
+}
+
 export async function getCategorieById(id: string) {
   if (inst === null) {
     throw new Error('client instance not found');

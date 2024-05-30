@@ -12,6 +12,8 @@ import {
   passwordReset,
   searchProducts,
 } from './Client';
+import QueryBuilder from './queryBuilder';
+import { SearchQuery } from './types';
 
 /* to run this file npx ts-node src/App/utils/api/examples.ts */
 
@@ -43,21 +45,27 @@ const show = (key: any) => {
     await loginClient('asd@asd.asd', 'ASDasdasd1');
 
     /* const elems1 = await getProducts();
-    show(elems1.body.results[0].masterData.current.name); */
+    show(elems1.body.results[0]); */
 
     // sort: [{ field: 'name', language: 'en-US', order: 'asc' }]
     const elems2 = await searchProducts(
       // поиск по незаконченному имени
-      // { wildcard: { field: 'name', language: 'en-US', value: 'tshirt*', caseInsensitive: false } }
-      { fullText: { field: 'name', language: 'en-US', value: 'test', caseInsensitive: false, mustMatch: 'any' } }
-      /* { fullText: { field: 'name', language: 'en-US', value: 'ASD', caseInsensitive: false, mustMatch: 'any' } } */
+      // new QueryBuilder().wildcard('name', 'en-US', 'eco*', true).get()
+      // сложный запрос
+      new QueryBuilder('or')
+        .fullText('name', 'en-US', 'UrbanPulse', 'any')
+        .wildcard('name', 'en-US', 'eco*', true)
+        .expression(
+          new QueryBuilder('and')
+            .wildcard('name', 'en-US', '?u*', true)
+            .wildcard('name', 'en-US', 'l*', true)
+            .get() as SearchQuery
+        )
+        .get()
     );
-    show(elems2);
-    show(await getProductById(elems2.body.results[0].id));
-
-    /* for (let i = 0; i < elems2.body.results.length; i++) {
-      show(await getProductById(elems2.body.results[i].id));
-    } */
+    for (let i = 0; i < elems2.body.results.length; i++) {
+      show((await getProductById(elems2.body.results[i].id)).body.masterData.current.name);
+    }
 
     /* const elems4 = await getUserProfile();
     show(elems4); */
