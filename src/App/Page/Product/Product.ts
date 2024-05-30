@@ -11,6 +11,10 @@ export default class ProductPage extends Page {
 
   product: IProduct | null;
 
+  currentSlide: number = 0;
+
+  shift: number = 0;
+
   constructor(router: Router) {
     super([style.product]);
     this.router = router;
@@ -42,32 +46,81 @@ export default class ProductPage extends Page {
     const smallImgsContainer: HTMLDivElement = new Component('div', [
       style.small_imgs_container,
     ]).getElement<HTMLDivElement>();
+    const scrollContainer: HTMLDivElement = new Component('div', [style.scroll_container]).getElement<HTMLDivElement>();
     const mainImgContainer: HTMLImageElement = new Component('img', [
       style.main_img_container,
     ]).getElement<HTMLImageElement>();
+    const arrow_left: HTMLDivElement = new Component('div', [
+      style.arrow,
+      style.arrow_top,
+    ]).getElement<HTMLDivElement>();
+    const arrow_right: HTMLDivElement = new Component('div', [
+      style.arrow,
+      style.arrow_bottom,
+    ]).getElement<HTMLDivElement>();
+    if (this.product !== null && this.product.images.length > 3) {
+      scrollContainer.append(arrow_left, arrow_right);
+    }
     mainImgContainer.src = `https://raw.githubusercontent.com/rolling-scopes-school/rss-puzzle-data/main/images/${this.product?.images[0]}`;
     this.product?.images.forEach((img, index) => {
-      const imgBox: HTMLImageElement = new Component('img', [style.small_img]).getElement<HTMLImageElement>();
+      const imgContainer: HTMLDivElement = new Component('div', [style.small_img]).getElement<HTMLDivElement>();
+      const imgBox: HTMLImageElement = new Component('img', []).getElement<HTMLImageElement>();
       imgBox.src = `https://raw.githubusercontent.com/rolling-scopes-school/rss-puzzle-data/main/images/${img}`;
       imgBox.addEventListener('click', (event: Event) =>
         this.clickSmallImgHandler(event, mainImgContainer, smallImgsContainer)
       );
       if (index === 0) {
-        imgBox.classList.add(style.active_small_img);
+        imgContainer.classList.add(style.active_small_img);
+        smallImgsContainer.dataset.slide = this.currentSlide.toString();
+        arrow_left.addEventListener('click', () => this.clickPrevHandler(imgContainer, smallImgsContainer));
+        arrow_right.addEventListener('click', () => this.clickNextHandler(imgContainer, smallImgsContainer));
       }
-      smallImgsContainer.append(imgBox);
+      imgContainer.append(imgBox);
+      smallImgsContainer.append(imgContainer);
     });
-    container.append(smallImgsContainer, mainImgContainer);
+    scrollContainer.append(smallImgsContainer);
+    container.append(scrollContainer, mainImgContainer);
     return container;
   }
 
   clickSmallImgHandler(event: Event, mainImg: HTMLImageElement, container: HTMLDivElement) {
-    const elem: HTMLImageElement = <HTMLImageElement>event.currentTarget;
+    const elem: HTMLImageElement = <HTMLImageElement>event.target;
     const pastActiveElem: HTMLButtonElement | null = container.querySelector(`.${style.active_small_img}`);
     mainImg.src = elem.src;
     isNull(pastActiveElem);
     pastActiveElem.classList.remove(style.active_small_img);
     elem.classList.add(style.active_small_img);
+  }
+
+  clickNextHandler(slide: HTMLDivElement, container: HTMLDivElement) {
+    const amount: number | undefined = this.product?.images.length;
+    const sizeWindow = document.documentElement.getBoundingClientRect().width;
+    if (amount !== undefined && this.currentSlide < amount - 3) {
+      this.currentSlide++;
+      if (sizeWindow > 767) {
+        this.shift = this.currentSlide * (slide.clientHeight + 20);
+        container.style.transform = `translateY(-${this.shift}px)`;
+      } else {
+        this.shift = this.currentSlide * (slide.clientWidth + 20);
+        container.style.transform = `translateX(-${this.shift}px)`;
+      }
+      container.dataset.slide = this.currentSlide.toString();
+    }
+  }
+
+  clickPrevHandler(slide: HTMLDivElement, container: HTMLDivElement) {
+    const sizeWindow = document.documentElement.getBoundingClientRect().width;
+    if (this.currentSlide > 0) {
+      this.currentSlide--;
+      if (sizeWindow > 767) {
+        this.shift = this.currentSlide * (slide.clientHeight + 20);
+        container.style.transform = `translateY(-${this.shift}px)`;
+      } else {
+        this.shift = this.currentSlide * (slide.clientWidth + 20);
+        container.style.transform = `translateX(-${this.shift}px)`;
+      }
+      container.dataset.slide = this.currentSlide.toString();
+    }
   }
 
   createProductDefinition() {
@@ -249,3 +302,23 @@ export default class ProductPage extends Page {
     }
   }
 }
+
+window.addEventListener('resize', () => {
+  const slider: HTMLDivElement | null = document.querySelector(`.${style.small_imgs_container}`);
+  const sizeWindow = document.documentElement.getBoundingClientRect().width;
+  if (slider !== null) {
+    const slide: HTMLDivElement | null = document.querySelector(`.${style.small_img}`);
+    if (slide !== null) {
+      if (sizeWindow > 767) {
+        console.log(slider.dataset.slide);
+        slider.style.transform = `translateX(0px)`;
+        const shift: number = (slide?.clientHeight + 20) * Number(slider.dataset.slide);
+        slider.style.transform = `translateY(-${shift}px)`;
+      } else {
+        slider.style.transform = `translateY(0px)`;
+        const shift: number = (slide?.clientWidth + 20) * Number(slider.dataset.slide);
+        slider.style.transform = `translateX(-${shift}px)`;
+      }
+    }
+  }
+});
