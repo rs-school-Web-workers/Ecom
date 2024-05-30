@@ -1,0 +1,54 @@
+$mainColorFont: #000000;
+$cardColorPriceDiscount: rgba(0, 0, 0, 0.4);
+$gapCardList: 20px;
+$cardRadiusImg: 20px;
+$marginAfterImg: 16px;
+$gapWrapperAbout: 8px;
+$cardNameFontSize: 20px;
+$cardPriceFontSize: 24px;
+$productTitleFontSize: 32px;
+.catalog {
+  .catalogContainerFilters {
+  }
+  .catalogContainerProducts {
+  }
+  .catalog__headerTitle {
+    color: $mainColorFont;
+    font-size: $productTitleFontSize;
+    font-family: Satoshi;
+    font-weight: 700;
+  }
+  .catalog__listProducts {
+    display: flex;
+    flex-direction: column;
+  }
+  .catalog__card {
+    color: $mainColorFont;
+  }
+  .catalog__cardImg {
+    border-radius: $cardRadiusImg;
+    margin-bottom: $marginAfterImg;
+    width: 30%;
+    height: 30%;
+    object-fit: cover;
+  }
+  .catalog__cardName {
+    font-family: Satoshi;
+    font-weight: 700;
+  }
+  .catalog__cardDescription {
+  }
+  .catalog__wrapperAbout {
+  }
+  .catalog__cardPriceContainer {
+  }
+  .catalog__cardPrice {
+    font-family: Satoshi;
+    font-weight: 700;
+    font-size: $cardPriceFontSize;
+  }
+  .catalog__cardPrice_dashedGrey {
+    color: $cardColorPriceDiscount;
+    text-decoration: line-through;
+  }
+}

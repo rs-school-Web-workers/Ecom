@@ -10,6 +10,7 @@ import NotFoundPage from './Page/NotFoundPage/NotFoundPage';
 import LoginPage from './Page/Login/Login';
 import { autoLoginCLient, isLogged } from './utils/api/Client';
 import RegistrationPage from './Page/Registration/Registration';
+import { CatalogPage } from './Page/CatalogPage/Catalog';
 
 export class App {
   router: Router;
@@ -80,7 +81,8 @@ export class App {
       {
         pagePath: PagePath.PRODUCTS,
         render: () => {
-          this.contentContainer.textContent = 'This is ' + PagePath.PRODUCTS;
+          const productPage = new CatalogPage();
+          this.setPage(productPage);
         },
       },
       {
