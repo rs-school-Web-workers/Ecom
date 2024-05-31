@@ -26,7 +26,6 @@ export class CatalogPage extends Page {
   titleContainerProducts = new Component('h1', [catalog__headerTitle]);
   constructor() {
     super([catalog]);
-    console.log(mydata, loki);
     this.createCardList();
     this.render();
   }
@@ -46,7 +45,7 @@ export class CatalogPage extends Page {
   createCardList() {
     mydata.casual[0]['t-shirt']?.forEach(({ brand, name, description, price, image }) => {
       const dataObject: CardItem = {
-        name: brand + name,
+        name: `${brand} ${name}`,
         description,
         priceWithDiscount: price,
         priceWithoutDiscount: price,
@@ -58,12 +57,11 @@ export class CatalogPage extends Page {
     });
   }
   createCard(data: CardItem) {
-    // const path = './src/assets/';
     const card = new Component('div', [catalog__card]);
     const imageCard = new Component('img', [catalog__cardImg]);
     console.log(data);
     imageCard.getElement<HTMLImageElement>().src = `${data.imageLink}`;
-    // imageCard.getElement<HTMLImageElement>().alt = data.name;
+    imageCard.getElement<HTMLImageElement>().alt = data.name;
     const titleCard = new Component('h3', [catalog__cardName]);
     titleCard.setTextContent(data.name);
     const descriptionCard = new Component('p', [catalog__cardDescription]);
