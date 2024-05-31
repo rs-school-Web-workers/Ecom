@@ -10,6 +10,7 @@ import NotFoundPage from './Page/NotFoundPage/NotFoundPage';
 import LoginPage from './Page/Login/Login';
 import { autoLoginCLient, isLogged } from './utils/api/Client';
 import RegistrationPage from './Page/Registration/Registration';
+import { UserProfilePage } from './Page/UserProfile/UserProfile';
 
 export class App {
   router: Router;
@@ -56,6 +57,20 @@ export class App {
             const loginPage: LoginPage = new LoginPage(this.router);
             this.setPage(loginPage);
           }
+        },
+      },
+      {
+        pagePath: PagePath.USERPROFILE,
+        render: () => {
+          const userProfilePage = new UserProfilePage();
+          this.setPage(userProfilePage);
+          // if (isLogged()) {
+          //   this.router.navigate(PagePath.MAIN);
+          //   this.router.renderPageView(PagePath.MAIN);
+          // } else {
+          //   const loginPage: LoginPage = new LoginPage(this.router);
+          //   this.setPage(loginPage);
+          // }
         },
       },
       {
