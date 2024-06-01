@@ -10,6 +10,8 @@ import NotFoundPage from './Page/NotFoundPage/NotFoundPage';
 import LoginPage from './Page/Login/Login';
 import { autoLoginCLient, isLogged } from './utils/api/Client';
 import RegistrationPage from './Page/Registration/Registration';
+import ProductPage from './Page/Product/Product';
+import * as style from './app.module.scss';
 
 export class App {
   router: Router;
@@ -23,11 +25,13 @@ export class App {
   constructor() {
     if (localStorage.getItem('token')) autoLoginCLient();
     this.container = document.body;
-    this.contentContainer = document.createElement('div');
+    console.log(style);
+    this.container = new Component('div', [style.app]).getElement<HTMLDivElement>();
+    document.body.append(this.container);
     const pages: PageInfo[] = this.initPages();
     this.router = new Router(pages);
     this.header = new Header(this.router);
-    this.contentContainer = new Component('div', ['content-container']).getElement<HTMLDivElement>();
+    this.contentContainer = new Component('div', ['content_container']).getElement<HTMLDivElement>();
     this.initApp();
   }
 
@@ -93,8 +97,9 @@ export class App {
       },
       {
         pagePath: `${PagePath.PRODUCTS}/${SECTION_NAME}/${ID_ELEMENT}`,
-        render: (section_name: string = '', id: string = '') => {
-          this.contentContainer.textContent = 'This is ' + PagePath.PRODUCTS + `/${section_name}/${id}`;
+        render: () => {
+          const product: ProductPage = new ProductPage(this.router);
+          this.setPage(product);
         },
       },
       {

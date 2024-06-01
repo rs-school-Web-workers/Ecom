@@ -7,17 +7,23 @@ $commonGap: 20px;
   background-color: $commonBackground;
   background-image: url(../../../assets/imgs/common-block-background.webp);
   background-position: top right;
+  background-size: cover;
   height: 663px;
   background-size: 663px;
   background-repeat: no-repeat;
   padding: 100px;
   gap: $commonGap;
+  max-width: 1440px;
 
   @media (max-width: 768px) {
     background-position: bottom center;
     height: 853px;
     background-size: 448px;
     padding: 40px;
+  }
+
+  @media (max-width: 420px) {
+    padding: 15px;
   }
 }
 
@@ -31,6 +37,8 @@ $commonGap: 20px;
     font-size: 36px;
     width: 315px;
   }
+
+
 }
 
 .definition-block {
