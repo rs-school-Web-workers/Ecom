@@ -1,0 +1,29 @@
+.modal_product {
+  width: 100%;
+  max-width: 600px;
+
+  @media (max-width: 767px) {
+    max-width: 500px;
+  }
+
+  @media (max-width: 600px) {
+    max-width: 330px;
+  }
+}
+
+.product_buttons_container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.product_ok_button {
+  font-family: Integral CF;
+  font-size: 24px;
+  background-color: black;
+  cursor: pointer;
+  color: white;
+  padding: 10px 15px;
+  width: 100px;
+  border-radius: 20px;
+}

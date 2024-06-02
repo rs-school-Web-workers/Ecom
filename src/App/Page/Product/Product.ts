@@ -5,6 +5,7 @@ import * as style from './product.module.scss';
 import data from '../../../assets/data/products.json';
 import { IProduct } from './types';
 import { isNull } from '../../utils/base-methods';
+import { ProductModal } from '../../Modal/ProductModal/ProductModal';
 
 export default class ProductPage extends Page {
   router: Router;
@@ -17,10 +18,13 @@ export default class ProductPage extends Page {
 
   startTouch: number = 0;
 
+  modal: ProductModal | null;
+
   constructor(router: Router) {
     super([style.product]);
     this.router = router;
     this.product = null;
+    this.modal = null;
     this.initProductInfo();
     this.initPage();
   }
@@ -33,6 +37,10 @@ export default class ProductPage extends Page {
   initPage() {
     this.createPathChain();
     this.createProductDetail();
+    if (this.product !== null) {
+      this.modal = new ProductModal('product', this.product?.images);
+      this.container?.append(this.modal.background);
+    }
   }
 
   createProductDetail() {
@@ -67,6 +75,7 @@ export default class ProductPage extends Page {
     this.product?.images.forEach((img, index) => {
       const imgContainer: HTMLDivElement = new Component('div', [style.small_img]).getElement<HTMLDivElement>();
       const imgBox: HTMLImageElement = new Component('img', []).getElement<HTMLImageElement>();
+      imgBox.dataset.slide = (index + 1).toString();
       imgBox.src = `https://raw.githubusercontent.com/rolling-scopes-school/rss-puzzle-data/main/images/${img}`;
       imgBox.addEventListener('click', (event: Event) =>
         this.clickSmallImgHandler(event, mainImgContainer, smallImgsContainer)
@@ -84,13 +93,22 @@ export default class ProductPage extends Page {
       imgContainer.append(imgBox);
       smallImgsContainer.append(imgContainer);
     });
+    mainImgContainer.addEventListener('click', () => this.clickMainImgHandler());
     scrollContainer.append(smallImgsContainer);
     container.append(scrollContainer, mainImgContainer);
     return container;
   }
 
+  clickMainImgHandler() {
+    this.modal?.modalShow();
+  }
+
   clickSmallImgHandler(event: Event, mainImg: HTMLImageElement, container: HTMLDivElement) {
     const elem: HTMLImageElement = <HTMLImageElement>event.target;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const swiper: any = document.querySelector('.swiper-container');
+    console.log(elem.dataset.slide);
+    swiper.swiper.slideTo(elem.dataset.slide);
     const pastActiveElem: HTMLButtonElement | null = container.querySelector(`.${style.active_small_img}`);
     mainImg.src = elem.src;
     isNull(pastActiveElem);
@@ -187,9 +205,7 @@ export default class ProductPage extends Page {
   createPathChain() {
     const chainContainer: HTMLDivElement = new Component('div', [style.chain_container]).getElement<HTMLDivElement>();
     const browserAdress: string = window.location.pathname;
-    console.log(window.location.pathname);
     const chainArray = [...browserAdress.split('/').slice(0, -1)];
-    console.log(chainArray);
     chainArray.forEach((chain, index) => {
       if (index < chainArray.length - 1) {
         if (chain === '') {
@@ -330,7 +346,6 @@ window.addEventListener('resize', () => {
     const slide: HTMLDivElement | null = document.querySelector(`.${style.small_img}`);
     if (slide !== null) {
       if (sizeWindow > 767) {
-        console.log(slider.dataset.slide);
         slider.style.transform = `translateX(0px)`;
         const shift: number = (slide?.clientHeight + 20) * Number(slider.dataset.slide);
         slider.style.transform = `translateY(-${shift}px)`;
