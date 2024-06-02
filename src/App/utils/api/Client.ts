@@ -1,5 +1,7 @@
 import { BaseAddress, ByProjectKeyRequestBuilder, createApiBuilderFromCtpClient } from '@commercetools/platform-sdk';
 import { ClientBuilder, TokenCache, TokenStore } from '@commercetools/sdk-client-v2';
+import type { /* SearchQuery, */ SearchSorting } from '@commercetools/platform-sdk';
+import type { QueryExpression, SearchQuery } from './types.ts';
 
 let inst: ByProjectKeyRequestBuilder | null = null;
 const projectKey = process.env.PROJECT_KEY;
@@ -34,6 +36,9 @@ export function getClient() {
 export function getAnonClient() {
   if (!projectKey || !region || !clientId || !clientSecret || !clientScopes) {
     throw new Error('Env parameters are undefined');
+  }
+  if (inst !== null) {
+    return inst;
   }
   const ctpClient = new ClientBuilder()
     .withAnonymousSessionFlow({
@@ -209,4 +214,261 @@ export async function signinClient(
       throw err;
     });
   return inst;
+}
+
+export async function getProducts() {
+  if (inst === null) {
+    throw new Error('client instance not found');
+  }
+  return await inst.products().get().execute();
+}
+
+export async function getProductById(id: string) {
+  if (inst === null) {
+    throw new Error('client instance not found');
+  }
+  return await inst.products().withId({ ID: id }).get().execute();
+}
+
+export async function getCategories() {
+  if (inst === null) {
+    throw new Error('client instance not found');
+  }
+  return await inst.categories().get().execute();
+}
+
+export async function getCategorieById(id: string) {
+  if (inst === null) {
+    throw new Error('client instance not found');
+  }
+  return await inst.categories().withId({ ID: id }).get().execute();
+}
+
+/**
+ * https://docs.commercetools.com/api/search-query-language#query-fields
+ * exact	  Performs exact match on values of a specified field.
+ * fullText Performs full-text search on a specified field.
+ * prefix	  Searches for values starting with a specified prefix.
+ * range	  Searches for values within a specified range.
+ * wildcard Searches  for values with specified wildcards.
+ * exists   Checks whether a specified field has a non-null value.
+ * @param query
+ * @param sort
+ * @param limit сколько данных вернуть с сервера
+ * @param offset смещение в общем массиве данных относительно начала
+ * @returns
+ */
+export async function searchProducts(
+  query?: SearchQuery | QueryExpression,
+  sort?: SearchSorting[],
+  limit?: number,
+  offset?: number
+) {
+  if (inst === null) {
+    throw new Error('client instance not found');
+  }
+  return await inst
+    .products()
+    .search()
+    .post({
+      body: { query, sort, limit, offset },
+    })
+    .execute();
+}
+
+export async function getUserProfile() {
+  if (inst === null) {
+    throw new Error('client instance not found');
+  }
+  return await inst.me().get().execute();
+}
+
+export async function passwordReset(version: number, currentPassword: string, newPassword: string) {
+  if (inst === null) {
+    throw new Error('client instance not found');
+  }
+  return await inst.me().password().post({ body: { version, currentPassword, newPassword } }).execute();
+}
+
+export async function changeUserProfile(
+  version: number,
+  firstName: string,
+  lastName: string,
+  email: string,
+  dateOfBirth: string
+) {
+  if (inst === null) {
+    throw new Error('client instance not found');
+  }
+  return await inst
+    .me()
+    .post({
+      body: {
+        version,
+        actions: [
+          { action: 'setFirstName', firstName },
+          { action: 'setLastName', lastName },
+          { action: 'changeEmail', email },
+          { action: 'setDateOfBirth', dateOfBirth },
+        ],
+      },
+    })
+    .execute();
+}
+
+export async function addAddress(version: number, address: BaseAddress) {
+  if (inst === null) {
+    throw new Error('client instance not found');
+  }
+  return await inst
+    .me()
+    .post({
+      body: {
+        version,
+        actions: [{ action: 'addAddress', address }],
+      },
+    })
+    .execute();
+}
+
+export async function changeAddress(version: number, address: BaseAddress, addressId?: string, addressKey?: string) {
+  if (inst === null) {
+    throw new Error('client instance not found');
+  }
+  if (typeof addressId === 'undefined' && typeof addressKey === 'undefined') {
+    throw new Error('id or key must be specified');
+  }
+  return await inst
+    .me()
+    .post({
+      body: {
+        version,
+        actions: [{ action: 'changeAddress', addressId, addressKey, address }],
+      },
+    })
+    .execute();
+}
+
+export async function removeAddress(version: number, addressId?: string, addressKey?: string) {
+  if (inst === null) {
+    throw new Error('client instance not found');
+  }
+  if (typeof addressId === 'undefined' && typeof addressKey === 'undefined') {
+    throw new Error('id or key must be specified');
+  }
+  return await inst
+    .me()
+    .post({
+      body: {
+        version,
+        actions: [{ action: 'removeAddress', addressId, addressKey }],
+      },
+    })
+    .execute();
+}
+
+export async function setDefaultBillingAddress(version: number, addressId?: string, addressKey?: string) {
+  if (inst === null) {
+    throw new Error('client instance not found');
+  }
+  if (typeof addressId === 'undefined' && typeof addressKey === 'undefined') {
+    throw new Error('id or key must be specified');
+  }
+  return await inst
+    .me()
+    .post({
+      body: {
+        version,
+        actions: [{ action: 'setDefaultBillingAddress', addressId, addressKey }],
+      },
+    })
+    .execute();
+}
+
+export async function addBillingAddress(version: number, addressId?: string, addressKey?: string) {
+  if (inst === null) {
+    throw new Error('client instance not found');
+  }
+  if (typeof addressId === 'undefined' && typeof addressKey === 'undefined') {
+    throw new Error('id or key must be specified');
+  }
+  return await inst
+    .me()
+    .post({
+      body: {
+        version,
+        actions: [{ action: 'addBillingAddressId', addressId, addressKey }],
+      },
+    })
+    .execute();
+}
+export async function removeBillingAddress(version: number, addressId?: string, addressKey?: string) {
+  if (inst === null) {
+    throw new Error('client instance not found');
+  }
+  if (typeof addressId === 'undefined' && typeof addressKey === 'undefined') {
+    throw new Error('id or key must be specified');
+  }
+  return await inst
+    .me()
+    .post({
+      body: {
+        version,
+        actions: [{ action: 'removeBillingAddressId', addressId, addressKey }],
+      },
+    })
+    .execute();
+}
+
+export async function setDefaultShippingAddress(version: number, addressId?: string, addressKey?: string) {
+  if (inst === null) {
+    throw new Error('client instance not found');
+  }
+  if (typeof addressId === 'undefined' && typeof addressKey === 'undefined') {
+    throw new Error('id or key must be specified');
+  }
+  return await inst
+    .me()
+    .post({
+      body: {
+        version,
+        actions: [{ action: 'setDefaultShippingAddress', addressId, addressKey }],
+      },
+    })
+    .execute();
+}
+
+export async function addShippingAddress(version: number, addressId?: string, addressKey?: string) {
+  if (inst === null) {
+    throw new Error('client instance not found');
+  }
+  if (typeof addressId === 'undefined' && typeof addressKey === 'undefined') {
+    throw new Error('id or key must be specified');
+  }
+  return await inst
+    .me()
+    .post({
+      body: {
+        version,
+        actions: [{ action: 'addShippingAddressId', addressId, addressKey }],
+      },
+    })
+    .execute();
+}
+export async function removeShippingAddress(version: number, addressId?: string, addressKey?: string) {
+  if (inst === null) {
+    throw new Error('client instance not found');
+  }
+  if (typeof addressId === 'undefined' && typeof addressKey === 'undefined') {
+    throw new Error('id or key must be specified');
+  }
+  return await inst
+    .me()
+    .post({
+      body: {
+        version,
+        actions: [{ action: 'removeShippingAddressId', addressId, addressKey }],
+      },
+    })
+    .execute();
 }

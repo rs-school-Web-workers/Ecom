@@ -84,7 +84,9 @@ export class App {
       {
         pagePath: PagePath.PRODUCTS,
         render: () => {
-          this.contentContainer.textContent = 'This is ' + PagePath.PRODUCTS;
+          const products: HTMLDivElement = new Component('div', ['products-page']).getElement<HTMLDivElement>();
+          this.container.replaceChildren();
+          this.contentContainer.append(products);
         },
       },
       {

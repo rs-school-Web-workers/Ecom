@@ -1,6 +1,6 @@
 import { isNull } from './base-methods';
 
-interface CallBackParam {
+export interface CallBackParam {
   eventName?: string;
   callback?: (event?: Event) => void;
 }
