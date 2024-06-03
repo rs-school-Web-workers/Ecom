@@ -6,7 +6,16 @@ export interface CardItem {
   imageLink: string;
 }
 
-export const DressColors = [
+export interface ICatalogFilter {
+  colors: string[];
+  sizes: string[];
+  cloth: string[];
+  brand: string[];
+  min: number;
+  max: number;
+}
+
+export const DressColors: string[] = [
   'black',
   'grey',
   'blue',
@@ -25,7 +34,7 @@ export const DressColors = [
   'turquoise',
 ];
 
-export const DreassSizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
+export const DressSizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
 
 export const DressBrand = [
   'PUMA',
@@ -55,3 +64,14 @@ export const DressBrand = [
 export const dresses = ['T-shirt', 'Trunks', 'Jackets', 'Pants', 'Shirts', 'Sport-suits', 'For-swimming'];
 
 export const sortValue = ['asc', 'des', 'alph'];
+
+export const styles = ['Casual', 'Formal', 'Gym', 'All'];
+
+export const defaultStateFilter: ICatalogFilter = {
+  colors: [],
+  sizes: [],
+  cloth: [],
+  brand: [],
+  min: 1,
+  max: 1000,
+};
