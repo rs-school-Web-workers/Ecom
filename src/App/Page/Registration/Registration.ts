@@ -1,6 +1,6 @@
 import { Router } from '../../Router/Router';
 import { PagePath } from '../../Router/types';
-import { showLogoutButton } from '../../components/header/Header';
+import { showLogoutButton, showUserProfileLink } from '../../components/header/Header';
 import { createInputView } from '../../components/input/inputComponent';
 import { createSelectView } from '../../components/select/selectComponent';
 import { signinClient } from '../../utils/api/Client';
@@ -382,6 +382,7 @@ export default class RegistrationPage extends Page {
     this.router.navigate(PagePath.MAIN);
     this.router.renderPageView(PagePath.MAIN);
     showLogoutButton();
+    showUserProfileLink();
   }
 
   toogleList(el: Event) {
