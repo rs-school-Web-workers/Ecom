@@ -7,6 +7,7 @@ import { IProduct } from './types';
 import { isNull } from '../../utils/base-methods';
 import { ProductModal } from '../../Modal/ProductModal/ProductModal';
 import { getProductById } from '../../utils/api/Client';
+import type { Variant } from './types';
 
 export default class ProductPage extends Page {
   router: Router;
@@ -20,6 +21,8 @@ export default class ProductPage extends Page {
   startTouch: number = 0;
 
   modal: ProductModal | null;
+  info: { name?: string; definition?: string } = {};
+  variants: Variant[] = [];
 
   constructor(router: Router, id: string) {
     super([style.product]);
@@ -32,6 +35,23 @@ export default class ProductPage extends Page {
   async initProductInfo(id: string) {
     const response = await getProductById(id);
     console.log(response);
+    this.info = {
+      name: response.body.masterData.current.name['en-US'],
+      definition: response.body.masterData.current.description!['en-US'],
+    };
+    this.variants = response.body.masterData.current.variants.map((el) => {
+      const res: Variant = {
+        color: el.attributes?.filter((attr) => attr.name === 'color')[0].value[0],
+        price: (el.prices![0].value.centAmount / 100).toFixed(2),
+        brand: el.attributes?.filter((attr) => attr.name === 'brand')[0].value,
+        images: el.images?.map((img) => img.url) ?? [],
+      };
+      if (el.prices![0].discounted) {
+        res.discounted = (el.prices![0].discounted?.value.centAmount / 100).toFixed(2);
+      }
+      return res;
+    });
+
     // запрос информации продукта
     /* "name": "One Life Graphic T-shirt",
       "price": "300",

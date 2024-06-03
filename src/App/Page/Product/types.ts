@@ -7,3 +7,5 @@ export interface IProduct {
   sizes: string[];
   images: string[];
 }
+
+export type Variant = { color: string; price: string; discounted?: string; brand: string; images: string[] };
