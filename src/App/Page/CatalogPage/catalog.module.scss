@@ -154,6 +154,7 @@ $border-bottom-color: rgb(0, 0, 0, 0.1);
 
 .filter_color_checkbox {
   background-color: white;
+  border: 1px solid black;
   border-radius: 50%;
   width: 10px;
   height: 10px;
@@ -250,6 +251,7 @@ $border-bottom-color: rgb(0, 0, 0, 0.1);
 .filter_dress_show,
 .filter_price_show {
   width: 15px;
+  cursor: pointer;
 }
 
 .filter_colors_name_container,
@@ -359,11 +361,6 @@ $border-bottom-color: rgb(0, 0, 0, 0.1);
   color: black;
 }
 
-.active_elem {
-  display: flex;
-  transition: 1s;
-}
-
 .search_container {
   display: flex;
   gap: 20px;
@@ -382,4 +379,84 @@ $border-bottom-color: rgb(0, 0, 0, 0.1);
   border: none;
   background-color: transparent;
   width: 100%;
+}
+
+.price_select_container {
+  display: none;
+  flex-direction: column;
+}
+
+.price_range_container {
+  position: relative;
+  pointer-events: none;
+  appearance: none
+}
+
+.price_progress {
+  width: 100%;
+  height: 5px;
+  // background-color: transparent;
+  border-radius: 5px;
+}
+
+.min_range_select,
+.max_range_select {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  display: block;
+  margin: 0;
+  margin-top: -10px;
+  cursor: pointer;
+  background: transparent;
+}
+
+.max_range_select {
+  margin-top: -15px;
+}
+
+input[type="range"]::-webkit-slider-thumb{
+  -webkit-appearance: none;
+  height: 15px;
+  width: 15px;
+  background-color: black;
+  cursor: pointer;
+  pointer-events: auto;
+  border-radius: 50%;
+}
+
+input[type="range"]:active::-webkit-slider-thumb{
+  background-color: #ffffff;
+  border: 2px solid black;
+}
+
+.active_elem {
+  display: flex;
+  transition: 1s;
+}
+
+.price_values {
+  display: flex;
+  justify-content: space-between;
+}
+
+.price_min_value,
+.price_max_value {
+  font-family: Satoshi;
+  font-weight: 600;
+  font-size: 18px;
+}
+
+.active_sizebox {
+  background-color: black;
+  color: white;
+}
+
+.active_colorBox .filter_color_checkbox {
+  opacity: 1;
+}
+
+.active_cloth,
+.active_brand {
+  color: black;
 }

@@ -27,7 +27,30 @@ export const DressColors = [
 
 export const DreassSizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
 
-export const DressStyles = ['Casual', 'Formal', 'Gym'];
+export const DressBrand = [
+  'PUMA',
+  'oodji',
+  'The North Face',
+  'United Color of Benetton',
+  'Sela',
+  'Mango',
+  'Colin`s',
+  'RNT 23',
+  'Armani Exchange',
+  'Primo Emporio',
+  's.Oliver',
+  'Marselesa',
+  'Sisley',
+  'Antony Morato',
+  'Lee',
+  'Levi`s',
+  'Nume',
+  'Pink Frost',
+  'Franco La`Rinchi',
+  'EA7',
+  'Fila',
+  'Kappa',
+];
 
 export const dresses = ['T-shirt', 'Trunks', 'Jackets', 'Pants', 'Shirts', 'Sport-suits', 'For-swimming'];
 

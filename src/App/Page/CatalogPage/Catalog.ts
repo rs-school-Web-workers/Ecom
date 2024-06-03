@@ -3,7 +3,7 @@ import mydata from '../../../assets/data/mydata.json';
 import Page from '../Page';
 import * as catalogStyle from './catalog.module.scss';
 import loki from '../../../assets/imgs/loki.webp';
-import { CardItem, DreassSizes, DressColors, DressStyles, dresses, sortValue } from './types';
+import { CardItem, DreassSizes, DressBrand, DressColors, dresses, sortValue } from './types';
 const {
   catalog,
   catalogContainer,
@@ -206,6 +206,223 @@ export class CatalogPage extends Page {
     const filterLogo: HTMLImageElement = new Component('img', ['filter_logo']).getElement<HTMLImageElement>();
     filterLogo.src = filter_logo;
     nameContainer.append(name, filterLogo);
+    const clothContainer: HTMLDivElement = this.createFilterCloth();
+    const priceContainer: HTMLDivElement = this.createFilterPrice();
+    const colorsContainer: HTMLDivElement = this.createFilterColors();
+    const sizeContainer: HTMLDivElement = this.createFilterSizes();
+    const dressContainer: HTMLDivElement = this.createFilterDress();
+    const applyButton: HTMLButtonElement = new Component('button', [
+      catalogStyle.filter_button_apply,
+    ]).getElement<HTMLButtonElement>();
+    applyButton.textContent = 'Apply Filter';
+    applyButton.addEventListener('click', () => this.clickApplyHandler());
+    const resetButton: HTMLButtonElement = new Component('button', [
+      catalogStyle.filter_button_reset,
+    ]).getElement<HTMLButtonElement>();
+    resetButton.textContent = 'Reset Filter';
+    resetButton.addEventListener('click', () => this.clickResetHandler());
+    this.containerFilters.append(
+      nameContainer,
+      clothContainer,
+      priceContainer,
+      colorsContainer,
+      sizeContainer,
+      dressContainer,
+      applyButton,
+      resetButton
+    );
+  }
+
+  clickApplyHandler() {
+    const selectedSizeFilter: NodeListOf<HTMLDivElement> = this.containerFilters.querySelectorAll(
+      `.${catalogStyle.active_sizebox}`
+    );
+    const sizeSelect: string[] = [];
+    selectedSizeFilter.forEach((size) => {
+      if (size.dataset.size !== undefined) {
+        sizeSelect.push(size.dataset.size);
+      }
+    });
+    const selectedColorFilter: NodeListOf<HTMLDivElement> = this.containerFilters.querySelectorAll(
+      `.${catalogStyle.active_colorBox}`
+    );
+    const colorSelect: string[] = [];
+    selectedColorFilter.forEach((color) => {
+      if (color.dataset.color !== undefined) {
+        colorSelect.push(color.dataset.color);
+      }
+    });
+    const minPriceRange: HTMLInputElement | null = this.containerFilters.querySelector(
+      `.${catalogStyle.min_range_select}`
+    );
+    const maxPriceRange: HTMLInputElement | null = this.containerFilters.querySelector(
+      `.${catalogStyle.max_range_select}`
+    );
+    const min: number = Number(minPriceRange?.value);
+    const max: number = Number(maxPriceRange?.value);
+    const clothSelect: string[] = [];
+    const selectedClothFilter: NodeListOf<HTMLDivElement> = this.containerFilters.querySelectorAll(
+      `.${catalogStyle.active_cloth}.${catalogStyle.filter_cloth_line}`
+    );
+    selectedClothFilter.forEach((cloth) => {
+      if (cloth.dataset.clothName !== undefined) {
+        clothSelect.push(cloth.dataset.clothName);
+      }
+    });
+    const brandSelect: string[] = [];
+    const selectedBrandFilter: NodeListOf<HTMLDivElement> = this.containerFilters.querySelectorAll(
+      `.${catalogStyle.active_brand}.${catalogStyle.filter_style_line}`
+    );
+    selectedBrandFilter.forEach((brand) => {
+      if (brand.dataset.styleName !== undefined) {
+        brandSelect.push(brand.dataset.styleName);
+      }
+    });
+    console.log(sizeSelect);
+    console.log(colorSelect);
+    console.log(brandSelect);
+    console.log(clothSelect);
+    console.log(min);
+    console.log(max);
+    //запрос с данными на фильтрацию
+  }
+
+  clickResetHandler() {
+    const selectedSizeFilter = this.containerFilters.querySelectorAll(`.${catalogStyle.active_sizebox}`);
+    selectedSizeFilter.forEach((size) => {
+      size.classList.remove(catalogStyle.active_sizebox);
+    });
+    const selectedColorFilter = this.containerFilters.querySelectorAll(`.${catalogStyle.active_colorBox}`);
+    selectedColorFilter.forEach((size) => {
+      size.classList.remove(catalogStyle.active_colorBox);
+    });
+    const minPriceElem: HTMLDivElement | null = this.containerFilters.querySelector(`.${catalogStyle.price_min_value}`);
+    const maxPriceElem: HTMLDivElement | null = this.containerFilters.querySelector(`.${catalogStyle.price_max_value}`);
+    if (minPriceElem !== null && maxPriceElem !== null) {
+      minPriceElem.textContent = '0$';
+      maxPriceElem.textContent = '1000$';
+    }
+    const minPriceRange: HTMLInputElement | null = this.containerFilters.querySelector(
+      `.${catalogStyle.min_range_select}`
+    );
+    const maxPriceRange: HTMLInputElement | null = this.containerFilters.querySelector(
+      `.${catalogStyle.max_range_select}`
+    );
+    const priceProgress: HTMLDivElement | null = this.containerFilters.querySelector(`.${catalogStyle.price_progress}`);
+    if (minPriceRange !== null && maxPriceRange !== null && priceProgress !== null) {
+      minPriceRange.value = '0';
+      maxPriceRange.value = '1000';
+      this.changeProgressHandler(minPriceRange, maxPriceRange, priceProgress);
+    }
+    const selectedClothFilter = this.containerFilters.querySelectorAll(`.${catalogStyle.active_cloth}`);
+    selectedClothFilter.forEach((cloth) => {
+      cloth.classList.remove(catalogStyle.active_cloth);
+    });
+    const selectedBrandFilter = this.containerFilters.querySelectorAll(`.${catalogStyle.active_brand}`);
+    selectedBrandFilter.forEach((brand) => {
+      brand.classList.remove(catalogStyle.active_brand);
+    });
+  }
+
+  createFilterPrice() {
+    const priceContainer: HTMLDivElement = new Component('div', [
+      catalogStyle.filter_price_container,
+    ]).getElement<HTMLDivElement>();
+    const priceNameContainer: HTMLDivElement = new Component('div', [
+      catalogStyle.filter_price_name_container,
+    ]).getElement<HTMLDivElement>();
+    const priceName = new Component('span', [catalogStyle.filter_price_name]).getElement<HTMLSpanElement>();
+    priceName.textContent = 'Price';
+    const showPrice = new Component('img', [catalogStyle.filter_price_show]).getElement<HTMLImageElement>();
+    priceNameContainer.append(priceName, showPrice);
+    showPrice.src = unshow;
+    showPrice.addEventListener('click', () => this.clickShowHandler(showPrice, priceSelectContainer));
+    const priceSelectContainer: HTMLDivElement = new Component('div', [
+      catalogStyle.price_select_container,
+    ]).getElement<HTMLDivElement>();
+    const priceRangeContainer: HTMLDivElement = new Component('div', [
+      catalogStyle.price_range_container,
+    ]).getElement<HTMLDivElement>();
+    const priceValues: HTMLDivElement = new Component('div', [catalogStyle.price_values]).getElement<HTMLDivElement>();
+    const priceMinValue: HTMLSpanElement = new Component('div', [
+      catalogStyle.price_min_value,
+    ]).getElement<HTMLDivElement>();
+    const priceMaxValue: HTMLSpanElement = new Component('div', [
+      catalogStyle.price_max_value,
+    ]).getElement<HTMLDivElement>();
+    priceValues.append(priceMinValue, priceMaxValue);
+    const priceProgress: HTMLDivElement = new Component('div', [
+      catalogStyle.price_progress,
+    ]).getElement<HTMLDivElement>();
+    const minSelect: HTMLInputElement = new Component('input', [
+      catalogStyle.min_range_select,
+    ]).getElement<HTMLInputElement>();
+    minSelect.type = 'range';
+    minSelect.min = '0';
+    minSelect.max = '1000';
+    minSelect.step = '5';
+    minSelect.value = '0';
+    priceMinValue.textContent = `0$`;
+    const maxSelect: HTMLInputElement = new Component('input', [
+      catalogStyle.max_range_select,
+    ]).getElement<HTMLInputElement>();
+    maxSelect.type = 'range';
+    maxSelect.min = '0';
+    maxSelect.max = '1000';
+    maxSelect.step = '5';
+    maxSelect.value = '1000';
+    priceMaxValue.textContent = `1000$`;
+    priceProgress.style.background = `linear-gradient(to right, #dadae5 ${minSelect.value}% , #000000 ${minSelect.value}% , #000000 ${maxSelect.value}%, #dadae5 ${maxSelect.value}%)`;
+    minSelect.addEventListener('input', () =>
+      this.inputMinInputHandler(minSelect, maxSelect, priceProgress, priceMinValue, priceMaxValue)
+    );
+    maxSelect.addEventListener('input', () =>
+      this.inputMaxInputHandler(minSelect, maxSelect, priceProgress, priceMinValue, priceMaxValue)
+    );
+    priceRangeContainer.append(priceProgress, minSelect, maxSelect);
+    priceSelectContainer.append(priceRangeContainer, priceValues);
+    priceContainer.append(priceNameContainer, priceSelectContainer);
+    return priceContainer;
+  }
+
+  changeProgressHandler(minInput: HTMLInputElement, maxInput: HTMLInputElement, progress: HTMLDivElement) {
+    const lengthRange: number = Number(minInput.max);
+    const min: number = (Number(minInput.value) / lengthRange) * 100;
+    const max: number = (Number(maxInput.value) / lengthRange) * 100;
+    progress.style.background = `linear-gradient(to right, #dadae5 ${min}% , #000000 ${min}% , #000000 ${max}%, #dadae5 ${max}%)`;
+  }
+
+  inputMinInputHandler(
+    minInput: HTMLInputElement,
+    maxInput: HTMLInputElement,
+    progress: HTMLDivElement,
+    min: HTMLSpanElement,
+    max: HTMLSpanElement
+  ) {
+    if (Number(maxInput.value) < Number(minInput.value)) {
+      maxInput.value = minInput.value;
+    }
+    this.changeProgressHandler(minInput, maxInput, progress);
+    min.textContent = minInput.value + `$`;
+    max.textContent = maxInput.value + `$`;
+  }
+
+  inputMaxInputHandler(
+    minInput: HTMLInputElement,
+    maxInput: HTMLInputElement,
+    progress: HTMLDivElement,
+    min: HTMLSpanElement,
+    max: HTMLSpanElement
+  ) {
+    if (Number(maxInput.value) < Number(minInput.value)) {
+      minInput.value = maxInput.value;
+    }
+    this.changeProgressHandler(minInput, maxInput, progress);
+    min.textContent = minInput.value + `$`;
+    max.textContent = maxInput.value + `$`;
+  }
+
+  createFilterCloth() {
     const clothContainer: HTMLDivElement = new Component('div', [
       catalogStyle.filter_cloth_container,
     ]).getElement<HTMLDivElement>();
@@ -223,22 +440,15 @@ export class CatalogPage extends Page {
       clothLineSymbol.textContent = '>';
       clothLine.dataset.clothName = dress.toLowerCase();
       clothLineContainer.append(clothLine, clothLineSymbol);
+      clothContainer.addEventListener('click', (event) =>
+        this.clickFilterElemHandler(event, catalogStyle.active_cloth)
+      );
       clothContainer.append(clothLineContainer);
     });
-    const priceContainer: HTMLDivElement = new Component('div', [
-      catalogStyle.filter_price_container,
-    ]).getElement<HTMLDivElement>();
-    const priceNameContainer: HTMLDivElement = new Component('div', [
-      catalogStyle.filter_price_name_container,
-    ]).getElement<HTMLDivElement>();
-    const priceName = new Component('span', [catalogStyle.filter_price_name]).getElement<HTMLSpanElement>();
-    priceName.textContent = 'Price';
-    const showPrice = new Component('img', [catalogStyle.filter_price_show]).getElement<HTMLImageElement>();
-    priceNameContainer.append(priceName, showPrice);
-    showPrice.src = unshow;
-    priceContainer.append(priceNameContainer);
-    const colorsContainer: HTMLDivElement = this.createFilterColors();
-    const sizeContainer: HTMLDivElement = this.createFilterSizes();
+    return clothContainer;
+  }
+
+  createFilterDress() {
     const dressContainer: HTMLDivElement = new Component('div', [
       catalogStyle.filter_dress_container,
     ]).getElement<HTMLDivElement>();
@@ -248,16 +458,16 @@ export class CatalogPage extends Page {
     const nameDress: HTMLSpanElement = new Component('span', [
       catalogStyle.filter_dress_name,
     ]).getElement<HTMLSpanElement>();
-    nameDress.textContent = 'Dress Style';
+    nameDress.textContent = 'Dress Brand';
     const showDress = new Component('img', [catalogStyle.filter_dress_show]).getElement<HTMLImageElement>();
     showDress.src = unshow;
     const dressSelectedContainer: HTMLDivElement = new Component('div', [
       catalogStyle.filter_select_dress,
     ]).getElement<HTMLDivElement>();
-    DressStyles.forEach((styleName) => {
-      const styleLineContainer: HTMLAnchorElement = new Component('a', [
+    DressBrand.forEach((styleName) => {
+      const styleLineContainer: HTMLDivElement = new Component('div', [
         catalogStyle.filter_style_line_container,
-      ]).getElement<HTMLAnchorElement>();
+      ]).getElement<HTMLDivElement>();
       const styleLine: HTMLDivElement = new Component('div', [
         catalogStyle.filter_style_line,
       ]).getElement<HTMLDivElement>();
@@ -268,29 +478,15 @@ export class CatalogPage extends Page {
       styleLineSymbol.textContent = '>';
       styleLine.dataset.styleName = styleName;
       styleLineContainer.append(styleLine, styleLineSymbol);
+      styleLineContainer.addEventListener('click', (event) =>
+        this.clickFilterElemHandler(event, catalogStyle.active_brand)
+      );
       dressSelectedContainer.append(styleLineContainer);
     });
     showDress.addEventListener('click', () => this.clickShowHandler(showDress, dressSelectedContainer));
     dressNameContainer.append(nameDress, showDress);
     dressContainer.append(dressNameContainer, dressSelectedContainer);
-    const applyButton: HTMLButtonElement = new Component('button', [
-      catalogStyle.filter_button_apply,
-    ]).getElement<HTMLButtonElement>();
-    applyButton.textContent = 'Apply Filter';
-    const resetButton: HTMLButtonElement = new Component('button', [
-      catalogStyle.filter_button_reset,
-    ]).getElement<HTMLButtonElement>();
-    resetButton.textContent = 'Reset Filter';
-    this.containerFilters.append(
-      nameContainer,
-      clothContainer,
-      priceContainer,
-      colorsContainer,
-      sizeContainer,
-      dressContainer,
-      applyButton,
-      resetButton
-    );
+    return dressContainer;
   }
 
   createFilterColors() {
@@ -318,6 +514,7 @@ export class CatalogPage extends Page {
       ]).getElement<HTMLDivElement>();
       colorBox.dataset.color = color;
       colorBox.style.backgroundColor = color;
+      colorBox.addEventListener('click', (event) => this.clickFilterColorHandler(event, catalogStyle.active_colorBox));
       colorBox.append(checkBox);
       colorSelectContainer.append(colorBox);
     });
@@ -349,12 +546,23 @@ export class CatalogPage extends Page {
       ]).getElement<HTMLButtonElement>();
       sizeBox.textContent = size.at(0)?.toUpperCase() + size.slice(1);
       sizeBox.dataset.size = size;
+      sizeBox.addEventListener('click', (event) => this.clickFilterElemHandler(event, catalogStyle.active_sizebox));
       sizeSelectContainer.append(sizeBox);
     });
     showSize.addEventListener('click', () => this.clickShowHandler(showSize, sizeSelectContainer));
     sizeNameContainer.append(nameSize, showSize);
     sizeContainer.append(sizeNameContainer, sizeSelectContainer);
     return sizeContainer;
+  }
+
+  clickFilterElemHandler(event: Event, className: string) {
+    const elem: HTMLButtonElement = <HTMLButtonElement>event.target;
+    elem.classList.toggle(className);
+  }
+
+  clickFilterColorHandler(event: Event, className: string) {
+    const elem: HTMLButtonElement = <HTMLButtonElement>event.currentTarget;
+    elem.classList.toggle(className);
   }
 
   clickShowHandler(showElem: HTMLImageElement, container: HTMLDivElement) {
