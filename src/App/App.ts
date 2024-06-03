@@ -10,6 +10,7 @@ import NotFoundPage from './Page/NotFoundPage/NotFoundPage';
 import LoginPage from './Page/Login/Login';
 import { autoLoginCLient, isLogged } from './utils/api/Client';
 import RegistrationPage from './Page/Registration/Registration';
+import { CatalogPage } from './Page/CatalogPage/Catalog';
 import ProductPage from './Page/Product/Product';
 import * as style from './app.module.scss';
 
@@ -84,9 +85,8 @@ export class App {
       {
         pagePath: PagePath.PRODUCTS,
         render: () => {
-          const products: HTMLDivElement = new Component('div', ['products-page']).getElement<HTMLDivElement>();
-          this.container.replaceChildren();
-          this.contentContainer.append(products);
+          const productPage = new CatalogPage();
+          this.setPage(productPage);
         },
       },
       {
