@@ -213,6 +213,10 @@ export class CatalogPage extends Page {
     return card;
   }
 
+  // clickCardHandler() {
+
+  // }
+
   createFilterContainer() {
     const nameContainer: HTMLDivElement = new Component('div', [
       catalogStyle.name_filter_container,

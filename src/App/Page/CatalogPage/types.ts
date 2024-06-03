@@ -1,4 +1,6 @@
 export interface CardItem {
+  // id: string;
+  // category: string;
   name: string;
   description: string;
   priceWithDiscount: string;
