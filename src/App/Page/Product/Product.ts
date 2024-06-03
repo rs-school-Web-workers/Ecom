@@ -24,6 +24,9 @@ export default class ProductPage extends Page {
   modal: ProductModal | null;
   info: { name?: string; definition?: string } = {};
   variants: Variant[] = [];
+  index = 0;
+  products: IProduct[] = [];
+  colors: string[] = [];
 
   imagesContainer: HTMLDivElement = new Component('div', [style.img_container]).getElement<HTMLDivElement>();
 
@@ -42,27 +45,43 @@ export default class ProductPage extends Page {
   async initProductInfo(id: string) {
     try {
       const response = await getProductById(id);
-      console.log(response);
+      this.colors = [response.body.masterData.current.masterVariant]
+        .concat(response.body.masterData.current.variants)
+        .map((el) => {
+          return el.attributes?.filter((attr) => attr.name === 'color')[0].value[0];
+        });
       this.info = {
         name: response.body.masterData.current.name['en-US'],
         definition: response.body.masterData.current.description!['en-US'],
       };
-      this.variants = response.body.masterData.current.variants
-        .concat([response.body.masterData.current.masterVariant])
+      this.variants = [response.body.masterData.current.masterVariant]
+        .concat(response.body.masterData.current.variants)
         .map((el) => {
           const res: Variant = {
             color: el.attributes?.filter((attr) => attr.name === 'color')[0].value[0],
-            price: (el.prices![0].value.centAmount / 100).toFixed(2),
+            price: el.prices![0].value.centAmount,
             brand: el.attributes?.filter((attr) => attr.name === 'brand')[0].value,
             images: el.images?.map((img) => img.url) ?? [],
             sizes: el.attributes?.filter((attr) => attr.name === 'size')[0].value,
           };
           if (el.prices![0].discounted) {
-            res.discounted = (el.prices![0].discounted?.value.centAmount / 100).toFixed(2);
+            res.discounted = el.prices![0].discounted?.value.centAmount;
           }
           return res;
         });
       console.log(this.info, this.variants);
+      this.products = this.variants.map((el) => {
+        return {
+          name: this.info.name!,
+          price: el.price.toString(),
+          discount: el.discounted ? ((el.discounted * 100) / el.price).toString() : '',
+          definition: this.info.definition!,
+          colors: [el.color],
+          sizes: el.sizes,
+          images: el.images,
+          brand: el.brand,
+        };
+      });
       this.product = data.products[0];
     } catch {
       this.router.navigate(PagePath.NOT_FOUND);
@@ -75,8 +94,8 @@ export default class ProductPage extends Page {
   initPage() {
     this.createPathChain();
     this.createProductDetail();
-    if (this.product !== null) {
-      this.modal = new ProductModal('product', this.product?.images);
+    if (this.variants[this.index] != null) {
+      this.modal = new ProductModal('product', this.variants[this.index].images);
       this.container?.append(this.modal.background);
     }
   }
@@ -111,15 +130,15 @@ export default class ProductPage extends Page {
       style.arrow,
       style.arrow_bottom,
     ]).getElement<HTMLDivElement>();
-    if (this.product !== null && this.product.images.length > 3) {
+    if (this.variants[this.index] != null && this.variants[this.index].images.length > 3) {
       scrollContainer.append(arrow_left, arrow_right);
     }
-    mainImgContainer.src = `https://raw.githubusercontent.com/rolling-scopes-school/rss-puzzle-data/main/images/${this.product?.images[0]}`;
-    this.product?.images.forEach((img, index) => {
+    mainImgContainer.src = `${this.variants[this.index].images[0]}`;
+    this.variants[this.index].images.forEach((img, index) => {
       const imgContainer: HTMLDivElement = new Component('div', [style.small_img]).getElement<HTMLDivElement>();
       const imgBox: HTMLImageElement = new Component('img', []).getElement<HTMLImageElement>();
       imgBox.dataset.slide = (index + 1).toString();
-      imgBox.src = `https://raw.githubusercontent.com/rolling-scopes-school/rss-puzzle-data/main/images/${img}`;
+      imgBox.src = `${img}`;
       imgBox.addEventListener('click', (event: Event) =>
         this.clickSmallImgHandler(event, mainImgContainer, smallImgsContainer)
       );
@@ -150,6 +169,7 @@ export default class ProductPage extends Page {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const swiper: any = document.querySelector('.swiper-container');
     console.log(elem.dataset.slide);
+    console.log(swiper.swiper);
     swiper.swiper.slideTo(elem.dataset.slide);
     const pastActiveElem: HTMLButtonElement | null = container.querySelector(`.${style.active_small_img}`);
     mainImg.src = elem.src;
@@ -173,7 +193,7 @@ export default class ProductPage extends Page {
   }
 
   clickNextHandler(slide: HTMLDivElement, container: HTMLDivElement) {
-    const amount: number | undefined = this.product?.images.length;
+    const amount: number | undefined = this.variants[this.index].images.length;
     const sizeWindow = document.documentElement.getBoundingClientRect().width;
     if (amount !== undefined && this.currentSlide < amount - 3) {
       this.currentSlide++;
@@ -206,14 +226,14 @@ export default class ProductPage extends Page {
   createProductDefinition() {
     const container: HTMLDivElement = new Component('div', [style.product_definition]).getElement<HTMLDivElement>();
     const name: HTMLHeadingElement = new Component('h3', [style.product_name]).getElement<HTMLHeadingElement>();
-    if (this.product !== null) {
-      name.textContent = this.product?.name;
+    if (this.variants[this.index] != null) {
+      name.textContent = this.info.name ?? 'error';
       const brand: HTMLDivElement = new Component('div', [style.product_brand]).getElement<HTMLDivElement>();
-      brand.textContent = this.product?.brand;
+      brand.textContent = this.variants[this.index].brand;
       const textDefinition: HTMLDivElement = new Component('div', [
         style.product_text_definition,
       ]).getElement<HTMLDivElement>();
-      textDefinition.textContent = this.product.definition;
+      textDefinition.textContent = this.info.definition ?? 'error';
       container.append(
         name,
         brand,
@@ -236,14 +256,14 @@ export default class ProductPage extends Page {
       style.discount_container,
     ]).getElement<HTMLDivElement>();
     const discountText: HTMLSpanElement = new Component('div', [style.discount_text]).getElement<HTMLDivElement>();
-    if (this.product?.discount !== '') {
-      allPrice.textContent = `$${this.product?.price}`;
-      currentPrice.textContent = `$${Number(this.product?.price) * (1 - Number(this.product?.discount))}`;
-      discountText.textContent = `-${Number(this.product?.discount) * 100}%`;
+    if (this.variants[this.index].discounted) {
+      allPrice.textContent = `$${(Number(this.variants[this.index].price) / 100).toFixed(2)}`;
+      currentPrice.textContent = `$${(Number(this.variants[this.index].discounted) / 100).toFixed(2)}`;
+      discountText.textContent = `-${Math.ceil(Number(this.variants[this.index].discounted) * 100) / Number(this.variants[this.index].price)}%`;
       discountContainer.append(discountText);
       this.priceContainer.append(currentPrice, allPrice, discountContainer);
     } else {
-      currentPrice.textContent = `$${this.product.price}`;
+      currentPrice.textContent = `$${this.variants[this.index].price}`;
       this.priceContainer.append(currentPrice);
     }
   }
@@ -293,10 +313,11 @@ export default class ProductPage extends Page {
     const colorSelectContainer: HTMLDivElement = new Component('div', [
       style.product_select_colors,
     ]).getElement<HTMLDivElement>();
-    this.product?.colors.forEach((color, index) => {
+    this.colors.forEach((color, index) => {
       const colorBox: HTMLDivElement = new Component('div', [style.color_box]).getElement<HTMLDivElement>();
       const checkBox: HTMLDivElement = new Component('div', [style.color_checkbox]).getElement<HTMLDivElement>();
       colorBox.dataset.color = color;
+      colorBox.dataset.id = index.toString();
       colorBox.style.backgroundColor = color;
       colorBox.append(checkBox);
       if (index === 0) {
@@ -316,6 +337,7 @@ export default class ProductPage extends Page {
       pastActiveElem.classList.remove(style.active_colorBox);
     }
     elem.classList.add(style.active_colorBox);
+    this.index = Number(elem.dataset.id);
     this.renderProductPage();
   }
 
@@ -326,7 +348,7 @@ export default class ProductPage extends Page {
     const sizeSelectContainer: HTMLDivElement = new Component('div', [
       style.product_select_sizes,
     ]).getElement<HTMLDivElement>();
-    this.product?.sizes.forEach((size, index) => {
+    this.variants[this.index].sizes.forEach((size, index) => {
       const sizeBox: HTMLButtonElement = new Component('button', [style.size_box]).getElement<HTMLButtonElement>();
       sizeBox.textContent = size.at(0)?.toUpperCase() + size.slice(1);
       sizeBox.dataset.size = size;

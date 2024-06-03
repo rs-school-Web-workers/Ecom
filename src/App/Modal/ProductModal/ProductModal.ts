@@ -40,7 +40,7 @@ export class ProductModal extends Modal {
     const sliderWrapper: HTMLDivElement = new Component('div', ['swiper-wrapper']).getElement<HTMLDivElement>();
     this.imgArray.forEach((img) => {
       const slide: HTMLDivElement = new Component('div', ['swiper-slide']).getElement<HTMLDivElement>();
-      slide.style.backgroundImage = `url(https://raw.githubusercontent.com/rolling-scopes-school/rss-puzzle-data/main/images/${img})`;
+      slide.style.backgroundImage = `url(${img})`;
       sliderWrapper.append(slide);
     });
     const sliderPagination: HTMLDivElement = new Component('div', ['swiper-pagination']).getElement<HTMLDivElement>();

@@ -1,7 +1,5 @@
 import { BaseAddress, ByProjectKeyRequestBuilder, createApiBuilderFromCtpClient } from '@commercetools/platform-sdk';
 import { ClientBuilder, TokenCache, TokenStore } from '@commercetools/sdk-client-v2';
-import type { SearchSorting } from '@commercetools/platform-sdk';
-import type { QueryExpression, SearchQuery } from './types.ts';
 
 let inst: ByProjectKeyRequestBuilder | null = null;
 const projectKey = process.env.PROJECT_KEY;
@@ -266,29 +264,28 @@ export async function getCategorieById(id: string) {
  * @returns
  */
 export async function searchProducts(
-  query?: SearchQuery | QueryExpression,
-  sort?: SearchSorting[],
-  limit?: number,
+  text: string,
+  filter?: string[],
+  sort?: string[],
+  facet?: string[],
+  limit: number = 0,
   offset?: number
 ) {
   if (inst === null) {
     throw new Error('client instance not found');
   }
-  /* return await inst
-    .products()
-    .search()
-    .post({
-      body: { query, sort, limit, offset },
-    })
-    .execute(); */
   return await inst
     .productProjections()
     .search()
     .get({
       queryArgs: {
+        'text.en': text,
+        fuzzy: true,
+        filter,
+        sort,
+        facet,
         limit,
         offset,
-        facet: ['variants.attributes.size', 'variants.price.centAmount'],
       },
     })
     .execute();
