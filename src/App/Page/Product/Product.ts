@@ -39,33 +39,22 @@ export default class ProductPage extends Page {
       name: response.body.masterData.current.name['en-US'],
       definition: response.body.masterData.current.description!['en-US'],
     };
-    this.variants = response.body.masterData.current.variants.map((el) => {
-      const res: Variant = {
-        color: el.attributes?.filter((attr) => attr.name === 'color')[0].value[0],
-        price: (el.prices![0].value.centAmount / 100).toFixed(2),
-        brand: el.attributes?.filter((attr) => attr.name === 'brand')[0].value,
-        images: el.images?.map((img) => img.url) ?? [],
-      };
-      if (el.prices![0].discounted) {
-        res.discounted = (el.prices![0].discounted?.value.centAmount / 100).toFixed(2);
-      }
-      return res;
-    });
-
-    // запрос информации продукта
-    /* "name": "One Life Graphic T-shirt",
-      "price": "300",
-      "discount": "0.4",
-      "definition": "This graphic t-shirt which is perfect for any occasion. Crafted from a soft and breathable fabric, it offers superior comfort and style.",
-      "colors": ["#4F4631", "#314F4A", "#31344F"],
-      "sizes": ["small", "medium", "large", "x-large"],
-      "images": [
-        "level1/deerhunt.jpg",
-        "level1/deerlake.jpg",
-        "level1/abbati2.jpg",
-        "level1/firework.jpg",
-        "level1/firework.jpg"
-      ] */
+    this.variants = response.body.masterData.current.variants
+      .concat([response.body.masterData.current.masterVariant])
+      .map((el) => {
+        const res: Variant = {
+          color: el.attributes?.filter((attr) => attr.name === 'color')[0].value[0],
+          price: (el.prices![0].value.centAmount / 100).toFixed(2),
+          brand: el.attributes?.filter((attr) => attr.name === 'brand')[0].value,
+          images: el.images?.map((img) => img.url) ?? [],
+          sizes: el.attributes?.filter((attr) => attr.name === 'size')[0].value,
+        };
+        if (el.prices![0].discounted) {
+          res.discounted = (el.prices![0].discounted?.value.centAmount / 100).toFixed(2);
+        }
+        return res;
+      });
+    console.log(this.info, this.variants);
     this.product = data.products[0];
   }
 

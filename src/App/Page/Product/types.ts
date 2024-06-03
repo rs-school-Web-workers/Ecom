@@ -8,4 +8,11 @@ export interface IProduct {
   images: string[];
 }
 
-export type Variant = { color: string; price: string; discounted?: string; brand: string; images: string[] };
+export type Variant = {
+  color: string;
+  price: string;
+  discounted?: string;
+  brand: string;
+  images: string[];
+  sizes: string[];
+};
