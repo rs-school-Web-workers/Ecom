@@ -6,4 +6,5 @@ export interface IProduct {
   colors: string[];
   sizes: string[];
   images: string[];
+  brand: string;
 }

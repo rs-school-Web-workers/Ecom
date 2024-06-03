@@ -20,11 +20,20 @@ export default class ProductPage extends Page {
 
   modal: ProductModal | null;
 
+  imagesContainer: HTMLDivElement | null;
+
+  sizeContainer: HTMLDivElement | null;
+
+  priceContainer: HTMLDivElement | null;
+
   constructor(router: Router) {
     super([style.product]);
     this.router = router;
     this.product = null;
     this.modal = null;
+    this.imagesContainer = null;
+    this.sizeContainer = null;
+    this.priceContainer = null;
     this.initProductInfo();
     this.initPage();
   }
@@ -43,10 +52,16 @@ export default class ProductPage extends Page {
     }
   }
 
+  renderProductPage() {
+    this.sizeContainer = this.createSizeSelect();
+    this.imagesContainer = this.createImgContainer();
+    this.priceContainer = this.createPriceContainer();
+  }
   createProductDetail() {
     const container: HTMLDivElement = new Component('div', [style.product_detail]).getElement<HTMLDivElement>();
     const infoContainer: HTMLDivElement = new Component('div', [style.product_info]).getElement<HTMLDivElement>();
-    infoContainer.append(this.createImgContainer(), this.createProductDefinition());
+    this.imagesContainer = this.createImgContainer();
+    infoContainer.append(this.imagesContainer, this.createProductDefinition());
     container.append(this.createPathChain(), infoContainer);
     this.container?.append(container);
   }
@@ -166,16 +181,21 @@ export default class ProductPage extends Page {
     const name: HTMLHeadingElement = new Component('h3', [style.product_name]).getElement<HTMLHeadingElement>();
     isNull(this.product);
     name.textContent = this.product?.name;
+    const brand: HTMLDivElement = new Component('div', [style.product_brand]).getElement<HTMLDivElement>();
+    brand.textContent = this.product?.brand;
     const textDefinition: HTMLDivElement = new Component('div', [
       style.product_text_definition,
     ]).getElement<HTMLDivElement>();
     textDefinition.textContent = this.product.definition;
+    this.sizeContainer = this.createSizeSelect();
+    this.priceContainer = this.createPriceContainer();
     container.append(
       name,
-      this.createPriceContainer(),
+      brand,
+      this.priceContainer,
       textDefinition,
       this.createColorsSelect(),
-      this.createSizeSelect(),
+      this.sizeContainer,
       this.createCartButton()
     );
     return container;
@@ -266,9 +286,11 @@ export default class ProductPage extends Page {
   clickColorHandler(event: Event, container: HTMLDivElement) {
     const elem: HTMLDivElement = <HTMLDivElement>event.currentTarget;
     const pastActiveElem: HTMLButtonElement | null = container.querySelector(`.${style.active_colorBox}`);
-    isNull(pastActiveElem);
-    pastActiveElem.classList.remove(style.active_colorBox);
+    if (pastActiveElem !== null) {
+      pastActiveElem.classList.remove(style.active_colorBox);
+    }
     elem.classList.add(style.active_colorBox);
+    this.renderProductPage();
   }
 
   createSizeSelect() {
