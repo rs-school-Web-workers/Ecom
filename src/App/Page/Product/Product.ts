@@ -25,20 +25,17 @@ export default class ProductPage extends Page {
   info: { name?: string; definition?: string } = {};
   variants: Variant[] = [];
 
-  imagesContainer: HTMLDivElement | null;
+  imagesContainer: HTMLDivElement = new Component('div', [style.img_container]).getElement<HTMLDivElement>();
 
-  sizeContainer: HTMLDivElement | null;
+  sizeContainer: HTMLDivElement = new Component('div', [style.product_sizes]).getElement<HTMLDivElement>();
 
-  priceContainer: HTMLDivElement | null;
+  priceContainer: HTMLDivElement = new Component('div', [style.price_container]).getElement<HTMLDivElement>();
 
   constructor(router: Router, id: string) {
     super([style.product]);
     this.router = router;
     this.product = null;
     this.modal = null;
-    this.imagesContainer = null;
-    this.sizeContainer = null;
-    this.priceContainer = null;
     this.initProductInfo(id).then(() => this.initPage());
   }
 
@@ -85,21 +82,20 @@ export default class ProductPage extends Page {
   }
 
   renderProductPage() {
-    this.sizeContainer = this.createSizeSelect();
-    this.imagesContainer = this.createImgContainer();
-    this.priceContainer = this.createPriceContainer();
+    this.createSizeSelect();
+    this.createImgContainer();
+    this.createPriceContainer();
   }
   createProductDetail() {
     const container: HTMLDivElement = new Component('div', [style.product_detail]).getElement<HTMLDivElement>();
     const infoContainer: HTMLDivElement = new Component('div', [style.product_info]).getElement<HTMLDivElement>();
-    this.imagesContainer = this.createImgContainer();
     infoContainer.append(this.imagesContainer, this.createProductDefinition());
     container.append(this.createPathChain(), infoContainer);
     this.container?.append(container);
   }
 
   createImgContainer() {
-    const container: HTMLDivElement = new Component('div', [style.img_container]).getElement<HTMLDivElement>();
+    this.imagesContainer.replaceChildren();
     const smallImgsContainer: HTMLDivElement = new Component('div', [
       style.small_imgs_container,
     ]).getElement<HTMLDivElement>();
@@ -142,8 +138,7 @@ export default class ProductPage extends Page {
     });
     mainImgContainer.addEventListener('click', () => this.clickMainImgHandler());
     scrollContainer.append(smallImgsContainer);
-    container.append(scrollContainer, mainImgContainer);
-    return container;
+    this.imagesContainer.append(scrollContainer, mainImgContainer);
   }
 
   clickMainImgHandler() {
@@ -219,8 +214,6 @@ export default class ProductPage extends Page {
         style.product_text_definition,
       ]).getElement<HTMLDivElement>();
       textDefinition.textContent = this.product.definition;
-      this.sizeContainer = this.createSizeSelect();
-      this.priceContainer = this.createPriceContainer();
       container.append(
         name,
         brand,
@@ -230,12 +223,13 @@ export default class ProductPage extends Page {
         this.sizeContainer,
         this.createCartButton()
       );
+      this.renderProductPage();
     }
     return container;
   }
 
   createPriceContainer() {
-    const container: HTMLDivElement = new Component('div', [style.price_container]).getElement<HTMLDivElement>();
+    this.priceContainer.replaceChildren();
     const currentPrice: HTMLDivElement = new Component('div', [style.current_price]).getElement<HTMLDivElement>();
     const allPrice: HTMLDivElement = new Component('div', [style.all_price]).getElement<HTMLDivElement>();
     const discountContainer: HTMLDivElement = new Component('div', [
@@ -247,12 +241,11 @@ export default class ProductPage extends Page {
       currentPrice.textContent = `$${Number(this.product?.price) * (1 - Number(this.product?.discount))}`;
       discountText.textContent = `-${Number(this.product?.discount) * 100}%`;
       discountContainer.append(discountText);
-      container.append(currentPrice, allPrice, discountContainer);
+      this.priceContainer.append(currentPrice, allPrice, discountContainer);
     } else {
       currentPrice.textContent = `$${this.product.price}`;
-      container.append(currentPrice);
+      this.priceContainer.append(currentPrice);
     }
-    return container;
   }
 
   createPathChain() {
@@ -327,7 +320,7 @@ export default class ProductPage extends Page {
   }
 
   createSizeSelect() {
-    const sizesContainer: HTMLDivElement = new Component('div', [style.product_sizes]).getElement<HTMLDivElement>();
+    this.sizeContainer.replaceChildren();
     const sizeName: HTMLDivElement = new Component('div', [style.product_sizes_name]).getElement<HTMLDivElement>();
     sizeName.textContent = 'Choose Size';
     const sizeSelectContainer: HTMLDivElement = new Component('div', [
@@ -340,11 +333,10 @@ export default class ProductPage extends Page {
       if (index === 0) {
         sizeBox.classList.add(style.active_sizebox);
       }
-      sizeBox.addEventListener('click', (event) => this.clickSizeboxHandler(event, sizesContainer));
+      sizeBox.addEventListener('click', (event) => this.clickSizeboxHandler(event, this.sizeContainer));
       sizeSelectContainer.append(sizeBox);
     });
-    sizesContainer.append(sizeName, sizeSelectContainer);
-    return sizesContainer;
+    this.sizeContainer.append(sizeName, sizeSelectContainer);
   }
 
   clickSizeboxHandler(event: Event, container: HTMLDivElement) {
