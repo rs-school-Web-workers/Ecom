@@ -1,6 +1,6 @@
 import { BaseAddress, ByProjectKeyRequestBuilder, createApiBuilderFromCtpClient } from '@commercetools/platform-sdk';
 import { ClientBuilder, TokenCache, TokenStore } from '@commercetools/sdk-client-v2';
-import type { /* SearchQuery, */ SearchSorting } from '@commercetools/platform-sdk';
+import type { SearchSorting } from '@commercetools/platform-sdk';
 import type { QueryExpression, SearchQuery } from './types.ts';
 
 let inst: ByProjectKeyRequestBuilder | null = null;
@@ -95,9 +95,9 @@ export function autoLoginCLient() {
   inst
     .get()
     .execute()
-    .catch((err) => {
-      inst = null;
-      throw err;
+    .catch(() => {
+      destroyClient();
+      getAnonClient();
     });
   return inst;
 }
@@ -274,11 +274,22 @@ export async function searchProducts(
   if (inst === null) {
     throw new Error('client instance not found');
   }
-  return await inst
+  /* return await inst
     .products()
     .search()
     .post({
       body: { query, sort, limit, offset },
+    })
+    .execute(); */
+  return await inst
+    .productProjections()
+    .search()
+    .get({
+      queryArgs: {
+        limit,
+        offset,
+        facet: ['variants.attributes.size', 'variants.price.centAmount'],
+      },
     })
     .execute();
 }

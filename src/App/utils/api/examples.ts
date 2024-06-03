@@ -48,7 +48,7 @@ const show = (key: any) => {
     show(elems1.body.results[0]); */
 
     // sort: [{ field: 'name', language: 'en-US', order: 'asc' }]
-    const elems2 = await searchProducts(
+    /*  const elems2 = await searchProducts(
       // поиск по незаконченному имени
       // new QueryBuilder().wildcard('name', 'en-US', 'eco*', true).get()
       // сложный запрос
@@ -65,7 +65,7 @@ const show = (key: any) => {
     );
     for (let i = 0; i < elems2.body.results.length; i++) {
       show((await getProductById(elems2.body.results[i].id)).body.masterData.current.name);
-    }
+    } */
 
     /* const elems4 = await getUserProfile();
     show(elems4); */
