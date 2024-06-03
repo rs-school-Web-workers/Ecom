@@ -285,18 +285,19 @@ export default class ProductPage extends Page {
       if (index === 0) {
         sizeBox.classList.add(style.active_sizebox);
       }
+      sizeBox.addEventListener('click', (event) => this.clickSizeboxHandler(event, sizesContainer));
       sizeSelectContainer.append(sizeBox);
     });
-    sizesContainer.addEventListener('click', (event) => this.clickSizeboxHandler(event, sizesContainer));
     sizesContainer.append(sizeName, sizeSelectContainer);
     return sizesContainer;
   }
 
   clickSizeboxHandler(event: Event, container: HTMLDivElement) {
-    const elem: HTMLButtonElement = <HTMLButtonElement>event.target;
+    const elem: HTMLButtonElement = <HTMLButtonElement>event.currentTarget;
     const pastActiveElem: HTMLButtonElement | null = container.querySelector(`.${style.active_sizebox}`);
-    isNull(pastActiveElem);
-    pastActiveElem.classList.remove(style.active_sizebox);
+    if (pastActiveElem !== null) {
+      pastActiveElem.classList.remove(style.active_sizebox);
+    }
     elem.classList.add(style.active_sizebox);
   }
 
