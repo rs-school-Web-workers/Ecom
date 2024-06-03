@@ -65,7 +65,13 @@ export const dresses = ['T-shirt', 'Trunks', 'Jackets', 'Pants', 'Shirts', 'Spor
 
 export const sortValue = ['asc', 'des', 'alph'];
 
-export const styles = ['Casual', 'Formal', 'Gym', 'All'];
+export const styles = ['Casual', 'Formal', 'Gym'];
+
+export const styleSubcategory = [
+  ['T-shirt', 'Trunks'],
+  ['Jackets', 'Pants', 'Shirts'],
+  ['Sport-suits', 'For-swimming'],
+];
 
 export const defaultStateFilter: ICatalogFilter = {
   colors: [],

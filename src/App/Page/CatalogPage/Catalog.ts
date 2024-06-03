@@ -8,11 +8,11 @@ import {
   DressSizes,
   DressBrand,
   DressColors,
-  dresses,
   sortValue,
   ICatalogFilter,
   defaultStateFilter,
   styles,
+  styleSubcategory,
 } from './types';
 const {
   catalog,
@@ -454,7 +454,7 @@ export class CatalogPage extends Page {
       catalogStyle.filter_style_dress,
     ]).getElement<HTMLDivElement>();
     showDress.addEventListener('click', () => this.clickShowHandler(showDress, clothSelectedContainer));
-    styles.forEach((style) => {
+    styles.forEach((style, index) => {
       const clothStyleLineContainer: HTMLDivElement = new Component('div', [
         catalogStyle.filter_style_cloth_line_container,
       ]).getElement<HTMLDivElement>();
@@ -476,7 +476,7 @@ export class CatalogPage extends Page {
       clothStyleLineSymbol.addEventListener('click', () =>
         this.clickShowHandler(clothStyleLineSymbol, selectStyleClothContainer)
       );
-      dresses.forEach((dress) => {
+      styleSubcategory[index].forEach((dress) => {
         const clothLineContainer: HTMLDivElement = new Component('div', [
           catalogStyle.filter_cloth_line_container,
         ]).getElement<HTMLDivElement>();
@@ -493,13 +493,50 @@ export class CatalogPage extends Page {
         selectStyleClothContainer.append(clothLineContainer);
       });
       selectStyleClothContainer.addEventListener('click', (event) => {
-        this.clickFilterElemHandler(event, catalogStyle.active_cloth);
+        this.clickFilterClothHandler(event, catalogStyle.active_cloth);
       });
       clothStyleLineContainer.append(clothStyleNameLineContainer, selectStyleClothContainer);
       clothSelectedContainer.append(clothStyleLineContainer);
     });
+    const clothStyleLineContainer: HTMLDivElement = new Component('div', [
+      catalogStyle.filter_style_cloth_line_container,
+    ]).getElement<HTMLDivElement>();
+    const clothStyleNameLineContainer: HTMLDivElement = new Component('div', [
+      catalogStyle.filter_cloth_line_name_container,
+    ]).getElement<HTMLDivElement>();
+    const clothStyleLine: HTMLDivElement = new Component('div', [
+      catalogStyle.filter_style_name,
+      catalogStyle.filter_cloth_line,
+    ]).getElement<HTMLDivElement>();
+    clothStyleLine.textContent = 'All';
+    clothStyleLine.dataset.clothName = `All`;
+    clothStyleNameLineContainer.append(clothStyleLine);
+    clothStyleNameLineContainer.addEventListener('click', (event) =>
+      this.clickFilterClothHandler(event, catalogStyle.active_cloth)
+    );
+    clothStyleLineContainer.append(clothStyleNameLineContainer);
+    clothSelectedContainer.append(clothStyleLineContainer);
     clothContainer.append(clothNameContainer, clothSelectedContainer);
     return clothContainer;
+  }
+
+  clickFilterClothHandler(event: Event, className: string) {
+    const elem: HTMLButtonElement = <HTMLButtonElement>event.target;
+    elem.classList.toggle(className);
+    const currentCategory = elem.dataset.clothName?.split('_')[0];
+    const selectedClothFilter: NodeListOf<HTMLDivElement> = this.containerFilters.querySelectorAll(
+      `.${catalogStyle.active_cloth}.${catalogStyle.filter_cloth_line}`
+    );
+    selectedClothFilter.forEach((cloth) => {
+      if (cloth.dataset.clothName !== undefined) {
+        const clothCategory = cloth.dataset.clothName?.split('_')[0];
+        console.log(currentCategory);
+        console.log(clothCategory);
+        if (currentCategory !== clothCategory) {
+          cloth.classList.remove(catalogStyle.active_cloth);
+        }
+      }
+    });
   }
 
   createFilterDress() {

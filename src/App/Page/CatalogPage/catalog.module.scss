@@ -493,3 +493,14 @@ input[type="range"]:active::-webkit-slider-thumb{
 .active_brand {
   color: black;
 }
+
+.filter_style_name.filter_cloth_line {
+  font-family: Satoshi;
+  font-weight: 700;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.filter_style_name.filter_cloth_line.active_cloth {
+  font-size: 20px;
+}
