@@ -6,6 +6,9 @@ import data from '../../../assets/data/products.json';
 import { IProduct } from './types';
 import { isNull } from '../../utils/base-methods';
 import { ProductModal } from '../../Modal/ProductModal/ProductModal';
+import { getProductById } from '../../utils/api/Client';
+import type { Variant } from './types';
+import { PagePath } from '../../Router/types';
 
 export default class ProductPage extends Page {
   router: Router;
@@ -19,6 +22,8 @@ export default class ProductPage extends Page {
   startTouch: number = 0;
 
   modal: ProductModal | null;
+  info: { name?: string; definition?: string } = {};
+  variants: Variant[] = [];
 
   imagesContainer: HTMLDivElement | null;
 
@@ -26,7 +31,7 @@ export default class ProductPage extends Page {
 
   priceContainer: HTMLDivElement | null;
 
-  constructor(router: Router) {
+  constructor(router: Router, id: string) {
     super([style.product]);
     this.router = router;
     this.product = null;
@@ -34,13 +39,40 @@ export default class ProductPage extends Page {
     this.imagesContainer = null;
     this.sizeContainer = null;
     this.priceContainer = null;
-    this.initProductInfo();
-    this.initPage();
+    this.initProductInfo(id).then(() => this.initPage());
   }
 
-  initProductInfo() {
-    // запрос информации продукта
-    this.product = data.products[0];
+  async initProductInfo(id: string) {
+    try {
+      const response = await getProductById(id);
+      console.log(response);
+      this.info = {
+        name: response.body.masterData.current.name['en-US'],
+        definition: response.body.masterData.current.description!['en-US'],
+      };
+      this.variants = response.body.masterData.current.variants
+        .concat([response.body.masterData.current.masterVariant])
+        .map((el) => {
+          const res: Variant = {
+            color: el.attributes?.filter((attr) => attr.name === 'color')[0].value[0],
+            price: (el.prices![0].value.centAmount / 100).toFixed(2),
+            brand: el.attributes?.filter((attr) => attr.name === 'brand')[0].value,
+            images: el.images?.map((img) => img.url) ?? [],
+            sizes: el.attributes?.filter((attr) => attr.name === 'size')[0].value,
+          };
+          if (el.prices![0].discounted) {
+            res.discounted = (el.prices![0].discounted?.value.centAmount / 100).toFixed(2);
+          }
+          return res;
+        });
+      console.log(this.info, this.variants);
+      this.product = data.products[0];
+    } catch {
+      this.router.navigate(PagePath.NOT_FOUND);
+      this.router.renderPageView(PagePath.NOT_FOUND);
+    }
+    // const response = await getProductById(id);
+    // console.log(response);
   }
 
   initPage() {
@@ -179,25 +211,26 @@ export default class ProductPage extends Page {
   createProductDefinition() {
     const container: HTMLDivElement = new Component('div', [style.product_definition]).getElement<HTMLDivElement>();
     const name: HTMLHeadingElement = new Component('h3', [style.product_name]).getElement<HTMLHeadingElement>();
-    isNull(this.product);
-    name.textContent = this.product?.name;
-    const brand: HTMLDivElement = new Component('div', [style.product_brand]).getElement<HTMLDivElement>();
-    brand.textContent = this.product?.brand;
-    const textDefinition: HTMLDivElement = new Component('div', [
-      style.product_text_definition,
-    ]).getElement<HTMLDivElement>();
-    textDefinition.textContent = this.product.definition;
-    this.sizeContainer = this.createSizeSelect();
-    this.priceContainer = this.createPriceContainer();
-    container.append(
-      name,
-      brand,
-      this.priceContainer,
-      textDefinition,
-      this.createColorsSelect(),
-      this.sizeContainer,
-      this.createCartButton()
-    );
+    if (this.product !== null) {
+      name.textContent = this.product?.name;
+      const brand: HTMLDivElement = new Component('div', [style.product_brand]).getElement<HTMLDivElement>();
+      brand.textContent = this.product?.brand;
+      const textDefinition: HTMLDivElement = new Component('div', [
+        style.product_text_definition,
+      ]).getElement<HTMLDivElement>();
+      textDefinition.textContent = this.product.definition;
+      this.sizeContainer = this.createSizeSelect();
+      this.priceContainer = this.createPriceContainer();
+      container.append(
+        name,
+        brand,
+        this.priceContainer,
+        textDefinition,
+        this.createColorsSelect(),
+        this.sizeContainer,
+        this.createCartButton()
+      );
+    }
     return container;
   }
 
