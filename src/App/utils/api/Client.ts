@@ -11,6 +11,13 @@ const clientSecret = process.env.CLIENT_SECRET;
 const clientScopes = process.env.CLIENT_SCOPES;
 const scopes = clientScopes?.split(' ');
 
+const projectKeyAnon = process.env.ANON_PROJECT_KEY;
+const regionAnon = process.env.ANON_REGION;
+const clientIdAnon = process.env.ANON_CLIENT_ID;
+const clientSecretAnon = process.env.ANON_CLIENT_SECRET;
+const clientScopesAnon = process.env.ANON_SCOPES;
+const scopesAnon = clientScopesAnon?.split(' ');
+
 class MyTokenCache implements TokenCache {
   myCaсhe: TokenStore = {
     token: '',
@@ -34,7 +41,7 @@ export function getClient() {
 }
 
 export function getAnonClient() {
-  if (!projectKey || !region || !clientId || !clientSecret || !clientScopes) {
+  if (!projectKeyAnon || !regionAnon || !clientIdAnon || !clientSecretAnon || !clientScopesAnon) {
     throw new Error('Env parameters are undefined');
   }
   if (inst !== null) {
@@ -42,20 +49,20 @@ export function getAnonClient() {
   }
   const ctpClient = new ClientBuilder()
     .withAnonymousSessionFlow({
-      host: `https://auth.${region}.gcp.commercetools.com`,
-      projectKey,
+      host: `https://auth.${regionAnon}.gcp.commercetools.com`,
+      projectKey: projectKeyAnon,
       credentials: {
-        clientId,
-        clientSecret,
+        clientId: clientIdAnon,
+        clientSecret: clientSecretAnon,
       },
-      scopes,
+      scopes: scopesAnon,
       fetch,
     })
     .withHttpMiddleware({
-      host: `https://api.${region}.gcp.commercetools.com`,
+      host: `https://api.${regionAnon}.gcp.commercetools.com`,
       fetch,
     });
-  inst = createApiBuilderFromCtpClient(ctpClient.build()).withProjectKey({ projectKey });
+  inst = createApiBuilderFromCtpClient(ctpClient.build()).withProjectKey({ projectKey: projectKeyAnon });
   return inst;
 }
 

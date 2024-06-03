@@ -6,6 +6,7 @@ import data from '../../../assets/data/products.json';
 import { IProduct } from './types';
 import { isNull } from '../../utils/base-methods';
 import { ProductModal } from '../../Modal/ProductModal/ProductModal';
+import { getProductById } from '../../utils/api/Client';
 
 export default class ProductPage extends Page {
   router: Router;
@@ -20,17 +21,31 @@ export default class ProductPage extends Page {
 
   modal: ProductModal | null;
 
-  constructor(router: Router) {
+  constructor(router: Router, id: string) {
     super([style.product]);
     this.router = router;
     this.product = null;
     this.modal = null;
-    this.initProductInfo();
-    this.initPage();
+    this.initProductInfo(id).then(() => this.initPage());
   }
 
-  initProductInfo() {
+  async initProductInfo(id: string) {
+    const response = await getProductById(id);
+    console.log(response);
     // запрос информации продукта
+    /* "name": "One Life Graphic T-shirt",
+      "price": "300",
+      "discount": "0.4",
+      "definition": "This graphic t-shirt which is perfect for any occasion. Crafted from a soft and breathable fabric, it offers superior comfort and style.",
+      "colors": ["#4F4631", "#314F4A", "#31344F"],
+      "sizes": ["small", "medium", "large", "x-large"],
+      "images": [
+        "level1/deerhunt.jpg",
+        "level1/deerlake.jpg",
+        "level1/abbati2.jpg",
+        "level1/firework.jpg",
+        "level1/firework.jpg"
+      ] */
     this.product = data.products[0];
   }
 
