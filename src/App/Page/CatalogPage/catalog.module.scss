@@ -126,10 +126,17 @@ $border-bottom-color: rgb(0, 0, 0, 0.1);
 .filter_size_name,
 .filter_price_name,
 .filter_dress_name,
-.filter_color_name {
+.filter_color_name,
+.filter_cloth_name {
   font-family: Satoshi;
   font-weight: 700;
   font-size: 20px;
+}
+
+.filter_style_name {
+  font-family: Satoshi;
+  font-weight: 700;
+  font-size: 18px;
 }
 
 .filter_select_colors {
@@ -188,6 +195,12 @@ $border-bottom-color: rgb(0, 0, 0, 0.1);
   border-bottom: 1px solid $border-bottom-color;
 }
 
+.filter_style_cloth_line_container {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
 .name_filter_container {
   display: flex;
   justify-content: space-between;
@@ -207,7 +220,7 @@ $border-bottom-color: rgb(0, 0, 0, 0.1);
   cursor: pointer;
 }
 
-.filter_style_line_container,
+.filter_brand_line_container,
 .filter_cloth_line_container {
   display: flex;
   justify-content: space-between;
@@ -215,15 +228,17 @@ $border-bottom-color: rgb(0, 0, 0, 0.1);
   cursor: pointer;
 }
 
-.filter_style_line_container:hover,
+.filter_brand_line_container:hover,
 .filter_cloth_line_container:hover {
   color: black;
 }
 
 .filter_style_line,
+.filter_brand_line,
 .filter_cloth_line,
 .filter_cloth_line_symbol,
-.filter_style_line_symbol {
+.filter_style_line_symbol,
+.filter_brand_line_symbol {
   font-family: Satoshi;
   font-weight: 400;
   font-size: 16px;
@@ -241,6 +256,20 @@ $border-bottom-color: rgb(0, 0, 0, 0.1);
   gap: 15px;
 }
 
+.filter_style_dress {
+  display: none;
+  flex-direction: column;
+  gap: 15px;
+  padding-left: 10px;
+}
+
+.filter_style_cloth_dress {
+  display: none;
+  flex-direction: column;
+  gap: 15px;
+  padding-left: 20px;
+}
+
 .filter_cloth_container {
   padding-bottom: 20px;
   border-bottom: 1px solid $border-bottom-color;
@@ -249,7 +278,9 @@ $border-bottom-color: rgb(0, 0, 0, 0.1);
 .filter_color_show,
 .filter_size_show,
 .filter_dress_show,
-.filter_price_show {
+.filter_price_show,
+.filter_cloth_show,
+.filter_style_show {
   width: 15px;
   cursor: pointer;
 }
@@ -257,7 +288,9 @@ $border-bottom-color: rgb(0, 0, 0, 0.1);
 .filter_colors_name_container,
 .filter_size_name_container,
 .filter_dress_name_container,
-.filter_price_name_container {
+.filter_price_name_container,
+.filter_cloth_name_container,
+.filter_cloth_line_name_container {
   display: flex;
   justify-content: space-between;
 }

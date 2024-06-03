@@ -3,7 +3,17 @@ import mydata from '../../../assets/data/mydata.json';
 import Page from '../Page';
 import * as catalogStyle from './catalog.module.scss';
 import loki from '../../../assets/imgs/loki.webp';
-import { CardItem, DreassSizes, DressBrand, DressColors, dresses, sortValue } from './types';
+import {
+  CardItem,
+  DressSizes,
+  DressBrand,
+  DressColors,
+  dresses,
+  sortValue,
+  ICatalogFilter,
+  defaultStateFilter,
+  styles,
+} from './types';
 const {
   catalog,
   catalogContainer,
@@ -38,6 +48,7 @@ export class CatalogPage extends Page {
   contentContainer: HTMLDivElement = new Component('div', [
     catalogStyle.products_content_container,
   ]).getElement<HTMLDivElement>();
+  stateFilter: ICatalogFilter = Object.create(defaultStateFilter); // хранит состояние активных фильтров
 
   constructor() {
     super([catalog]);
@@ -243,6 +254,7 @@ export class CatalogPage extends Page {
         sizeSelect.push(size.dataset.size);
       }
     });
+    this.stateFilter.sizes = sizeSelect;
     const selectedColorFilter: NodeListOf<HTMLDivElement> = this.containerFilters.querySelectorAll(
       `.${catalogStyle.active_colorBox}`
     );
@@ -252,14 +264,15 @@ export class CatalogPage extends Page {
         colorSelect.push(color.dataset.color);
       }
     });
+    this.stateFilter.colors = colorSelect;
     const minPriceRange: HTMLInputElement | null = this.containerFilters.querySelector(
       `.${catalogStyle.min_range_select}`
     );
     const maxPriceRange: HTMLInputElement | null = this.containerFilters.querySelector(
       `.${catalogStyle.max_range_select}`
     );
-    const min: number = Number(minPriceRange?.value);
-    const max: number = Number(maxPriceRange?.value);
+    this.stateFilter.min = Number(minPriceRange?.value);
+    this.stateFilter.max = Number(maxPriceRange?.value);
     const clothSelect: string[] = [];
     const selectedClothFilter: NodeListOf<HTMLDivElement> = this.containerFilters.querySelectorAll(
       `.${catalogStyle.active_cloth}.${catalogStyle.filter_cloth_line}`
@@ -269,21 +282,21 @@ export class CatalogPage extends Page {
         clothSelect.push(cloth.dataset.clothName);
       }
     });
+    this.stateFilter.cloth = clothSelect;
     const brandSelect: string[] = [];
     const selectedBrandFilter: NodeListOf<HTMLDivElement> = this.containerFilters.querySelectorAll(
       `.${catalogStyle.active_brand}.${catalogStyle.filter_style_line}`
     );
     selectedBrandFilter.forEach((brand) => {
-      if (brand.dataset.styleName !== undefined) {
-        brandSelect.push(brand.dataset.styleName);
+      if (brand.dataset.brandName !== undefined) {
+        brandSelect.push(brand.dataset.brandName);
       }
     });
+    this.stateFilter.brand = brandSelect;
     console.log(sizeSelect);
     console.log(colorSelect);
     console.log(brandSelect);
     console.log(clothSelect);
-    console.log(min);
-    console.log(max);
     //запрос с данными на фильтрацию
   }
 
@@ -322,6 +335,7 @@ export class CatalogPage extends Page {
     selectedBrandFilter.forEach((brand) => {
       brand.classList.remove(catalogStyle.active_brand);
     });
+    this.stateFilter = Object.create(defaultStateFilter);
   }
 
   createFilterPrice() {
@@ -426,25 +440,65 @@ export class CatalogPage extends Page {
     const clothContainer: HTMLDivElement = new Component('div', [
       catalogStyle.filter_cloth_container,
     ]).getElement<HTMLDivElement>();
-    dresses.forEach((dress) => {
-      const clothLineContainer: HTMLDivElement = new Component('div', [
-        catalogStyle.filter_cloth_line_container,
+    const clothNameContainer: HTMLDivElement = new Component('div', [
+      catalogStyle.filter_cloth_name_container,
+    ]).getElement<HTMLDivElement>();
+    const nameDress: HTMLSpanElement = new Component('span', [
+      catalogStyle.filter_cloth_name,
+    ]).getElement<HTMLSpanElement>();
+    nameDress.textContent = 'Dress Style';
+    const showDress = new Component('img', [catalogStyle.filter_cloth_show]).getElement<HTMLImageElement>();
+    showDress.src = unshow;
+    clothNameContainer.append(nameDress, showDress);
+    const clothSelectedContainer: HTMLDivElement = new Component('div', [
+      catalogStyle.filter_style_dress,
+    ]).getElement<HTMLDivElement>();
+    showDress.addEventListener('click', () => this.clickShowHandler(showDress, clothSelectedContainer));
+    styles.forEach((style) => {
+      const clothStyleLineContainer: HTMLDivElement = new Component('div', [
+        catalogStyle.filter_style_cloth_line_container,
       ]).getElement<HTMLDivElement>();
-      const clothLine: HTMLDivElement = new Component('div', [
-        catalogStyle.filter_cloth_line,
+      const clothStyleNameLineContainer: HTMLDivElement = new Component('div', [
+        catalogStyle.filter_cloth_line_name_container,
       ]).getElement<HTMLDivElement>();
-      clothLine.textContent = dress;
-      const clothLineSymbol: HTMLDivElement = new Component('div', [
-        catalogStyle.filter_cloth_line_symbol,
+      const clothStyleLine: HTMLDivElement = new Component('div', [
+        catalogStyle.filter_style_name,
       ]).getElement<HTMLDivElement>();
-      clothLineSymbol.textContent = '>';
-      clothLine.dataset.clothName = dress.toLowerCase();
-      clothLineContainer.append(clothLine, clothLineSymbol);
-      clothContainer.addEventListener('click', (event) =>
-        this.clickFilterElemHandler(event, catalogStyle.active_cloth)
+      clothStyleLine.textContent = style;
+      const clothStyleLineSymbol: HTMLImageElement = new Component('img', [
+        catalogStyle.filter_style_show,
+      ]).getElement<HTMLImageElement>();
+      clothStyleLineSymbol.src = unshow;
+      clothStyleNameLineContainer.append(clothStyleLine, clothStyleLineSymbol);
+      const selectStyleClothContainer: HTMLDivElement = new Component('div', [
+        catalogStyle.filter_style_cloth_dress,
+      ]).getElement<HTMLDivElement>();
+      clothStyleLineSymbol.addEventListener('click', () =>
+        this.clickShowHandler(clothStyleLineSymbol, selectStyleClothContainer)
       );
-      clothContainer.append(clothLineContainer);
+      dresses.forEach((dress) => {
+        const clothLineContainer: HTMLDivElement = new Component('div', [
+          catalogStyle.filter_cloth_line_container,
+        ]).getElement<HTMLDivElement>();
+        const clothLine: HTMLDivElement = new Component('div', [
+          catalogStyle.filter_cloth_line,
+        ]).getElement<HTMLDivElement>();
+        clothLine.textContent = dress;
+        clothLine.dataset.clothName = `${style}_${dress}`;
+        const clothLineSymbol: HTMLDivElement = new Component('div', [
+          catalogStyle.filter_cloth_line_symbol,
+        ]).getElement<HTMLDivElement>();
+        clothLineSymbol.textContent = '>';
+        clothLineContainer.append(clothLine, clothLineSymbol);
+        selectStyleClothContainer.append(clothLineContainer);
+      });
+      selectStyleClothContainer.addEventListener('click', (event) => {
+        this.clickFilterElemHandler(event, catalogStyle.active_cloth);
+      });
+      clothStyleLineContainer.append(clothStyleNameLineContainer, selectStyleClothContainer);
+      clothSelectedContainer.append(clothStyleLineContainer);
     });
+    clothContainer.append(clothNameContainer, clothSelectedContainer);
     return clothContainer;
   }
 
@@ -464,19 +518,19 @@ export class CatalogPage extends Page {
     const dressSelectedContainer: HTMLDivElement = new Component('div', [
       catalogStyle.filter_select_dress,
     ]).getElement<HTMLDivElement>();
-    DressBrand.forEach((styleName) => {
+    DressBrand.forEach((brandName) => {
       const styleLineContainer: HTMLDivElement = new Component('div', [
-        catalogStyle.filter_style_line_container,
+        catalogStyle.filter_brand_line_container,
       ]).getElement<HTMLDivElement>();
       const styleLine: HTMLDivElement = new Component('div', [
-        catalogStyle.filter_style_line,
+        catalogStyle.filter_brand_line,
       ]).getElement<HTMLDivElement>();
-      styleLine.textContent = styleName;
+      styleLine.textContent = brandName;
       const styleLineSymbol: HTMLDivElement = new Component('div', [
-        catalogStyle.filter_style_line_symbol,
+        catalogStyle.filter_brand_line_symbol,
       ]).getElement<HTMLDivElement>();
       styleLineSymbol.textContent = '>';
-      styleLine.dataset.styleName = styleName;
+      styleLine.dataset.brandName = brandName;
       styleLineContainer.append(styleLine, styleLineSymbol);
       styleLineContainer.addEventListener('click', (event) =>
         this.clickFilterElemHandler(event, catalogStyle.active_brand)
@@ -540,7 +594,7 @@ export class CatalogPage extends Page {
     const sizeSelectContainer: HTMLDivElement = new Component('div', [
       catalogStyle.filter_select_sizes,
     ]).getElement<HTMLDivElement>();
-    DreassSizes.forEach((size) => {
+    DressSizes.forEach((size) => {
       const sizeBox: HTMLButtonElement = new Component('button', [
         catalogStyle.filter_size_box,
       ]).getElement<HTMLButtonElement>();
