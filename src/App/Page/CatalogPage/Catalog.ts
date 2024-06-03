@@ -5,14 +5,13 @@ import * as catalogStyle from './catalog.module.scss';
 import loki from '../../../assets/imgs/loki.webp';
 import {
   CardItem,
-  DressSizes,
-  DressBrand,
-  DressColors,
   sortValue,
   ICatalogFilter,
   defaultStateFilter,
   styles,
   styleSubcategory,
+  IFilterVariant,
+  defaultVariantFilter,
 } from './types';
 const {
   catalog,
@@ -49,6 +48,7 @@ export class CatalogPage extends Page {
     catalogStyle.products_content_container,
   ]).getElement<HTMLDivElement>();
   stateFilter: ICatalogFilter = Object.create(defaultStateFilter); // хранит состояние активных фильтров
+  variantFilter: IFilterVariant = defaultVariantFilter;
 
   constructor() {
     super([catalog]);
@@ -64,6 +64,10 @@ export class CatalogPage extends Page {
     this.modalBackground.addEventListener('click', (event) => this.clickCloseFilterLogoHandler(event));
     this.contentContainer.append(this.containerFilters, this.containerProducts);
     this.container?.append(this.searchContainer, this.contentContainer, this.modalBackground);
+  }
+
+  initFilterVariant() {
+    // инициализация значений критериеы фильтра
   }
 
   createHeaderCatalog() {
@@ -181,6 +185,7 @@ export class CatalogPage extends Page {
       this.listProductsContainer.append(card.getElement());
     });
   }
+
   createCard(data: CardItem) {
     const card = new Component('div', [catalog__card]);
     const imageCard = new Component('img', [catalog__cardImg]);
@@ -312,8 +317,8 @@ export class CatalogPage extends Page {
     const minPriceElem: HTMLDivElement | null = this.containerFilters.querySelector(`.${catalogStyle.price_min_value}`);
     const maxPriceElem: HTMLDivElement | null = this.containerFilters.querySelector(`.${catalogStyle.price_max_value}`);
     if (minPriceElem !== null && maxPriceElem !== null) {
-      minPriceElem.textContent = '0$';
-      maxPriceElem.textContent = '1000$';
+      minPriceElem.textContent = `${this.variantFilter.min}$`;
+      maxPriceElem.textContent = `${this.variantFilter.max}$`;
     }
     const minPriceRange: HTMLInputElement | null = this.containerFilters.querySelector(
       `.${catalogStyle.min_range_select}`
@@ -323,8 +328,8 @@ export class CatalogPage extends Page {
     );
     const priceProgress: HTMLDivElement | null = this.containerFilters.querySelector(`.${catalogStyle.price_progress}`);
     if (minPriceRange !== null && maxPriceRange !== null && priceProgress !== null) {
-      minPriceRange.value = '0';
-      maxPriceRange.value = '1000';
+      minPriceRange.value = `${this.variantFilter.min}`;
+      maxPriceRange.value = `${this.variantFilter.max}`;
       this.changeProgressHandler(minPriceRange, maxPriceRange, priceProgress);
     }
     const selectedClothFilter = this.containerFilters.querySelectorAll(`.${catalogStyle.active_cloth}`);
@@ -372,20 +377,20 @@ export class CatalogPage extends Page {
       catalogStyle.min_range_select,
     ]).getElement<HTMLInputElement>();
     minSelect.type = 'range';
-    minSelect.min = '0';
-    minSelect.max = '1000';
+    minSelect.min = `${this.variantFilter.min}`;
+    minSelect.max = `${this.variantFilter.max}`;
     minSelect.step = '5';
-    minSelect.value = '0';
-    priceMinValue.textContent = `0$`;
+    minSelect.value = `${this.variantFilter.min}`;
+    priceMinValue.textContent = `${this.variantFilter.min}$`;
     const maxSelect: HTMLInputElement = new Component('input', [
       catalogStyle.max_range_select,
     ]).getElement<HTMLInputElement>();
     maxSelect.type = 'range';
-    maxSelect.min = '0';
-    maxSelect.max = '1000';
+    maxSelect.min = `${this.variantFilter.min}`;
+    maxSelect.max = `${this.variantFilter.max}`;
     maxSelect.step = '5';
-    maxSelect.value = '1000';
-    priceMaxValue.textContent = `1000$`;
+    maxSelect.value = `${this.variantFilter.max}`;
+    priceMaxValue.textContent = `${this.variantFilter.max}$`;
     priceProgress.style.background = `linear-gradient(to right, #dadae5 ${minSelect.value}% , #000000 ${minSelect.value}% , #000000 ${maxSelect.value}%, #dadae5 ${maxSelect.value}%)`;
     minSelect.addEventListener('input', () =>
       this.inputMinInputHandler(minSelect, maxSelect, priceProgress, priceMinValue, priceMaxValue)
@@ -555,7 +560,7 @@ export class CatalogPage extends Page {
     const dressSelectedContainer: HTMLDivElement = new Component('div', [
       catalogStyle.filter_select_dress,
     ]).getElement<HTMLDivElement>();
-    DressBrand.forEach((brandName) => {
+    this.variantFilter.brand.forEach((brandName) => {
       const styleLineContainer: HTMLDivElement = new Component('div', [
         catalogStyle.filter_brand_line_container,
       ]).getElement<HTMLDivElement>();
@@ -596,7 +601,7 @@ export class CatalogPage extends Page {
     const colorSelectContainer: HTMLDivElement = new Component('div', [
       catalogStyle.filter_select_colors,
     ]).getElement<HTMLDivElement>();
-    DressColors.forEach((color) => {
+    this.variantFilter.colors.forEach((color) => {
       const colorBox: HTMLDivElement = new Component('div', [
         catalogStyle.filter_color_box,
       ]).getElement<HTMLDivElement>();
@@ -631,7 +636,7 @@ export class CatalogPage extends Page {
     const sizeSelectContainer: HTMLDivElement = new Component('div', [
       catalogStyle.filter_select_sizes,
     ]).getElement<HTMLDivElement>();
-    DressSizes.forEach((size) => {
+    this.variantFilter.sizes.forEach((size) => {
       const sizeBox: HTMLButtonElement = new Component('button', [
         catalogStyle.filter_size_box,
       ]).getElement<HTMLButtonElement>();
