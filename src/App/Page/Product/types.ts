@@ -11,8 +11,8 @@ export interface IProduct {
 
 export type Variant = {
   color: string;
-  price: string;
-  discounted?: string;
+  price: number;
+  discounted?: number;
   brand: string;
   images: string[];
   sizes: string[];
