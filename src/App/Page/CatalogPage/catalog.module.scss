@@ -1,0 +1,83 @@
+$mainColorFont: #000000;
+$cardColorPriceDiscount: rgba(0, 0, 0, 0.4);
+$gapCardList: 20px;
+$marginAfterImg: 16px;
+$gapWrapperAbout: 8px;
+$cardNameFontSize: 20px;
+$cardPriceFontSize: 24px;
+$cardDescriptionFontSize: 14px;
+$productTitleFontSize: 32px;
+.catalog {
+  display: flex;
+  gap: 20px;
+  padding: 24px 100px;
+  .catalogContainerFilters {
+    flex: 1 1 24%
+  }
+  .catalogContainerProducts {
+    flex: 1 1 76%;
+  }
+  .catalog__headerTitle {
+    color: $mainColorFont;
+    font-size: $productTitleFontSize;
+    font-family: Satoshi;
+    font-weight: 700;
+    margin-bottom: 16px;
+  }
+  .catalog__listProducts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $gapCardList;
+  }
+  .catalog__card {
+    display: flex;
+    flex-direction: column;
+    color: $mainColorFont;
+    max-width: 295px;
+    cursor: pointer;
+    border-radius: 20px;
+    padding-bottom: 10px;
+  }
+  .catalog__cardImg {
+    border-radius: 20px;
+    margin-bottom: $marginAfterImg;
+    width: 100%;
+    height: 298px;
+    object-fit: cover;
+  }
+  .catalog__cardName {
+    font-family: Satoshi;
+    font-weight: 700;
+    // flex: 1 0 auto;
+  }
+  .catalog__cardDescription {
+    font-family: Satoshi;
+    font-weight: 700;
+    font-size: $cardDescriptionFontSize;
+    color: $cardColorPriceDiscount;
+  }
+  .catalog__wrapperAbout {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: $gapWrapperAbout;
+    border-bottom-left-radius: 20px;
+    border-bottom-right-radius: 20px;
+    height: 100%;
+    padding: 0px 10px;
+    // background-color: yellow;
+  }
+  .catalog__cardPriceContainer {
+    display: inline-flex;
+    gap: 10px;
+  }
+  .catalog__cardPrice {
+    font-family: Satoshi;
+    font-weight: 700;
+    font-size: $cardPriceFontSize;
+  }
+  .catalog__cardPrice_dashedGrey {
+    color: $cardColorPriceDiscount;
+    text-decoration: line-through;
+  }
+}
