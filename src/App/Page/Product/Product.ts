@@ -25,11 +25,20 @@ export default class ProductPage extends Page {
   info: { name?: string; definition?: string } = {};
   variants: Variant[] = [];
 
+  imagesContainer: HTMLDivElement | null;
+
+  sizeContainer: HTMLDivElement | null;
+
+  priceContainer: HTMLDivElement | null;
+
   constructor(router: Router, id: string) {
     super([style.product]);
     this.router = router;
     this.product = null;
     this.modal = null;
+    this.imagesContainer = null;
+    this.sizeContainer = null;
+    this.priceContainer = null;
     this.initProductInfo(id).then(() => this.initPage());
   }
 
@@ -75,10 +84,16 @@ export default class ProductPage extends Page {
     }
   }
 
+  renderProductPage() {
+    this.sizeContainer = this.createSizeSelect();
+    this.imagesContainer = this.createImgContainer();
+    this.priceContainer = this.createPriceContainer();
+  }
   createProductDetail() {
     const container: HTMLDivElement = new Component('div', [style.product_detail]).getElement<HTMLDivElement>();
     const infoContainer: HTMLDivElement = new Component('div', [style.product_info]).getElement<HTMLDivElement>();
-    infoContainer.append(this.createImgContainer(), this.createProductDefinition());
+    this.imagesContainer = this.createImgContainer();
+    infoContainer.append(this.imagesContainer, this.createProductDefinition());
     container.append(this.createPathChain(), infoContainer);
     this.container?.append(container);
   }
@@ -198,16 +213,21 @@ export default class ProductPage extends Page {
     const name: HTMLHeadingElement = new Component('h3', [style.product_name]).getElement<HTMLHeadingElement>();
     if (this.product !== null) {
       name.textContent = this.product?.name;
+      const brand: HTMLDivElement = new Component('div', [style.product_brand]).getElement<HTMLDivElement>();
+      brand.textContent = this.product?.brand;
       const textDefinition: HTMLDivElement = new Component('div', [
         style.product_text_definition,
       ]).getElement<HTMLDivElement>();
       textDefinition.textContent = this.product.definition;
+      this.sizeContainer = this.createSizeSelect();
+      this.priceContainer = this.createPriceContainer();
       container.append(
         name,
-        this.createPriceContainer(),
+        brand,
+        this.priceContainer,
         textDefinition,
         this.createColorsSelect(),
-        this.createSizeSelect(),
+        this.sizeContainer,
         this.createCartButton()
       );
     }
@@ -299,9 +319,11 @@ export default class ProductPage extends Page {
   clickColorHandler(event: Event, container: HTMLDivElement) {
     const elem: HTMLDivElement = <HTMLDivElement>event.currentTarget;
     const pastActiveElem: HTMLButtonElement | null = container.querySelector(`.${style.active_colorBox}`);
-    isNull(pastActiveElem);
-    pastActiveElem.classList.remove(style.active_colorBox);
+    if (pastActiveElem !== null) {
+      pastActiveElem.classList.remove(style.active_colorBox);
+    }
     elem.classList.add(style.active_colorBox);
+    this.renderProductPage();
   }
 
   createSizeSelect() {
@@ -318,18 +340,19 @@ export default class ProductPage extends Page {
       if (index === 0) {
         sizeBox.classList.add(style.active_sizebox);
       }
+      sizeBox.addEventListener('click', (event) => this.clickSizeboxHandler(event, sizesContainer));
       sizeSelectContainer.append(sizeBox);
     });
-    sizesContainer.addEventListener('click', (event) => this.clickSizeboxHandler(event, sizesContainer));
     sizesContainer.append(sizeName, sizeSelectContainer);
     return sizesContainer;
   }
 
   clickSizeboxHandler(event: Event, container: HTMLDivElement) {
-    const elem: HTMLButtonElement = <HTMLButtonElement>event.target;
+    const elem: HTMLButtonElement = <HTMLButtonElement>event.currentTarget;
     const pastActiveElem: HTMLButtonElement | null = container.querySelector(`.${style.active_sizebox}`);
-    isNull(pastActiveElem);
-    pastActiveElem.classList.remove(style.active_sizebox);
+    if (pastActiveElem !== null) {
+      pastActiveElem.classList.remove(style.active_sizebox);
+    }
     elem.classList.add(style.active_sizebox);
   }
 
