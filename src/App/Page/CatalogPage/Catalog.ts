@@ -269,7 +269,9 @@ export class CatalogPage extends Page {
 
   createCard(data: CardItem) {
     const card = new Component('div', [catalog__card]);
+    const imageCardContainer = new Component('div', [catalogStyle.catalog__cardImgContainer]);
     const imageCard = new Component('img', [catalog__cardImg]);
+    imageCardContainer.setChildren(imageCard.getElement());
     imageCard.getElement<HTMLImageElement>().src = `${data.imageLink}`;
     imageCard.getElement<HTMLImageElement>().alt = data.name;
     const titleCard = new Component('h3', [catalog__cardName]);
@@ -279,6 +281,9 @@ export class CatalogPage extends Page {
     const priceWithDiscount = new Component('span', [catalog__cardPrice]);
     priceWithDiscount.setTextContent(`${centsToDollar(Number(data.priceWithDiscount))}$`);
     const priceWithoutDiscount = new Component('span', [catalog__cardPrice, catalog__cardPrice_dashedGrey]);
+    console.log(data.priceWithDiscount);
+    console.log(data.priceWithoutDiscount);
+    console.log(data);
     if (data.priceWithDiscount !== '') {
       priceWithoutDiscount.setTextContent(data.priceWithoutDiscount);
     }
@@ -290,7 +295,7 @@ export class CatalogPage extends Page {
       descriptionCard.getElement(),
       containerForCardPrices.getElement()
     );
-    card.setChildren(imageCard.getElement<HTMLImageElement>(), wrapperAboutCard.getElement());
+    card.setChildren(imageCardContainer.getElement<HTMLImageElement>(), wrapperAboutCard.getElement());
     card.getElement<HTMLElement>().addEventListener('click', () => {
       const path = `/products/${data.category}/${data.id}`;
       this.router.navigate(path);
