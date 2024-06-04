@@ -146,7 +146,11 @@ export class InputTextControl extends HTMLElement {
   resetState() {
     this.input.classList.remove('success');
   }
-
+  changeValidations(newValidation: Validation[]) {
+    this.validationArray = newValidation;
+    this.validateInput(newValidation);
+    this.editProperty();
+  }
   get value() {
     return this.input.value;
   }

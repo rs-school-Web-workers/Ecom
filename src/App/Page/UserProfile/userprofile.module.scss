@@ -27,7 +27,7 @@ $linkColor: #0f3dde;
     flex-direction: column;
     gap: 20px;
     overflow-y: scroll;
-    height: 340px;
+    height: 380px;
     scrollbar-width: thin;
   }
   .userProfile__wrapperCheckBox {
@@ -52,7 +52,7 @@ $linkColor: #0f3dde;
   .userProfile__addressesContainer {
     display: flex;
     flex-direction: column;
-    flex: 0 1 auto;
+    flex: 0 1 30%;
     padding: 0px 20px;
   }
   .userProfile__form {
@@ -88,12 +88,12 @@ $linkColor: #0f3dde;
   .userProfile__FormList {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    column-gap: 4px;
+    column-gap: 15px;
     border: 2px solid #D9D9D9;
     border-radius: 8px;
-    padding: 5px;
+    padding: 20px;
   }
-  select-element {
+  select-component {
     margin-top: 20.7px;
   }
   .userProfile__listBtn {

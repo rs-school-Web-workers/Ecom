@@ -1,5 +1,5 @@
 import { InputTextControl } from '../../components/inputText/inputTextComponent';
-import { getUserProfile, changeUserProfile } from '../../utils/api/Client';
+import { getUserProfile, changeUserProfile /*, changeAddress */ } from '../../utils/api/Client';
 import Component from '../../utils/base-component';
 import Page from '../Page';
 import {
@@ -15,9 +15,9 @@ import {
   surnameValidator,
 } from '../../utils/validationsInputText';
 import * as userProfileStyle from './userprofile.module.scss';
-import { createSelectView } from '../../components/select/selectComponent';
 import { countries } from '../../utils/countries';
-import { addressItem, getUserProfileData } from './types';
+import { addressItem, getUserProfileData /*, changeAddress */ } from './types';
+import { SelectNewControl } from '../../components/selectNew/selectNewComponent';
 
 const {
   userProfile,
@@ -236,7 +236,7 @@ export class UserProfilePage extends Page {
     const street = new InputTextControl('text', streetValidator, 'Street', 'Enter street', true);
     const streetNumber = new InputTextControl('text', [], 'Street Number', 'Enter street number', true);
     const city = new InputTextControl('text', cityValidator, 'City', 'Enter city', true);
-    const selectCountry = createSelectView(countries);
+    const selectCountry = new SelectNewControl(countries);
     const wrapperBillingAndShippingCheckbox = new Component('div', [userProfile__wrapperCheckBox]);
     const checkboxBilling = new Component('input', [userProfile__inputCheck, 'billing']).getElement<HTMLInputElement>();
     checkboxBilling.type = 'checkbox';
@@ -258,16 +258,15 @@ export class UserProfilePage extends Page {
     const buttonSubmit = new Component('button', [userProfile__formBtn, userProfile__listBtn]);
     buttonSubmit.setTextContent('Save Changes');
     buttonSubmit.getElement<HTMLButtonElement>().type = 'submit';
-    let postalCode;
+
+    /** Добавление данных */
+
     form.setId(id);
     street.value = streetNameValue;
     streetNumber.value = streetNumberValue;
     city.value = cityValue;
-    let selectValue: HTMLElement;
-    setTimeout(() => {
-      selectValue = selectCountry.shadowRoot?.querySelector('.placeholder') as HTMLElement;
-      selectValue.textContent = countryValue;
-    }, 100);
+    selectCountry.setValue(countryValue);
+    let postalCode: InputTextControl | undefined;
     switch (countryValue) {
       case 'BY':
         postalCode = new InputTextControl('text', postalCodeBelarusValidator, 'Postal Code', 'Enter postal code', true);
@@ -281,7 +280,28 @@ export class UserProfilePage extends Page {
     }
     if (postalCode) {
       postalCode.value = postalCodeValue;
+      form.getElement<HTMLFormElement>().addEventListener(
+        'selectNewValue',
+        (e) => {
+          const target = e as CustomEvent<{ value: string }>;
+          if (target.detail.value) {
+            switch (target.detail.value) {
+              case 'BY':
+                postalCode.changeValidations(postalCodeBelarusValidator);
+                break;
+              case 'RU':
+                postalCode.changeValidations(postalCodeRussiaValidator);
+                break;
+              case 'PL':
+                postalCode.changeValidations(postalCodePolandValidator);
+                break;
+            }
+          }
+        },
+        { capture: true, passive: true }
+      );
     }
+
     checkboxDefaultBilling.checked = defaultBillingValue;
     checkboxDefaultShipping.checked = defaultShippingValue;
     checkboxShipping.checked = shippingValue;
@@ -296,37 +316,20 @@ export class UserProfilePage extends Page {
       postalCode!,
       buttonSubmit.getElement<HTMLButtonElement>()
     );
+    buttonSubmit.getElement<HTMLButtonElement>().disabled = true;
     this.addressesList.setChildren(form.getElement<HTMLFormElement>());
+    form.getElement<HTMLFormElement>().addEventListener('submit', (e) => this.submitFormAddressesUserInformation(e));
   }
-  // showPostalCode(e: Event) {
-  //   const path = e.composedPath();
-  //   const selectElement = path.find((node) => {
-  //     if (node instanceof HTMLElement) {
-  //       if (node.className === 'placeholder selected') {
-  //         return node;
-  //       }
-  //     }
-  //   }) as HTMLElement;
-  //   path.forEach((node) => {
-  //     if (node instanceof HTMLElement) {
-  //       if (node === this.shippingList) {
-  //         if (this.sPostalCode) this.sPostalCode.remove();
-  //         switch (selectElement.getAttribute('shortName')) {
-  //           case 'BY':
-  //             this.sPostalCode = createInputView('text', postalCodeBelarusValidator, '', 'PostalCode');
-  //             this.shippingList.append(this.sPostalCode);
-  //             break;
-  //           case 'RU':
-  //             this.sPostalCode = createInputView('text', postalCodeRussiaValidator, '', 'PostalCode');
-  //             this.shippingList.append(this.sPostalCode);
-  //             break;
-  //           case 'PL':
-  //             this.sPostalCode = createInputView('text', postalCodePolandValidator, '', 'PostalCode');
-  //             this.shippingList.append(this.sPostalCode);
-  //             break;
-  //         }
-  //       }
-  //     }
-  //   });
-  // }
+  async submitFormAddressesUserInformation(event: Event) {
+    event.preventDefault();
+    const data = (await getUserProfile()).body;
+    console.log(data);
+    // await changeAddress;
+    // const { firstName, lastName, email, dateOfBirth } = {
+    //   firstName: this.nameInput.value,
+    //   lastName: this.surnameInput.value,
+    //   email: this.emailInput.value,
+    //   dateOfBirth: this.dateOfBirthday.value,
+    // };
+  }
 }
