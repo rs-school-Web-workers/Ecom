@@ -198,11 +198,31 @@ export class CatalogPage extends Page {
 
   async createCardList() {
     // тут еще доделать сортировку фильтрацию и поиск
-    const products = await getClient()
-      ?.productProjections()
-      .search()
-      .get({ queryArgs: { limit: 500, fuzzy: true, filter: [] } })
-      .execute();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const args: any = {};
+    args.limit = 500;
+    args.fuzzy = true;
+    args.filter = [];
+    if (this.stateFilter.min >= 0) {
+      args.filter.push(`variants.price.centAmount:range (${this.stateFilter.min} to ${this.stateFilter.max})`);
+    }
+    if (this.stateFilter.brand.length) {
+      args.filter.push(`variants.attributes.brand:${this.stateFilter.brand.map((el) => `"${el}"`).join(',')}`);
+    }
+    if (this.stateFilter.colors.length) {
+      args.filter.push(`variants.attributes.color:${this.stateFilter.colors.map((el) => `"${el}"`).join(',')}`);
+    }
+    if (this.stateFilter.sizes.length) {
+      args.filter.push(`variants.attributes.size:${this.stateFilter.sizes.map((el) => `"${el}"`).join(',')}`);
+    }
+    args['text.en-US'] = this.stateFilter.text ?? '';
+    console.log(args.filter);
+    const categories = (await getClient()?.categories().get().execute())?.body.results.map((el) => {
+      return { [`${el.slug['en-US']}`]: el.id };
+    });
+    console.log(categories);
+    const products = await getClient()?.productProjections().search().get({ queryArgs: args }).execute();
+    console.log(products);
     const data = await Promise.all<{ [row: string]: string }>(
       products!.body.results.map(async (el) => {
         const priceWithDiscount =
@@ -211,7 +231,7 @@ export class CatalogPage extends Page {
         const priceWithoutDiscount = el.masterVariant.prices![0].value.centAmount.toString();
         return {
           id: el.id,
-          category: (await getCategorieById(el.categories[0].id)).body.name['en-US'],
+          category: (await getCategorieById(el.categories[0].id)).body.slug['en-US'],
           name: el.name['en-US'],
           description: el.description!['en-US'],
           priceWithDiscount,
@@ -221,6 +241,7 @@ export class CatalogPage extends Page {
         };
       })
     );
+    console.log(data);
     data.forEach(({ id, category, brand, name, description, priceWithDiscount, priceWithoutDiscount, imageLink }) => {
       const dataObject: CardItem = {
         id,
@@ -246,9 +267,11 @@ export class CatalogPage extends Page {
     const descriptionCard = new Component('p', [catalog__cardDescription]);
     descriptionCard.setTextContent(data.description);
     const priceWithDiscount = new Component('span', [catalog__cardPrice]);
-    priceWithDiscount.setTextContent(data.priceWithDiscount);
+    priceWithDiscount.setTextContent(`${centsToDollar(Number(data.priceWithDiscount))}$`);
     const priceWithoutDiscount = new Component('span', [catalog__cardPrice, catalog__cardPrice_dashedGrey]);
-    priceWithoutDiscount.setTextContent(data.priceWithoutDiscount);
+    if (data.priceWithDiscount !== '') {
+      priceWithoutDiscount.setTextContent(data.priceWithoutDiscount);
+    }
     const containerForCardPrices = new Component('div', [catalog__cardPriceContainer]);
     containerForCardPrices.setChildren(priceWithDiscount.getElement(), priceWithoutDiscount.getElement());
     const wrapperAboutCard = new Component('div', [catalog__wrapperAbout]);
@@ -259,7 +282,7 @@ export class CatalogPage extends Page {
     );
     card.setChildren(imageCard.getElement<HTMLImageElement>(), wrapperAboutCard.getElement());
     card.getElement<HTMLElement>().addEventListener('click', () => {
-      const path = `/products/${data.category.toLowerCase()}/${data.id}`;
+      const path = `/products/${data.category}/${data.id}`;
       this.router.navigate(path);
       this.router.renderPageView(path);
     });

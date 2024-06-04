@@ -83,8 +83,8 @@ export const defaultStateFilter: ICatalogFilter = {
   sizes: [],
   cloth: [],
   brand: [],
-  min: 0,
-  max: 1000,
+  min: -1,
+  max: -1,
 };
 
 export interface IFilterVariant {
