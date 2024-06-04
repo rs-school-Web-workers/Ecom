@@ -6,7 +6,7 @@ interface Validation {
   message: string;
 }
 
-export class InputNewControl extends HTMLElement {
+export class InputTextControl extends HTMLElement {
   private errMsg = document.createElement('div');
   private input = document.createElement('input');
   private label = document.createElement('label');
@@ -61,6 +61,9 @@ export class InputNewControl extends HTMLElement {
     this.btnEdit.classList.add('button');
     this.btnDelete.classList.add('button');
     this.btnCheck.classList.add('button');
+    this.btnEdit.type = 'button';
+    this.btnDelete.type = 'button';
+    this.btnCheck.type = 'button';
   }
 
   createControlsInput(setEdit: boolean, setDelete: boolean) {
@@ -133,4 +136,4 @@ export class InputNewControl extends HTMLElement {
     this.input.value = value;
   }
 }
-customElements.define('input-text', InputNewControl);
+customElements.define('input-text', InputTextControl);

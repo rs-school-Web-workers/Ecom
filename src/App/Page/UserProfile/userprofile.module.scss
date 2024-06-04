@@ -6,91 +6,127 @@ $linkColor: #0f3dde;
   display: flex;
   align-items: center;
   justify-content: center;
+  padding-left: 80px;
   height: 100%;
   .userProfile__formContainer {
     display: flex;
-    align-items: center;
-    justify-content: center;
     flex: 1 1 auto;
     padding: 0px 20px;
-    .userProfile__form {
-      display: flex;
-      flex-direction: column;
-      gap: $gapForm;
-      margin-bottom: 30px;
-    }
-    .userProfile__title {
-      margin-bottom: 10px;
-      font-family: Integral CF;
-    }
-    .userProfile__aboutText {
-      margin-bottom: 54px;
-      font-family: Integral CF;
-    }
-    .userProfile__btnListShow {
-      padding: 6px 10px;
-      font-size: 18px;
-      font-weight: bold;
-      background-color: $buttonBackground;
-      font-family: Satoshi;
-      border: none;
-      color: $buttonColorFont;
-      border-radius: 100px;
-      cursor: pointer;
-      margin-bottom: 10px;
-      box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.4);
-      transition: opacity 0.3s;
-      &:hover {
-        opacity: 0.8;
-      }
-    }
-    .userProfile__listShipping {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      column-gap: 4px;
-    }
-    .userProfile__listBilling {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      column-gap: 4px;
-    }
-    .userProfile__label {
-      display: inline-flex;
-      gap: 10px;
-      align-self: center;
-      font-family: Satoshi;
-      color: rgb(255, 0, 0);
-      margin-left: 10px;
-      .userProfile__inputCheck {
-        width: 20px;
-        height: 20px;
-      }
-    }
-    .userProfile__formBtn {
-      padding: 6px 10px;
-      font-size: 18px;
-      font-weight: bold;
-      background-color: $buttonBackground;
-      font-family: Satoshi;
-      border: none;
-      color: $buttonColorFont;
-      border-radius: 100px;
-      cursor: pointer;
-      margin-bottom: 10px;
-      box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.4);
-      transition: opacity 0.3s;
-      &:hover {
-        opacity: 0.8;
-      }
-    }
 
-    .userProfile__footer {
-      text-align: center;
-      font-family: Integral CF;
+    // .userProfile__footer {
+    //   text-align: center;
+    //   font-family: Integral CF;
+    // }
+    // .userProfile__footerLink {
+    //   text-decoration: none;
+    //   color: $linkColor;
+    // }
+  }
+  .userProfile__formContainer_addresses {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    overflow-y: scroll;
+    height: 340px;
+    scrollbar-width: thin;
+  }
+  .userProfile__wrapperCheckBox {
+    display: flex;
+  }
+  .userProfile__btnDelete {
+    display: flex;
+    padding: 0px;
+    border: none;
+    cursor: pointer;
+    background-color: white;
+    margin-left: 10px;
+  }
+  .userProfile__wrapperCheckBox_default {
+    display: flex;
+    grid-column: 1 / span 2;
+    justify-content: space-between;
+    padding-bottom: 5px;
+    margin-bottom: 5px;
+    border-bottom: 2px solid #D9D9D9;
+  }
+  .userProfile__addressesContainer {
+    display: flex;
+    flex-direction: column;
+    flex: 0 1 auto;
+    padding: 0px 20px;
+  }
+  .userProfile__form {
+    display: flex;
+    flex-direction: column;
+    gap: $gapForm;
+  }
+  .userProfile__title {
+    margin-bottom: 10px;
+    font-family: Integral CF;
+  }
+  .userProfile__aboutText {
+    margin-bottom: 20px;
+    font-family: Integral CF;
+  }
+  // .userProfile__btnListShow {
+  //   padding: 6px 10px;
+  //   font-size: 18px;
+  //   font-weight: bold;
+  //   background-color: $buttonBackground;
+  //   font-family: Satoshi;
+  //   border: none;
+  //   color: $buttonColorFont;
+  //   border-radius: 100px;
+  //   cursor: pointer;
+  //   margin-bottom: 10px;
+  //   box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.4);
+  //   transition: opacity 0.3s;
+  //   &:hover {
+  //     opacity: 0.8;
+  //   }
+  // }
+  .userProfile__FormList {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 4px;
+    border: 2px solid #D9D9D9;
+    border-radius: 8px;
+    padding: 5px;
+  }
+  select-element {
+    margin-top: 20.7px;
+  }
+  .userProfile__listBtn {
+    margin-top: 6px;
+    grid-column: 1 / span 2;
+  }
+  .userProfile__label {
+    display: inline-flex;
+    gap: 10px;
+    align-self: center;
+    font-family: Satoshi;
+    color: rgb(255, 0, 0);
+    margin-left: 10px;
+    .userProfile__inputCheck {
+      width: 20px;
+      height: 20px;
     }
-    .userProfile__footerLink {
-      text-decoration: none;
-      color: $linkColor;
+  }
+  .userProfile__formBtn {
+    padding: 6px 10px;
+    font-size: 18px;
+    font-weight: bold;
+    background-color: $buttonBackground;
+    font-family: Satoshi;
+    border: none;
+    color: $buttonColorFont;
+    border-radius: 100px;
+    cursor: pointer;
+    margin-bottom: 10px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.4);
+    transition: opacity 0.3s;
+    &:hover {
+      opacity: 0.8;
     }
   }
   .userProfileImgWrapper {
@@ -98,7 +134,7 @@ $linkColor: #0f3dde;
     background-repeat: no-repeat;
     background-position: left center;
     background-size: cover;
-    flex: 1 1 auto;
+    flex: 1 1 50%;
     height: 1042px;
   }
 }

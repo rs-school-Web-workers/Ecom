@@ -57,6 +57,10 @@ export const styles = `
 .input-field.success {
   border-color: #6fcf97;
 }
+.input-field[disabled].success {
+  border-color: white;
+  border-bottom: 2px solid #6fcf97;
+}
 .input-field.unsuccess {
   border-color: #ee5757;
 }
