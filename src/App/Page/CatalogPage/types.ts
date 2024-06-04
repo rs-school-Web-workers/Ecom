@@ -1,6 +1,6 @@
 export interface CardItem {
-  // id: string;
-  // category: string;
+  id: string;
+  category: string;
   name: string;
   description: string;
   priceWithDiscount: string;
@@ -9,6 +9,9 @@ export interface CardItem {
 }
 
 export interface ICatalogFilter {
+  text?: string;
+  style?: string;
+  sort?: string;
   colors: string[];
   sizes: string[];
   cloth: string[];

@@ -1,8 +1,6 @@
 import Component from '../../utils/base-component';
-import mydata from '../../../assets/data/mydata.json';
 import Page from '../Page';
 import * as catalogStyle from './catalog.module.scss';
-import loki from '../../../assets/imgs/loki.webp';
 import {
   CardItem,
   sortValue,
@@ -33,9 +31,10 @@ import show from '../../../assets/imgs/svg/Vector.svg';
 import unshow from '../../../assets/imgs/svg/Vector2.svg';
 import filter_logo from '../../../assets/imgs/svg/filter.svg';
 import glass from '../../../assets/imgs/svg/glass.svg';
-import { getClient } from '../../utils/api/Client';
+import { getCategorieById, getClient } from '../../utils/api/Client';
 import { RangeFacetResult, TermFacetResult } from '@commercetools/platform-sdk';
 import { centsToDollar } from '../../utils/helpers';
+import { Router } from '../../Router/Router';
 
 export class CatalogPage extends Page {
   catalogContainer = new Component('div', [catalogContainer]);
@@ -52,9 +51,11 @@ export class CatalogPage extends Page {
   ]).getElement<HTMLDivElement>();
   stateFilter: ICatalogFilter = Object.create(defaultStateFilter); // хранит состояние активных фильтров
   variantFilter: IFilterVariant = defaultVariantFilter;
+  router;
 
-  constructor() {
+  constructor(router: Router) {
     super([catalog]);
+    this.router = router;
     this.initCatalogPage();
     this.render();
   }
@@ -74,7 +75,6 @@ export class CatalogPage extends Page {
         },
       })
       .execute();
-    console.log('facets:', facets);
     this.variantFilter = {
       colors: (facets?.body.facets['variants.attributes.color'] as TermFacetResult).terms.map((el) => el.term),
       brand: (facets?.body.facets['variants.attributes.brand'] as TermFacetResult).terms.map((el) => el.term),
@@ -112,6 +112,8 @@ export class CatalogPage extends Page {
 
   changeSearchHandler() {
     //вставить запрос и рендер
+    this.stateFilter.text = (this.searchContainer.children[1] as HTMLInputElement).value;
+    this.render();
   }
 
   createFilterSortContainer() {
@@ -167,6 +169,8 @@ export class CatalogPage extends Page {
     currentSort.textContent = currentElem.textContent;
     this.clickShowHandler(showElem, container);
     //добавить сортировку элементов и рендер
+    this.stateFilter.sort = currentElem.textContent ?? 'asc';
+    this.render();
   }
 
   clickFilterLogoHandler() {
@@ -188,20 +192,45 @@ export class CatalogPage extends Page {
     this.createCardList();
   }
 
-  setTitleContainerProducts(text: string = 'Casual') {
+  setTitleContainerProducts(text: string = '') {
     this.titleContainerProducts.textContent = text;
   }
 
-  createCardList() {
-    mydata.casual[0]['t-shirt']?.forEach(({ brand, name, description, price, image }) => {
+  async createCardList() {
+    // тут еще доделать сортировку фильтрацию и поиск
+    const products = await getClient()
+      ?.productProjections()
+      .search()
+      .get({ queryArgs: { limit: 500, fuzzy: true, filter: [] } })
+      .execute();
+    const data = await Promise.all<{ [row: string]: string }>(
+      products!.body.results.map(async (el) => {
+        const priceWithDiscount =
+          el.masterVariant.prices![0].discounted?.value.centAmount.toString() ??
+          el.masterVariant.prices![0].value.centAmount.toString();
+        const priceWithoutDiscount = el.masterVariant.prices![0].value.centAmount.toString();
+        return {
+          id: el.id,
+          category: (await getCategorieById(el.categories[0].id)).body.name['en-US'],
+          name: el.name['en-US'],
+          description: el.description!['en-US'],
+          priceWithDiscount,
+          priceWithoutDiscount: priceWithDiscount === priceWithoutDiscount ? '' : priceWithoutDiscount,
+          imageLink: el.masterVariant.images![0].url,
+          brand: el.masterVariant.attributes!.filter((el) => el.name === 'brand')[0].value,
+        };
+      })
+    );
+    data.forEach(({ id, category, brand, name, description, priceWithDiscount, priceWithoutDiscount, imageLink }) => {
       const dataObject: CardItem = {
-        name: `${brand} ${name}`,
+        id,
+        category,
+        name: `${brand} | ${name}`,
         description,
-        priceWithDiscount: price,
-        priceWithoutDiscount: price,
-        imageLink: loki,
+        priceWithDiscount,
+        priceWithoutDiscount,
+        imageLink,
       };
-      console.log(image);
       const card = this.createCard(dataObject);
       this.listProductsContainer.append(card.getElement());
     });
@@ -210,7 +239,6 @@ export class CatalogPage extends Page {
   createCard(data: CardItem) {
     const card = new Component('div', [catalog__card]);
     const imageCard = new Component('img', [catalog__cardImg]);
-    console.log(data);
     imageCard.getElement<HTMLImageElement>().src = `${data.imageLink}`;
     imageCard.getElement<HTMLImageElement>().alt = data.name;
     const titleCard = new Component('h3', [catalog__cardName]);
@@ -230,6 +258,11 @@ export class CatalogPage extends Page {
       containerForCardPrices.getElement()
     );
     card.setChildren(imageCard.getElement<HTMLImageElement>(), wrapperAboutCard.getElement());
+    card.getElement<HTMLElement>().addEventListener('click', () => {
+      const path = `/products/${data.category.toLowerCase()}/${data.id}`;
+      this.router.navigate(path);
+      this.router.renderPageView(path);
+    });
     // const discount = new Component('div', ['catalog__card-discount']);
     return card;
   }
@@ -328,6 +361,7 @@ export class CatalogPage extends Page {
     console.log(brandSelect);
     console.log(clothSelect);
     //запрос с данными на фильтрацию
+    this.render();
   }
 
   clickResetHandler() {

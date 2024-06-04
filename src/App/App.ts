@@ -89,7 +89,7 @@ export class App {
       {
         pagePath: PagePath.PRODUCTS,
         render: () => {
-          const productPage = new CatalogPage();
+          const productPage = new CatalogPage(this.router);
           this.setPage(productPage);
         },
       },

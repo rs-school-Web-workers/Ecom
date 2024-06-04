@@ -91,6 +91,11 @@ $border-bottom-color: rgb(0, 0, 0, 0.1);
     // flex: 1 0 auto;
   }
   .catalog__cardDescription {
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
     font-family: Satoshi;
     font-weight: 700;
     font-size: $cardDescriptionFontSize;
