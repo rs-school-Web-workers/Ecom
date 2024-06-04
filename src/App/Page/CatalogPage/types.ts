@@ -68,7 +68,7 @@ export const DressBrand = [
 
 export const dresses = ['T-shirt', 'Trunks', 'Jackets', 'Pants', 'Shirts', 'Sport-suits', 'For-swimming'];
 
-export const sortValue = ['asc', 'des', 'alph'];
+export const sortValue = ['asc', 'desc', 'alph'];
 
 export const styles = ['Casual', 'Formal', 'Gym'];
 
@@ -85,6 +85,7 @@ export const defaultStateFilter: ICatalogFilter = {
   brand: [],
   min: -1,
   max: -1,
+  sort: 'asc',
 };
 
 export interface IFilterVariant {

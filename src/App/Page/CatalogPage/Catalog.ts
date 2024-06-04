@@ -215,6 +215,11 @@ export class CatalogPage extends Page {
     if (this.stateFilter.sizes.length) {
       args.filter.push(`variants.attributes.size:${this.stateFilter.sizes.map((el) => `"${el}"`).join(',')}`);
     }
+    if (this.stateFilter.sort === 'asc' || this.stateFilter.sort === 'desc') {
+      args.sort = `price ${this.stateFilter.sort}`;
+    } else {
+      args.sort = 'name.en-US asc';
+    }
     args['text.en-US'] = this.stateFilter.text ?? '';
     console.log(args.filter);
     const categories = (await getClient()?.categories().get().execute())?.body.results.map((el) => {
