@@ -46,7 +46,6 @@
     "sass": "^1.76.0",
     "sass-loader": "^14.2.1",
     "style-loader": "^4.0.0",
-    "swiper": "^6.8.4",
     "ts-jest": "^29.1.2",
     "ts-loader": "^9.5.1",
     "ts-node": "^10.9.2",
@@ -64,6 +63,7 @@
     "@commercetools/sdk-client-v2": "^2.5.0",
     "babel-jest": "^29.7.0",
     "identity-obj-proxy": "^3.0.0",
+    "swiper": "^6.8.4",
     "webpack-merge": "^5.10.0"
   }
 }

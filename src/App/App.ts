@@ -30,7 +30,6 @@ export class App {
       getAnonClient();
     }
     this.container = document.body;
-    console.log(style);
     this.container = new Component('div', [style.app]).getElement<HTMLDivElement>();
     document.body.append(this.container);
     const pages: PageInfo[] = this.initPages();

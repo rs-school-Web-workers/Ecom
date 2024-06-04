@@ -2,18 +2,14 @@ import { Router } from '../../Router/Router';
 import Component from '../../utils/base-component';
 import Page from '../Page';
 import * as style from './product.module.scss';
-import data from '../../../assets/data/products.json';
 import { IProduct } from './types';
 import { isNull } from '../../utils/base-methods';
 import { ProductModal } from '../../Modal/ProductModal/ProductModal';
 import { getProductById } from '../../utils/api/Client';
 import type { Variant } from './types';
 import { PagePath } from '../../Router/types';
-
 export default class ProductPage extends Page {
   router: Router;
-
-  product: IProduct | null;
 
   currentSlide: number = 0;
 
@@ -37,7 +33,6 @@ export default class ProductPage extends Page {
   constructor(router: Router, id: string) {
     super([style.product]);
     this.router = router;
-    this.product = null;
     this.modal = null;
     this.initProductInfo(id).then(() => this.initPage());
   }
@@ -69,7 +64,6 @@ export default class ProductPage extends Page {
           }
           return res;
         });
-      console.log(this.info, this.variants);
       this.products = this.variants.map((el) => {
         return {
           name: this.info.name!,
@@ -82,28 +76,25 @@ export default class ProductPage extends Page {
           brand: el.brand,
         };
       });
-      this.product = data.products[0];
     } catch {
       this.router.navigate(PagePath.NOT_FOUND);
       this.router.renderPageView(PagePath.NOT_FOUND);
     }
-    // const response = await getProductById(id);
-    // console.log(response);
   }
 
   initPage() {
     this.createPathChain();
     this.createProductDetail();
-    if (this.variants[this.index] != null) {
-      this.modal = new ProductModal('product', this.variants[this.index].images);
-      this.container?.append(this.modal.background);
-    }
   }
 
   renderProductPage() {
     this.createSizeSelect();
     this.createImgContainer();
     this.createPriceContainer();
+    if (this.variants[this.index] != null) {
+      this.modal = new ProductModal('product', this.variants[this.index].images);
+      this.container?.append(this.modal.background);
+    }
   }
   createProductDetail() {
     const container: HTMLDivElement = new Component('div', [style.product_detail]).getElement<HTMLDivElement>();
@@ -167,10 +158,11 @@ export default class ProductPage extends Page {
   clickSmallImgHandler(event: Event, mainImg: HTMLImageElement, container: HTMLDivElement) {
     const elem: HTMLImageElement = <HTMLImageElement>event.target;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const swiper: any = document.querySelector('.swiper-container');
+    /* const swiper: any = document.querySelector('.swiper-container');
     console.log(elem.dataset.slide);
-    console.log(swiper.swiper);
-    swiper.swiper.slideTo(elem.dataset.slide);
+    console.log(swiper.swiper); */
+    this.modal?.swiper?.slideTo(Number(elem.dataset.slide) - 1);
+    console.log(elem.dataset.slide);
     const pastActiveElem: HTMLButtonElement | null = container.querySelector(`.${style.active_small_img}`);
     mainImg.src = elem.src;
     isNull(pastActiveElem);

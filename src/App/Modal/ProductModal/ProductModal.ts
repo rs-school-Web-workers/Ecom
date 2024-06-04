@@ -3,9 +3,12 @@ import { Modal } from '../Modal';
 import * as style from './productModal.module.scss';
 import './slider';
 import './slider.css';
+import SwiperCore from 'swiper/bundle';
+import 'swiper/swiper-bundle.css';
 
 export class ProductModal extends Modal {
   imgArray: string[];
+  swiper: SwiperCore | undefined;
 
   constructor(name: string, array: string[]) {
     super(style.modal_product, name);
@@ -49,5 +52,27 @@ export class ProductModal extends Modal {
     sliderContainer.append(sliderWrapper);
     sliderContainer.append(sliderPrev, sliderNext, sliderPagination);
     this.setContent(sliderContainer);
+    if (!this.swiper) {
+      this.swiper = new SwiperCore(sliderContainer, {
+        direction: 'horizontal',
+        grabCursor: true,
+        // loop: true,
+        freeMode: false,
+        followFinger: false,
+        observer: true,
+        observeParents: true,
+        parallax: true,
+        navigation: {
+          nextEl: '.swiper-button-next',
+          prevEl: '.swiper-button-prev',
+        },
+        pagination: {
+          el: '.swiper-pagination',
+          type: 'fraction',
+        },
+      });
+      sliderNext.addEventListener('click', () => this.swiper?.slideNext());
+      sliderPrev.addEventListener('click', () => this.swiper?.slidePrev());
+    }
   }
 }
