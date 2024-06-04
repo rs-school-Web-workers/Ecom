@@ -33,6 +33,9 @@ import show from '../../../assets/imgs/svg/Vector.svg';
 import unshow from '../../../assets/imgs/svg/Vector2.svg';
 import filter_logo from '../../../assets/imgs/svg/filter.svg';
 import glass from '../../../assets/imgs/svg/glass.svg';
+import { getClient } from '../../utils/api/Client';
+import { RangeFacetResult, TermFacetResult } from '@commercetools/platform-sdk';
+import { centsToDollar } from '../../utils/helpers';
 
 export class CatalogPage extends Page {
   catalogContainer = new Component('div', [catalogContainer]);
@@ -56,7 +59,29 @@ export class CatalogPage extends Page {
     this.render();
   }
 
-  initCatalogPage() {
+  async initCatalogPage() {
+    const facets = await getClient()
+      ?.productProjections()
+      .search()
+      .get({
+        queryArgs: {
+          facet: [
+            'variants.attributes.size',
+            'variants.attributes.color',
+            'variants.attributes.brand',
+            'variants.price.centAmount:range(0 to 1000000)',
+          ],
+        },
+      })
+      .execute();
+    console.log('facets:', facets);
+    this.variantFilter = {
+      colors: (facets?.body.facets['variants.attributes.color'] as TermFacetResult).terms.map((el) => el.term),
+      brand: (facets?.body.facets['variants.attributes.brand'] as TermFacetResult).terms.map((el) => el.term),
+      sizes: (facets?.body.facets['variants.attributes.size'] as TermFacetResult).terms.map((el) => el.term),
+      min: (facets?.body.facets['variants.price.centAmount'] as RangeFacetResult).ranges[0].min,
+      max: (facets?.body.facets['variants.price.centAmount'] as RangeFacetResult).ranges[0].max,
+    };
     this.createHeaderCatalog();
     this.createFilterContainer();
     this.createSearchContainer();
@@ -64,10 +89,6 @@ export class CatalogPage extends Page {
     this.modalBackground.addEventListener('click', (event) => this.clickCloseFilterLogoHandler(event));
     this.contentContainer.append(this.containerFilters, this.containerProducts);
     this.container?.append(this.searchContainer, this.contentContainer, this.modalBackground);
-  }
-
-  initFilterVariant() {
-    // инициализация значений критериеы фильтра
   }
 
   createHeaderCatalog() {
@@ -294,7 +315,7 @@ export class CatalogPage extends Page {
     this.stateFilter.cloth = clothSelect;
     const brandSelect: string[] = [];
     const selectedBrandFilter: NodeListOf<HTMLDivElement> = this.containerFilters.querySelectorAll(
-      `.${catalogStyle.active_brand}.${catalogStyle.filter_style_line}`
+      `.${catalogStyle.active_brand}.${catalogStyle.filter_brand_line}`
     );
     selectedBrandFilter.forEach((brand) => {
       if (brand.dataset.brandName !== undefined) {
@@ -321,8 +342,8 @@ export class CatalogPage extends Page {
     const minPriceElem: HTMLDivElement | null = this.containerFilters.querySelector(`.${catalogStyle.price_min_value}`);
     const maxPriceElem: HTMLDivElement | null = this.containerFilters.querySelector(`.${catalogStyle.price_max_value}`);
     if (minPriceElem !== null && maxPriceElem !== null) {
-      minPriceElem.textContent = `${this.variantFilter.min}$`;
-      maxPriceElem.textContent = `${this.variantFilter.max}$`;
+      minPriceElem.textContent = `${centsToDollar(this.variantFilter.min)}$`;
+      maxPriceElem.textContent = `${centsToDollar(this.variantFilter.max)}$`;
     }
     const minPriceRange: HTMLInputElement | null = this.containerFilters.querySelector(
       `.${catalogStyle.min_range_select}`
@@ -385,7 +406,7 @@ export class CatalogPage extends Page {
     minSelect.max = `${this.variantFilter.max}`;
     minSelect.step = '5';
     minSelect.value = `${this.variantFilter.min}`;
-    priceMinValue.textContent = `${this.variantFilter.min}$`;
+    priceMinValue.textContent = `${centsToDollar(this.variantFilter.min)}$`;
     const maxSelect: HTMLInputElement = new Component('input', [
       catalogStyle.max_range_select,
     ]).getElement<HTMLInputElement>();
@@ -394,7 +415,7 @@ export class CatalogPage extends Page {
     maxSelect.max = `${this.variantFilter.max}`;
     maxSelect.step = '5';
     maxSelect.value = `${this.variantFilter.max}`;
-    priceMaxValue.textContent = `${this.variantFilter.max}$`;
+    priceMaxValue.textContent = `${centsToDollar(this.variantFilter.max)}$`;
     priceProgress.style.background = `linear-gradient(to right, #dadae5 ${minSelect.value}% , #000000 ${minSelect.value}% , #000000 ${maxSelect.value}%, #dadae5 ${maxSelect.value}%)`;
     minSelect.addEventListener('input', () =>
       this.inputMinInputHandler(minSelect, maxSelect, priceProgress, priceMinValue, priceMaxValue)
@@ -426,8 +447,8 @@ export class CatalogPage extends Page {
       maxInput.value = minInput.value;
     }
     this.changeProgressHandler(minInput, maxInput, progress);
-    min.textContent = minInput.value + `$`;
-    max.textContent = maxInput.value + `$`;
+    min.textContent = centsToDollar(Number(minInput.value)) + `$`;
+    max.textContent = centsToDollar(Number(maxInput.value)) + `$`;
   }
 
   inputMaxInputHandler(
@@ -441,8 +462,8 @@ export class CatalogPage extends Page {
       minInput.value = maxInput.value;
     }
     this.changeProgressHandler(minInput, maxInput, progress);
-    min.textContent = minInput.value + `$`;
-    max.textContent = maxInput.value + `$`;
+    min.textContent = centsToDollar(Number(minInput.value)) + `$`;
+    max.textContent = centsToDollar(Number(maxInput.value)) + `$`;
   }
 
   createFilterCloth() {
