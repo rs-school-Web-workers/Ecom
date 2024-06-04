@@ -60,6 +60,7 @@ export default class Header {
   createNavigateContainer() {
     const navContainer: Component = new Component('div', [NAV_CONTAINER]);
     const navElement: Component = new Component('nav', [headerClassNames.NAV_ELEMENT]);
+    const productsLink: HTMLAnchorElement = this.createNavigateLink(headerLinkNames.PRODUCTS, PagePath.PRODUCTS);
     const menuLink: HTMLAnchorElement = this.createNavigateLink(headerLinkNames.MAIN, PagePath.MAIN);
     const loginLink: HTMLAnchorElement = this.createNavigateLink(headerLinkNames.LOGIN, PagePath.LOGIN);
     const registrationLink: HTMLAnchorElement = this.createNavigateLink(
@@ -68,7 +69,7 @@ export default class Header {
     );
     const logoutLink: HTMLAnchorElement = this.createNavigateLink(headerLinkNames.LOGOUT, PagePath.LOGIN);
     logoutLink.classList.add(headerClassNames.LOGOUT_BUTTON);
-    navElement.setChildren(menuLink, loginLink, registrationLink, logoutLink);
+    navElement.setChildren(productsLink, menuLink, loginLink, registrationLink, logoutLink);
     navContainer.setChildren(navElement.getElement<HTMLElement>());
     return navContainer.getElement<HTMLDivElement>();
   }
