@@ -1,16 +1,7 @@
 import Component from '../../utils/base-component';
 import Page from '../Page';
 import * as catalogStyle from './catalog.module.scss';
-import {
-  CardItem,
-  sortValue,
-  ICatalogFilter,
-  defaultStateFilter,
-  styles,
-  styleSubcategory,
-  IFilterVariant,
-  defaultVariantFilter,
-} from './types';
+import { CardItem, sortValue, ICatalogFilter, defaultStateFilter, IFilterVariant, defaultVariantFilter } from './types';
 const {
   catalog,
   catalogContainer,
@@ -52,6 +43,9 @@ export class CatalogPage extends Page {
   stateFilter: ICatalogFilter = Object.create(defaultStateFilter); // хранит состояние активных фильтров
   variantFilter: IFilterVariant = defaultVariantFilter;
   router;
+  categories: { slug: string; id: string; name: string; parent: string | undefined }[] | undefined;
+  styles: string[] = [];
+  styleSubcategory: string[][] = [];
 
   constructor(router: Router) {
     super([catalog]);
@@ -61,6 +55,14 @@ export class CatalogPage extends Page {
   }
 
   async initCatalogPage() {
+    this.categories = (await getClient()?.categories().get().execute())?.body.results.map((el) => {
+      return { id: el.id, name: el.name['en-US'], slug: el.slug['en-US'], parent: el.parent?.id };
+    });
+    const top = this.categories!.filter((el) => !el.parent);
+    this.styles = top.map((el) => el.name);
+    top.forEach((style) => {
+      this.styleSubcategory.push(this.categories!.filter((el) => el.parent === style.id).map((el) => el.name));
+    });
     const facets = await getClient()
       ?.productProjections()
       .search()
@@ -198,11 +200,18 @@ export class CatalogPage extends Page {
 
   async createCardList() {
     // тут еще доделать сортировку фильтрацию и поиск
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const args: any = {};
+    const args: { limit?: number; fuzzy?: boolean; filter?: string[]; sort?: string; 'text.en-US'?: string } = {};
     args.limit = 500;
     args.fuzzy = true;
     args.filter = [];
+    if (this.stateFilter.cloth.length && !this.stateFilter.cloth.includes('All')) {
+      args.filter.push(
+        `categories.id:${this.stateFilter.cloth
+          .map((el) => `"${this.categories!.filter((cat) => cat.name === el.split('_')[1])[0].id}"`)
+          .join(',')}`
+      );
+    }
+    console.log(args.filter);
     if (this.stateFilter.min >= 0) {
       args.filter.push(`variants.price.centAmount:range (${this.stateFilter.min} to ${this.stateFilter.max})`);
     }
@@ -222,10 +231,6 @@ export class CatalogPage extends Page {
     }
     args['text.en-US'] = this.stateFilter.text ?? '';
     console.log(args.filter);
-    const categories = (await getClient()?.categories().get().execute())?.body.results.map((el) => {
-      return { [`${el.slug['en-US']}`]: el.id };
-    });
-    console.log(categories);
     const products = await getClient()?.productProjections().search().get({ queryArgs: args }).execute();
     console.log(products);
     const data = await Promise.all<{ [row: string]: string }>(
@@ -546,7 +551,7 @@ export class CatalogPage extends Page {
       catalogStyle.filter_style_dress,
     ]).getElement<HTMLDivElement>();
     showDress.addEventListener('click', () => this.clickShowHandler(showDress, clothSelectedContainer));
-    styles.forEach((style, index) => {
+    this.styles.forEach((style, index) => {
       const clothStyleLineContainer: HTMLDivElement = new Component('div', [
         catalogStyle.filter_style_cloth_line_container,
       ]).getElement<HTMLDivElement>();
@@ -568,7 +573,7 @@ export class CatalogPage extends Page {
       clothStyleLineSymbol.addEventListener('click', () =>
         this.clickShowHandler(clothStyleLineSymbol, selectStyleClothContainer)
       );
-      styleSubcategory[index].forEach((dress) => {
+      this.styleSubcategory[index].forEach((dress) => {
         const clothLineContainer: HTMLDivElement = new Component('div', [
           catalogStyle.filter_cloth_line_container,
         ]).getElement<HTMLDivElement>();
@@ -622,8 +627,8 @@ export class CatalogPage extends Page {
     selectedClothFilter.forEach((cloth) => {
       if (cloth.dataset.clothName !== undefined) {
         const clothCategory = cloth.dataset.clothName?.split('_')[0];
-        console.log(currentCategory);
-        console.log(clothCategory);
+        /* console.log(currentCategory);
+        console.log(clothCategory); */
         if (currentCategory !== clothCategory) {
           cloth.classList.remove(catalogStyle.active_cloth);
         }
