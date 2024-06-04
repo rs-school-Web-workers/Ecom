@@ -1,5 +1,6 @@
 import { InputNewType } from './types';
 import { styles } from './inputTextComponentStyles';
+// import { saveInputEvent } from '../../utils/custom-event';
 
 interface Validation {
   validate: (value: string) => boolean;
@@ -25,7 +26,7 @@ export class InputTextControl extends HTMLElement {
       '<svg xmlns="http://www.w3.org/2000/svg" class="icon" viewBox="0 0 448 512"><path d="M135.2 17.7L128 32H32C14.3 32 0 46.3 0 64S14.3 96 32 96H416c17.7 0 32-14.3 32-32s-14.3-32-32-32H320l-7.2-14.3C307.4 6.8 296.3 0 284.2 0H163.8c-12.1 0-23.2 6.8-28.6 17.7zM416 128H32L53.2 467c1.6 25.3 22.6 45 47.9 45H346.9c25.3 0 46.3-19.7 47.9-45L416 128z"/></svg>',
   };
 
-  validationArray: Validation[];
+  private validationArray: Validation[];
 
   constructor(
     type: InputNewType = 'text',
@@ -51,7 +52,7 @@ export class InputTextControl extends HTMLElement {
     this.createControlsInput(setEdit, setDelete);
   }
 
-  init() {
+  private init() {
     this.errMsg.classList.add('error-message');
     this.label.classList.add('label-input');
     this.input.classList.add('input-field');
@@ -66,7 +67,7 @@ export class InputTextControl extends HTMLElement {
     this.btnCheck.type = 'button';
   }
 
-  createControlsInput(setEdit: boolean, setDelete: boolean) {
+  private createControlsInput(setEdit: boolean, setDelete: boolean) {
     const { SVGTRASH, SVGEDIT, SVGCHECK } = this.SVGPATHS;
     if (setDelete) {
       this.btnDelete.innerHTML = SVGTRASH;
@@ -82,13 +83,25 @@ export class InputTextControl extends HTMLElement {
     }
   }
 
-  editProperty() {
+  private editProperty() {
     this.input.disabled = false;
     this.btnEdit.disabled = true;
     this.btnCheck.disabled = false;
     this.input.focus();
   }
-  saveProperty() {
+  private saveProperty() {
+    this.checkState();
+    const state = this.input.classList.contains('success') && this.input.disabled === true;
+    const saveInputEvent = new CustomEvent('inputStateChange', {
+      cancelable: true,
+      composed: true,
+      detail: {
+        state,
+      },
+    });
+    this.btnEdit.dispatchEvent(saveInputEvent);
+  }
+  checkState() {
     if (this.input.classList.contains('unsuccess')) {
       this.input.classList.add('shake');
       this.errMsg.classList.add('shake');
@@ -102,9 +115,8 @@ export class InputTextControl extends HTMLElement {
       this.btnCheck.disabled = true;
     }
   }
-
   connectedCallback() {
-    this.input.oninput = () => this.validateInput(this.validationArray);
+    this.input.addEventListener('input', () => this.validateInput(this.validationArray));
   }
 
   private validateInput(validationType: Validation[]) {
@@ -127,7 +139,13 @@ export class InputTextControl extends HTMLElement {
     }
   }
 
-  setDisabled() {}
+  getSuccess() {
+    return (this.input.classList.contains('success') && this.input.disabled === true) || this.input.disabled === true;
+  }
+
+  resetState() {
+    this.input.classList.remove('success');
+  }
 
   get value() {
     return this.input.value;

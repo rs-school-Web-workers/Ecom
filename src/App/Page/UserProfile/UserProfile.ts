@@ -1,5 +1,5 @@
 import { InputTextControl } from '../../components/inputText/inputTextComponent';
-import { getUserProfile } from '../../utils/api/Client';
+import { getUserProfile, changeUserProfile } from '../../utils/api/Client';
 import Component from '../../utils/base-component';
 import Page from '../Page';
 import {
@@ -113,6 +113,7 @@ export class UserProfilePage extends Page {
     const buttonSubmit = new Component('button', [userProfile__formBtn]);
     buttonSubmit.setTextContent('Save Changes');
     buttonSubmit.getElement<HTMLButtonElement>().type = 'submit';
+    buttonSubmit.getElement<HTMLButtonElement>().disabled = true;
     this.nameInput.value = nameValue;
     this.surnameInput.value = surnameValue;
     this.dateOfBirthday.value = dateOfBirthValue;
@@ -125,7 +126,60 @@ export class UserProfilePage extends Page {
       this.dateOfBirthday,
       buttonSubmit.getElement<HTMLButtonElement>()
     );
+    form.getElement<HTMLFormElement>().addEventListener(
+      'inputStateChange',
+      (e: Event) => {
+        const customEvent = e as CustomEvent<{ state: boolean }>;
+        if (
+          customEvent.detail.state &&
+          this.nameInput.getSuccess() &&
+          this.surnameInput.getSuccess() &&
+          this.emailInput.getSuccess() &&
+          this.dateOfBirthday.getSuccess()
+        ) {
+          buttonSubmit.getElement<HTMLButtonElement>().disabled = false;
+        } else {
+          buttonSubmit.getElement<HTMLButtonElement>().disabled = true;
+        }
+      },
+      { capture: true, passive: true }
+    );
+    form
+      .getElement<HTMLFormElement>()
+      .addEventListener('submit', (e) => this.submitSaveFormPersonalUserInformation(e, buttonSubmit));
     this.wrapperForm.setChildren(form.getElement<HTMLFormElement>());
+  }
+
+  async submitSaveFormPersonalUserInformation(event: Event, buttonSubmit: Component) {
+    event.preventDefault();
+    const arr = [this.nameInput, this.surnameInput, this.emailInput, this.dateOfBirthday];
+    if (
+      this.nameInput.getSuccess() &&
+      this.surnameInput.getSuccess() &&
+      this.emailInput.getSuccess() &&
+      this.dateOfBirthday.getSuccess()
+    ) {
+      const { version } = (await getUserProfile()).body;
+      const { firstName, lastName, email, dateOfBirth } = {
+        firstName: this.nameInput.value,
+        lastName: this.surnameInput.value,
+        email: this.emailInput.value,
+        dateOfBirth: this.dateOfBirthday.value,
+      };
+      await changeUserProfile(version, firstName, lastName, email, dateOfBirth);
+      this.nameInput.resetState();
+      this.surnameInput.resetState();
+      this.emailInput.resetState();
+      this.dateOfBirthday.resetState();
+      buttonSubmit.getElement<HTMLButtonElement>().disabled = true;
+    } else {
+      arr.forEach((input) => {
+        if (!input.getSuccess()) {
+          input.checkState();
+        }
+      });
+      buttonSubmit.getElement<HTMLButtonElement>().disabled = true;
+    }
   }
 
   createFormAddressesUserInformation({
