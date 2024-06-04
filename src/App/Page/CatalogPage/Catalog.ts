@@ -281,11 +281,8 @@ export class CatalogPage extends Page {
     const priceWithDiscount = new Component('span', [catalog__cardPrice]);
     priceWithDiscount.setTextContent(`${centsToDollar(Number(data.priceWithDiscount))}$`);
     const priceWithoutDiscount = new Component('span', [catalog__cardPrice, catalog__cardPrice_dashedGrey]);
-    console.log(data.priceWithDiscount);
-    console.log(data.priceWithoutDiscount);
-    console.log(data);
-    if (data.priceWithDiscount !== '') {
-      priceWithoutDiscount.setTextContent(data.priceWithoutDiscount);
+    if (data.priceWithoutDiscount !== '') {
+      priceWithoutDiscount.setTextContent(`${centsToDollar(Number(data.priceWithoutDiscount))}$`);
     }
     const containerForCardPrices = new Component('div', [catalog__cardPriceContainer]);
     containerForCardPrices.setChildren(priceWithDiscount.getElement(), priceWithoutDiscount.getElement());
