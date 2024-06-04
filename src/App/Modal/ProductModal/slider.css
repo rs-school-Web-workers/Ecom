@@ -1,5 +1,5 @@
 .swiper-container {
-  width: 530px;
+  width: 400px;
   min-height: 530px;
   border-radius: 32px;
 }
@@ -7,7 +7,7 @@
 .swiper-slide {
   /* width: 530px; */
   min-height: 530px;
-  background-position: center center;
+  /* background-position: center center; */
   background-repeat: no-repeat;
   background-size: cover;
 }
@@ -30,14 +30,14 @@
 @media (max-width: 767px) {
   .swiper-container {
     width: 430px;
-    max-height: 430px;
+    /* max-height: 430px; */
     min-height: auto;
     border-radius: 32px;
   }
 
   .swiper-slide {
     width: 430px;
-    min-height: 430px;
+    min-height: 530px;
     background-position: center center;
     background-repeat: no-repeat;
     background-size: cover;
@@ -47,7 +47,7 @@
 @media (max-width: 600px) {
   .swiper-container {
     width: 330px;
-    height: 330px;
+    /* height: 330px; */
     border-radius: 32px;
   }
 }
