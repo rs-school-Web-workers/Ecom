@@ -46,18 +46,33 @@ export class CatalogPage extends Page {
   categories: { slug: string; id: string; name: string; parent: string | undefined }[] | undefined;
   styles: string[] = [];
   styleSubcategory: string[][] = [];
+  category: string;
 
-  constructor(router: Router) {
+  constructor(router: Router, category: string = '') {
     super([catalog]);
     this.router = router;
+    this.category = category;
+    this.initCategory();
     this.initCatalogPage();
-    this.render();
+  }
+
+  initCategory() {
+    if (this.category !== '') {
+      this.stateFilter.cloth = [`${this.category}_${this.category}`];
+      console.log(this.stateFilter.cloth);
+    }
   }
 
   async initCatalogPage() {
     this.categories = (await getClient()?.categories().get().execute())?.body.results.map((el) => {
       return { id: el.id, name: el.name['en-US'], slug: el.slug['en-US'], parent: el.parent?.id };
     });
+    if (this.category !== '') {
+      const name = this.categories?.filter((category) => category.slug === this.category)[0].name;
+      this.stateFilter.cloth = [`${name}_${name}`];
+      console.log(this.stateFilter.cloth);
+    }
+    // this.stateFilter.cloth = this.categories?.filter((category) => category.slug === this.category);
     const top = this.categories!.filter((el) => !el.parent);
     this.styles = top.map((el) => el.name);
     top.forEach((style) => {
@@ -91,6 +106,7 @@ export class CatalogPage extends Page {
     this.modalBackground.addEventListener('click', (event) => this.clickCloseFilterLogoHandler(event));
     this.contentContainer.append(this.containerFilters, this.containerProducts);
     this.container?.append(this.searchContainer, this.contentContainer, this.modalBackground);
+    this.render();
   }
 
   createHeaderCatalog() {
@@ -391,10 +407,6 @@ export class CatalogPage extends Page {
       }
     });
     this.stateFilter.brand = brandSelect;
-    console.log(sizeSelect);
-    console.log(colorSelect);
-    console.log(brandSelect);
-    console.log(clothSelect);
     //запрос с данными на фильтрацию
     this.render();
   }
