@@ -111,7 +111,8 @@ export class App {
       {
         pagePath: `${PagePath.PRODUCTS}/${SECTION_NAME}`,
         render: (section_name: string = '') => {
-          this.contentContainer.textContent = 'This is ' + PagePath.PRODUCTS + `/${section_name}`;
+          const productPage = new CatalogPage(this.router, section_name);
+          this.setPage(productPage);
         },
       },
       {
