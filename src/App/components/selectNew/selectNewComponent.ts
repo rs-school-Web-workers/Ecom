@@ -16,6 +16,7 @@ export class SelectNewControl extends HTMLElement {
     const shadow = this.attachShadow({ mode: 'open' });
     const style = document.createElement('style');
     style.textContent = styles;
+    this.placeholder.setTextContent('Select Country');
     this.countries = countries;
     shadow.append(style, this.component.getElement<HTMLDivElement>());
   }
@@ -68,7 +69,6 @@ export class SelectNewControl extends HTMLElement {
   selectOption(name: string, shortName: string) {
     const text = this.placeholder.getElement<HTMLSpanElement>();
     const selectValue = this.shadowRoot?.querySelector('.select__value');
-    text?.setAttribute('shortName', shortName);
     if (text) {
       text.classList.add('selected');
       text.textContent = name;
@@ -105,7 +105,20 @@ export class SelectNewControl extends HTMLElement {
     });
     return result || '';
   }
-
+  checkStateForSubmit() {
+    const selectValue = this.shadowRoot?.querySelector('.select__value');
+    selectValue?.classList.add('unsuccess');
+    if (selectValue?.classList.contains('unsuccess')) {
+      selectValue.classList.add('shake');
+      setTimeout(() => {
+        selectValue.classList.remove('shake');
+      }, 500);
+    }
+  }
+  getSuccessForSubmit() {
+    const selectValue = this.shadowRoot?.querySelector('.select__value');
+    return selectValue?.classList.contains('success');
+  }
   getSuccess() {
     return this.placeholder.getElement<HTMLSpanElement>().classList.contains('selected');
   }
@@ -113,6 +126,11 @@ export class SelectNewControl extends HTMLElement {
   resetState() {
     const selectValue = this.shadowRoot?.querySelector('.select__value');
     selectValue?.classList.remove('success');
+  }
+  resetStateForSubmit() {
+    this.resetState();
+    this.placeholder.getElement<HTMLSpanElement>().classList.remove('selected');
+    this.placeholder.setTextContent('Select Country');
   }
 }
 customElements.define('select-component', SelectNewControl);

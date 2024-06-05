@@ -1,6 +1,5 @@
 import { InputNewType } from './types';
 import { styles } from './inputTextComponentStyles';
-// import { saveInputEvent } from '../../utils/custom-event';
 
 interface Validation {
   validate: (value: string) => boolean;
@@ -38,7 +37,6 @@ export class InputTextControl extends HTMLElement {
   ) {
     super();
     this.input.setAttribute('type', type);
-    this.input.disabled = true;
     const shadow = this.attachShadow({ mode: 'open' });
     const style = document.createElement('style');
     style.textContent = styles;
@@ -76,6 +74,7 @@ export class InputTextControl extends HTMLElement {
     if (setEdit) {
       this.btnEdit.innerHTML = SVGEDIT;
       this.btnCheck.innerHTML = SVGCHECK;
+      this.input.disabled = true;
       this.wrapperSvg.append(this.btnEdit, this.btnCheck);
       this.btnCheck.disabled = true;
       this.btnEdit.onclick = () => this.editProperty();
@@ -115,6 +114,27 @@ export class InputTextControl extends HTMLElement {
       this.btnCheck.disabled = true;
     }
   }
+  checkStateForSubmit() {
+    this.validateInput(this.validationArray);
+    if (this.input.classList.contains('unsuccess')) {
+      this.input.classList.add('shake');
+      this.errMsg.classList.add('shake');
+      setTimeout(() => {
+        this.input.classList.remove('shake');
+        this.errMsg.classList.remove('shake');
+      }, 500);
+    }
+  }
+  checkStateForInvalidPassword() {
+    if (this.input.classList.contains('unsuccess')) {
+      this.input.classList.add('shake');
+      this.errMsg.classList.add('shake');
+      setTimeout(() => {
+        this.input.classList.remove('shake');
+        this.errMsg.classList.remove('shake');
+      }, 500);
+    }
+  }
   connectedCallback() {
     this.input.addEventListener('input', () => this.validateInput(this.validationArray));
   }
@@ -139,12 +159,24 @@ export class InputTextControl extends HTMLElement {
     }
   }
 
+  setErrorInvalidPassword(error: string) {
+    this.errMsg.textContent = error;
+    this.classList.add('error');
+    this.input.classList.add('unsuccess');
+    this.checkStateForInvalidPassword();
+  }
+  getSuccessForSubmit() {
+    return this.input.classList.contains('success');
+  }
   getSuccess() {
     return (this.input.classList.contains('success') && this.input.disabled === true) || this.input.disabled === true;
   }
-
   resetState() {
     this.input.classList.remove('success');
+  }
+  resetStateForSubmit() {
+    this.resetState();
+    this.input.value = '';
   }
   changeValidations(newValidation: Validation[]) {
     this.validationArray = newValidation;
