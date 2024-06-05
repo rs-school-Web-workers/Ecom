@@ -105,7 +105,7 @@ export class SelectNewControl extends HTMLElement {
     });
     return result || '';
   }
-  checkStateForAddAddress() {
+  checkStateForSubmit() {
     const selectValue = this.shadowRoot?.querySelector('.select__value');
     selectValue?.classList.add('unsuccess');
     if (selectValue?.classList.contains('unsuccess')) {
@@ -115,7 +115,7 @@ export class SelectNewControl extends HTMLElement {
       }, 500);
     }
   }
-  getSuccessForAddAddress() {
+  getSuccessForSubmit() {
     const selectValue = this.shadowRoot?.querySelector('.select__value');
     return selectValue?.classList.contains('success');
   }
@@ -127,7 +127,7 @@ export class SelectNewControl extends HTMLElement {
     const selectValue = this.shadowRoot?.querySelector('.select__value');
     selectValue?.classList.remove('success');
   }
-  resetStateForAddress() {
+  resetStateForSubmit() {
     this.resetState();
     this.placeholder.getElement<HTMLSpanElement>().classList.remove('selected');
     this.placeholder.setTextContent('Select Country');

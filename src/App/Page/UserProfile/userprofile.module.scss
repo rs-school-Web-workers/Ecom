@@ -64,7 +64,10 @@ $linkColor: #0f3dde;
     border: 2px solid white;
     gap: $gapForm;
     &.success {
-      border: 2px solid #6fcf97;
+      border-color:  #6fcf97;
+    }
+    &.unsuccess {
+      border-color: #ee5757;
     }
   }
   .userProfile__title {

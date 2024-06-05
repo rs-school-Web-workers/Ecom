@@ -1,6 +1,5 @@
 import { InputNewType } from './types';
 import { styles } from './inputTextComponentStyles';
-// import { saveInputEvent } from '../../utils/custom-event';
 
 interface Validation {
   validate: (value: string) => boolean;
@@ -115,8 +114,18 @@ export class InputTextControl extends HTMLElement {
       this.btnCheck.disabled = true;
     }
   }
-  checkStateForAddAddress() {
+  checkStateForSubmit() {
     this.validateInput(this.validationArray);
+    if (this.input.classList.contains('unsuccess')) {
+      this.input.classList.add('shake');
+      this.errMsg.classList.add('shake');
+      setTimeout(() => {
+        this.input.classList.remove('shake');
+        this.errMsg.classList.remove('shake');
+      }, 500);
+    }
+  }
+  checkStateForInvalidPassword() {
     if (this.input.classList.contains('unsuccess')) {
       this.input.classList.add('shake');
       this.errMsg.classList.add('shake');
@@ -149,7 +158,14 @@ export class InputTextControl extends HTMLElement {
       this.input.classList.remove('success');
     }
   }
-  getSuccessForAddAddress() {
+
+  setErrorInvalidPassword(error: string) {
+    this.errMsg.textContent = error;
+    this.classList.add('error');
+    this.input.classList.add('unsuccess');
+    this.checkStateForInvalidPassword();
+  }
+  getSuccessForSubmit() {
     return this.input.classList.contains('success');
   }
   getSuccess() {
@@ -158,7 +174,7 @@ export class InputTextControl extends HTMLElement {
   resetState() {
     this.input.classList.remove('success');
   }
-  resetStateForAddress() {
+  resetStateForSubmit() {
     this.resetState();
     this.input.value = '';
   }
