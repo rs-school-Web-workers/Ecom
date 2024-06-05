@@ -1,0 +1,20 @@
+{
+  "products": [
+    {
+      "name": "One Life Graphic T-shirt",
+      "price": "300",
+      "discount": "0.4",
+      "definition": "This graphic t-shirt which is perfect for any occasion. Crafted from a soft and breathable fabric, it offers superior comfort and style.",
+      "colors": ["#4F4631", "#314F4A", "#31344F"],
+      "sizes": ["small", "medium", "large", "x-large"],
+      "images": [
+        "level1/deerhunt.jpg",
+        "level1/deerlake.jpg",
+        "level1/abbati2.jpg",
+        "level1/firework.jpg",
+        "level1/firework.jpg"
+      ],
+      "brand": "some brand"
+    }
+  ]
+}

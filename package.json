@@ -63,6 +63,7 @@
     "@commercetools/sdk-client-v2": "^2.5.0",
     "babel-jest": "^29.7.0",
     "identity-obj-proxy": "^3.0.0",
+    "swiper": "^6.8.4",
     "webpack-merge": "^5.10.0"
   }
 }
