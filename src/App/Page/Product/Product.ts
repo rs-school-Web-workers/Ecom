@@ -255,7 +255,7 @@ export default class ProductPage extends Page {
       discountContainer.append(discountText);
       this.priceContainer.append(currentPrice, allPrice, discountContainer);
     } else {
-      currentPrice.textContent = `$${this.variants[this.index].price}`;
+      currentPrice.textContent = `$${(Number(this.variants[this.index].price) / 100).toFixed(2)}`;
       this.priceContainer.append(currentPrice);
     }
   }
