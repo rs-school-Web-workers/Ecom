@@ -78,6 +78,12 @@ interface dataForAddresses {
   billingValue?: boolean;
   id?: string;
 }
+interface dataBoxesForAddAddress {
+  checkboxDefaultBilling: HTMLInputElement;
+  checkboxDefaultShipping: HTMLInputElement;
+  checkboxBilling: HTMLInputElement;
+  checkboxShipping: HTMLInputElement;
+}
 
 export class UserProfilePage extends Page {
   private emailInput = new InputTextControl('email', emailValidator, 'Email address', 'Enter your e-mail', true);
@@ -101,25 +107,20 @@ export class UserProfilePage extends Page {
       this.containerImg.getElement<HTMLDivElement>()
     );
     this.initAddressesContainer();
-    this.setData();
+    this.setDataPersonalUserInformation();
+    this.setDataAddressesUserInformation();
     this.passwordInput.addEventListener('focus', () => this.toggler());
     this.newPasswordInput.addEventListener('focus', () => this.toggler());
   }
-
-  async setData() {
+  async setDataPersonalUserInformation() {
     const { body } = await getUserProfile();
-    const {
-      firstName,
-      lastName,
-      dateOfBirth,
-      email,
-      addresses,
-      defaultBillingAddressId,
-      defaultShippingAddressId,
-      shippingAddressIds,
-      billingAddressIds,
-    } = body as getUserProfileData;
+    const { firstName, lastName, dateOfBirth, email } = body as getUserProfileData;
     this.createFormPersonalUserInformation(firstName, lastName, dateOfBirth, email);
+  }
+  async setDataAddressesUserInformation() {
+    const { body } = await getUserProfile();
+    const { addresses, defaultBillingAddressId, defaultShippingAddressId, shippingAddressIds, billingAddressIds } =
+      body as getUserProfileData;
     addresses.forEach(({ streetName, streetNumber, postalCode, id, country, city }: addressItem) => {
       this.createFormAddressesUserInformation({
         streetNameValue: streetName || '',
@@ -365,6 +366,12 @@ export class UserProfilePage extends Page {
       selectCountry,
       postalCode,
     };
+    const propertyDataCheckboxes = {
+      checkboxDefaultBilling,
+      checkboxDefaultShipping,
+      checkboxBilling,
+      checkboxShipping,
+    };
     form.getElement<HTMLFormElement>().addEventListener(
       'selectNewValue',
       (e) => {
@@ -394,7 +401,7 @@ export class UserProfilePage extends Page {
     );
     form
       .getElement<HTMLFormElement>()
-      .addEventListener('submit', (event) => this.submitFormAddAddress(event, propertyData));
+      .addEventListener('submit', (event) => this.submitFormAddAddress(event, propertyData, propertyDataCheckboxes));
     form.setChildren(
       wrapperDefaultBillingAndShippingCheckbox.getElement(),
       streetName,
@@ -406,11 +413,12 @@ export class UserProfilePage extends Page {
     );
     return form;
   }
-  async submitFormAddAddress(event: Event, addressData: dataForChangeAddress) {
+  async submitFormAddAddress(event: Event, addressData: dataForChangeAddress, checkboxesData: dataBoxesForAddAddress) {
     event.preventDefault();
-    const { version } = (await getUserProfile()).body;
     const { streetName, streetNumber, city, selectCountry, postalCode } = addressData;
+    const { checkboxDefaultBilling, checkboxDefaultShipping, checkboxBilling, checkboxShipping } = checkboxesData;
     const arrAddressData = Object.values(addressData);
+    const arrCheckboxesData = Object.values(checkboxesData) as HTMLInputElement[];
     if (
       streetName.getSuccessForAddAddress() &&
       streetNumber.getSuccessForAddAddress() &&
@@ -418,6 +426,7 @@ export class UserProfilePage extends Page {
       selectCountry.getSuccessForAddAddress()
     ) {
       if (postalCode?.getSuccessForAddAddress()) {
+        const { version } = (await getUserProfile()).body;
         const address = {
           city: city.value,
           country: selectCountry.getValue(),
@@ -426,8 +435,51 @@ export class UserProfilePage extends Page {
           streetNumber: streetNumber.value,
         };
         await addAddress(version, address);
+        if (checkboxDefaultBilling.checked && checkboxDefaultShipping.checked) {
+          try {
+            const { version, addresses } = (await getUserProfile()).body;
+            const { id } = addresses.slice(addresses.length - 1)[0];
+            await setDefaultBillingAddress(version, id);
+            const { version: newValueVersion } = (await getUserProfile()).body;
+            await setDefaultShippingAddress(newValueVersion, id);
+          } catch (error) {
+            console.error(error);
+          }
+        } else if (checkboxDefaultBilling.checked) {
+          const { version, addresses } = (await getUserProfile()).body;
+          const { id } = addresses.slice(addresses.length - 1)[0];
+          await setDefaultBillingAddress(version, id);
+        } else if (checkboxDefaultShipping.checked) {
+          const { version, addresses } = (await getUserProfile()).body;
+          const { id } = addresses.slice(addresses.length - 1)[0];
+          await setDefaultShippingAddress(version, id);
+        }
+        if (checkboxBilling.checked && checkboxShipping.checked) {
+          try {
+            const { version, addresses } = (await getUserProfile()).body;
+            const { id } = addresses.slice(addresses.length - 1)[0];
+            await addBillingAddress(version, id);
+            const { version: newValueVersion } = (await getUserProfile()).body;
+            await addShippingAddress(newValueVersion, id);
+          } catch (error) {
+            console.error(error);
+          }
+        } else if (checkboxBilling.checked) {
+          const { version, addresses } = (await getUserProfile()).body;
+          const { id } = addresses.slice(addresses.length - 1)[0];
+          await addBillingAddress(version, id);
+        } else if (checkboxShipping.checked) {
+          const { version, addresses } = (await getUserProfile()).body;
+          const { id } = addresses.slice(addresses.length - 1)[0];
+          await addShippingAddress(version, id);
+        }
+        arrCheckboxesData.forEach((el) => (el.checked = false));
         arrAddressData.forEach((el) => el.resetStateForAddress());
         postalCode.remove();
+        while (this.addressesList.getElement<HTMLDivElement>().firstChild) {
+          this.addressesList.getElement<HTMLDivElement>().firstChild?.remove();
+        }
+        this.setDataAddressesUserInformation();
       } else {
         postalCode?.checkStateForAddAddress();
       }
@@ -608,10 +660,6 @@ export class UserProfilePage extends Page {
 
   async submitFormAddressesUserInformation(event: Event, propertyData: dataForChangeAddress, buttonSubmit: Component) {
     event.preventDefault();
-    const { target } = event;
-    if (target instanceof HTMLElement) {
-      console.log(target.getAttribute('id'));
-    }
     const { version } = (await getUserProfile()).body;
     const { streetName, streetNumber, city, selectCountry, postalCode } = propertyData;
     let id;

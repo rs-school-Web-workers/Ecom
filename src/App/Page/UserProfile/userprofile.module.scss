@@ -27,8 +27,9 @@ $linkColor: #0f3dde;
     flex-direction: column;
     gap: 20px;
     overflow-y: scroll;
-    height: 380px;
+    height: 420px;
     scrollbar-width: thin;
+    scroll-behavior: smooth;
   }
   .userProfile__wrapperCheckBox {
     display: flex;
