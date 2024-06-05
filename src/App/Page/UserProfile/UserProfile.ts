@@ -48,6 +48,7 @@ const {
   userProfile__wrapperCheckBox_default,
   userProfile__btnDelete,
   userProfile__aboutText,
+  success,
   // userProfile__btnListShow,
   userProfile__FormList,
   userProfile__label,
@@ -295,6 +296,9 @@ export class UserProfilePage extends Page {
         dateOfBirth: this.dateOfBirthday.value,
       };
       await changeUserProfile(version, firstName, lastName, email, dateOfBirth);
+      if (event.target instanceof HTMLFormElement) {
+        this.setSuccess(event.target);
+      }
       this.nameInput.resetState();
       this.surnameInput.resetState();
       this.emailInput.resetState();
@@ -476,6 +480,9 @@ export class UserProfilePage extends Page {
         arrCheckboxesData.forEach((el) => (el.checked = false));
         arrAddressData.forEach((el) => el.resetStateForAddress());
         postalCode.remove();
+        if (event.target instanceof HTMLFormElement) {
+          this.setSuccess(event.target);
+        }
         while (this.addressesList.getElement<HTMLDivElement>().firstChild) {
           this.addressesList.getElement<HTMLDivElement>().firstChild?.remove();
         }
@@ -683,6 +690,9 @@ export class UserProfilePage extends Page {
       selectCountry.getSuccess()
     ) {
       await changeAddress(version, address, id);
+      if (event.target instanceof HTMLFormElement) {
+        this.setSuccess(event.target);
+      }
       streetName.resetState();
       streetNumber.resetState();
       city.resetState();
@@ -749,5 +759,12 @@ export class UserProfilePage extends Page {
       await removeAddress(version, id);
       form.remove();
     }
+  }
+
+  setSuccess(target: HTMLFormElement) {
+    target.classList.add(success);
+    setTimeout(() => {
+      target.classList.remove(success);
+    }, 700);
   }
 }
