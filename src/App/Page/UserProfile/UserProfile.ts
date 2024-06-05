@@ -1,5 +1,18 @@
 import { InputTextControl } from '../../components/inputText/inputTextComponent';
-import { getUserProfile, changeUserProfile, changeAddress, destroyClient, passwordReset } from '../../utils/api/Client';
+import {
+  getUserProfile,
+  changeUserProfile,
+  changeAddress,
+  destroyClient,
+  passwordReset,
+  setDefaultBillingAddress,
+  setDefaultShippingAddress,
+  addBillingAddress,
+  removeBillingAddress,
+  addShippingAddress,
+  removeShippingAddress,
+  removeAddress,
+} from '../../utils/api/Client';
 import Component from '../../utils/base-component';
 import Page from '../Page';
 import {
@@ -51,10 +64,6 @@ interface dataForChangeAddress {
   city: InputTextControl;
   selectCountry: SelectNewControl;
   postalCode: InputTextControl | undefined;
-  checkboxDefaultBilling: HTMLInputElement;
-  checkboxDefaultShipping: HTMLInputElement;
-  checkboxBilling: HTMLInputElement;
-  checkboxShipping: HTMLInputElement;
 }
 
 export class UserProfilePage extends Page {
@@ -410,6 +419,15 @@ export class UserProfilePage extends Page {
       buttonSubmit.getElement<HTMLButtonElement>()
     );
     buttonSubmit.getElement<HTMLButtonElement>().disabled = true;
+    checkboxDefaultBilling.addEventListener('change', (event) =>
+      this.handlerDefaultCheckboxes(event, 'default-billing')
+    );
+    checkboxDefaultShipping.addEventListener('change', (event) =>
+      this.handlerDefaultCheckboxes(event, 'default-shipping')
+    );
+    checkboxShipping.addEventListener('change', (e) => this.handlerCheckBoxes(e, 'shipping'));
+    checkboxBilling.addEventListener('change', (e) => this.handlerCheckBoxes(e, 'billing'));
+    btnDelete.getElement<HTMLButtonElement>().addEventListener('click', (e) => this.deleteAddress(e));
     form.getElement<HTMLFormElement>().addEventListener(
       'inputStateChange',
       (e: Event) => {
@@ -436,15 +454,12 @@ export class UserProfilePage extends Page {
       city,
       selectCountry,
       postalCode,
-      checkboxDefaultBilling,
-      checkboxDefaultShipping,
-      checkboxBilling,
-      checkboxShipping,
     };
     form
       .getElement<HTMLFormElement>()
       .addEventListener('submit', (e) => this.submitFormAddressesUserInformation(e, propertyData, buttonSubmit));
   }
+
   async submitFormAddressesUserInformation(event: Event, propertyData: dataForChangeAddress, buttonSubmit: Component) {
     event.preventDefault();
     const { target } = event;
@@ -452,18 +467,7 @@ export class UserProfilePage extends Page {
       console.log(target.getAttribute('id'));
     }
     const { version } = (await getUserProfile()).body;
-    // console.log(data);
-    const {
-      streetName,
-      streetNumber,
-      city,
-      selectCountry,
-      postalCode,
-      // checkboxDefaultBilling,
-      // checkboxDefaultShipping,
-      // checkboxShipping,
-      // checkboxBilling,
-    } = propertyData;
+    const { streetName, streetNumber, city, selectCountry, postalCode } = propertyData;
     let id;
     if (event.target instanceof HTMLElement) {
       id = event.target.id;
@@ -501,6 +505,56 @@ export class UserProfilePage extends Page {
         }
       });
       buttonSubmit.getElement<HTMLButtonElement>().disabled = true;
+    }
+  }
+  async handlerDefaultCheckboxes(event: Event, className: string) {
+    const checkbox = event?.target as HTMLInputElement;
+    const id = checkbox?.closest('form')?.id;
+    const { version } = (await getUserProfile()).body;
+    if (id) {
+      if (className === 'default-billing') {
+        await setDefaultBillingAddress(version, id);
+      } else {
+        await setDefaultShippingAddress(version, id);
+      }
+    }
+    const checkboxes = document?.querySelectorAll(`.${className}`);
+    if (checkboxes) {
+      checkboxes.forEach((element) => {
+        if (element instanceof HTMLInputElement && element !== checkbox) {
+          (element as HTMLInputElement).checked = false;
+        }
+      });
+    }
+  }
+  async handlerCheckBoxes(event: Event, className: string) {
+    const checkbox = event?.target as HTMLInputElement;
+    const id = checkbox?.closest('form')?.id;
+    const { version } = (await getUserProfile()).body;
+    if (id) {
+      if (className === 'billing') {
+        if (checkbox.checked) {
+          addBillingAddress(version, id);
+        } else {
+          removeBillingAddress(version, id);
+        }
+      } else {
+        if (checkbox.checked) {
+          addShippingAddress(version, id);
+        } else {
+          removeShippingAddress(version, id);
+        }
+      }
+    }
+  }
+  async deleteAddress(event: Event) {
+    const buttonDelete = event?.target as HTMLInputElement;
+    const form = buttonDelete.closest('form');
+    const id = buttonDelete?.closest('form')?.id;
+    const { version } = (await getUserProfile()).body;
+    if (id && form) {
+      await removeAddress(version, id);
+      form.remove();
     }
   }
 }
