@@ -101,7 +101,18 @@ export const styles = `
   font-size: 13px;
   color: #9b9fa8;
 }
+@keyframes shake {
+  0% { transform: translateX(0); }
+  20% { transform: translateX(-2%); }
+  40% { transform: translateX(2%); }
+  60% { transform: translateX(-2%); }
+  80% { transform: translateX(2%); }
+  100% { transform: translateX(0); }
+}
 
+.shake {
+  animation: shake 0.5s;
+}
 .hide {
   display: none;
 }`;

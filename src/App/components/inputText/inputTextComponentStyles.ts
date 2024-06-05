@@ -11,7 +11,7 @@ export const styles = `
 }
 .label-text {
   display: inline-block;
-  font-size: 18px;
+  font-size: clamp(0.8rem, 2vw, 1.1rem);
   font-weight: bold;
   cursor: pointer;
 }
@@ -74,10 +74,10 @@ export const styles = `
 }
 @keyframes shake {
   0% { transform: translateX(0); }
-  20% { transform: translateX(-10px); }
-  40% { transform: translateX(10px); }
-  60% { transform: translateX(-10px); }
-  80% { transform: translateX(10px); }
+  20% { transform: translateX(-2%); }
+  40% { transform: translateX(2%); }
+  60% { transform: translateX(-2%); }
+  80% { transform: translateX(2%); }
   100% { transform: translateX(0); }
 }
 

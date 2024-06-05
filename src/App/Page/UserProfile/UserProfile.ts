@@ -12,12 +12,14 @@ import {
   addShippingAddress,
   removeShippingAddress,
   removeAddress,
+  addAddress,
 } from '../../utils/api/Client';
 import Component from '../../utils/base-component';
 import Page from '../Page';
 import {
   cityValidator,
   dateOfBirthdayValidator,
+  passwordValidator,
   emailValidator,
   nameValidator,
   postalCodeBelarusValidator,
@@ -26,12 +28,10 @@ import {
   streetValidator,
   surnameValidator,
 } from '../../utils/validationsInputText';
-import { passwordValidator as passwordValidatorOld } from '../../utils/validations';
 import * as userProfileStyle from './userprofile.module.scss';
 import { countries } from '../../utils/countries';
 import { addressItem, getUserProfileData /*, changeAddress */ } from './types';
 import { SelectNewControl } from '../../components/selectNew/selectNewComponent';
-import { createInputView } from '../../components/input/inputComponent';
 import { ClientResponse, ErrorResponse } from '@commercetools/platform-sdk';
 import { Router } from '../../Router/Router';
 import { PagePath } from '../../Router/types';
@@ -47,6 +47,8 @@ const {
   userProfile__wrapperCheckBox_default,
   userProfile__btnDelete,
   userProfile__aboutText,
+  success,
+  unsuccess,
   // userProfile__btnListShow,
   userProfile__FormList,
   userProfile__label,
@@ -65,11 +67,29 @@ interface dataForChangeAddress {
   selectCountry: SelectNewControl;
   postalCode: InputTextControl | undefined;
 }
+interface dataForAddresses {
+  streetNameValue: string;
+  streetNumberValue: string;
+  postalCodeValue: string;
+  countryValue: string;
+  cityValue: string;
+  defaultBillingValue?: boolean;
+  defaultShippingValue?: boolean;
+  shippingValue?: boolean;
+  billingValue?: boolean;
+  id?: string;
+}
+interface dataBoxesForAddAddress {
+  checkboxDefaultBilling: HTMLInputElement;
+  checkboxDefaultShipping: HTMLInputElement;
+  checkboxBilling: HTMLInputElement;
+  checkboxShipping: HTMLInputElement;
+}
 
 export class UserProfilePage extends Page {
   private emailInput = new InputTextControl('email', emailValidator, 'Email address', 'Enter your e-mail', true);
-  private passwordInput = createInputView('password', passwordValidatorOld, 'Password', 'Enter your password');
-  private newPasswordInput = createInputView('password', passwordValidatorOld, 'New Password', 'Enter new password');
+  private passwordInput = new InputTextControl('password', passwordValidator, 'Password', 'Enter your password');
+  private newPasswordInput = new InputTextControl('password', passwordValidator, 'New Password', 'Enter new password');
   private nameInput = new InputTextControl('text', nameValidator, 'Name', 'Enter your name', true);
   private surnameInput = new InputTextControl('text', surnameValidator, 'Surname', 'Enter your surname', true);
   private dateOfBirthday = new InputTextControl('date', dateOfBirthdayValidator, 'Date of birth', '', true);
@@ -88,25 +108,19 @@ export class UserProfilePage extends Page {
       this.containerImg.getElement<HTMLDivElement>()
     );
     this.initAddressesContainer();
-    this.setData();
-    this.passwordInput.addEventListener('focus', () => this.toggler());
-    this.newPasswordInput.addEventListener('focus', () => this.toggler());
+    this.setDataPersonalUserInformation();
+    this.setDataAddressesUserInformation();
   }
-
-  async setData() {
+  async setDataPersonalUserInformation() {
     const { body } = await getUserProfile();
-    const {
-      firstName,
-      lastName,
-      dateOfBirth,
-      email,
-      addresses,
-      defaultBillingAddressId,
-      defaultShippingAddressId,
-      shippingAddressIds,
-      billingAddressIds,
-    } = body as getUserProfileData;
+    const { firstName, lastName, dateOfBirth, email } = body as getUserProfileData;
     this.createFormPersonalUserInformation(firstName, lastName, dateOfBirth, email);
+    this.createFormPassword();
+  }
+  async setDataAddressesUserInformation() {
+    const { body } = await getUserProfile();
+    const { addresses, defaultBillingAddressId, defaultShippingAddressId, shippingAddressIds, billingAddressIds } =
+      body as getUserProfileData;
     addresses.forEach(({ streetName, streetNumber, postalCode, id, country, city }: addressItem) => {
       this.createFormAddressesUserInformation({
         streetNameValue: streetName || '',
@@ -125,25 +139,68 @@ export class UserProfilePage extends Page {
 
   initAddressesContainer() {
     const title = new Component('h1', [userProfile__title]);
+    const titleForAdd = new Component('h1', [userProfile__title]);
+    titleForAdd.setTextContent('Add address');
     title.setTextContent('User Addresses');
-    const titleList = new Component('h3', [userProfile__aboutText]);
-    titleList.setTextContent('Your List of Addresses');
-    this.addressesContainer.setChildren(title.getElement(), titleList.getElement(), this.addressesList.getElement());
+    const subtitleList = new Component('h3', [userProfile__aboutText]);
+    const subtitleForAdd = new Component('h3', [userProfile__aboutText]);
+    subtitleList.setTextContent('Your List of Addresses');
+    subtitleForAdd.setTextContent('Enter all necessary data to add a form');
+    const formAddAddress = this.createFormToAddAddress();
+    this.addressesContainer.setChildren(
+      titleForAdd.getElement(),
+      subtitleForAdd.getElement(),
+      formAddAddress.getElement<HTMLFormElement>(),
+      title.getElement(),
+      subtitleList.getElement(),
+      this.addressesList.getElement()
+    );
   }
 
-  toggler() {
-    const passwordInputValue = this.emailInput.shadowRoot?.children[1].lastChild;
-    const newPasswordInputValue = this.newPasswordInput.shadowRoot?.children[1].lastChild;
-    if (
-      passwordInputValue instanceof HTMLInputElement &&
-      newPasswordInputValue instanceof HTMLInputElement &&
-      passwordInputValue.classList.contains('crederror') &&
-      newPasswordInputValue.classList.contains('crederror')
-    ) {
-      passwordInputValue.dispatchEvent(new Event('validate'));
-      newPasswordInputValue.dispatchEvent(new Event('validate'));
-      passwordInputValue.classList.remove('crederror');
-      newPasswordInputValue.classList.remove('crederror');
+  createFormPassword() {
+    const form = new Component('form', [userProfile__form]);
+    const title = new Component('h2', [userProfile__title]);
+    title.setTextContent('Change Password');
+    const buttonSubmit = new Component('button', [userProfile__formBtn]);
+    buttonSubmit.getElement<HTMLButtonElement>().type = 'submit';
+    buttonSubmit.setTextContent('Save Changes');
+    form.getElement<HTMLFormElement>().addEventListener('submit', (event) => this.submitSavePassword(event));
+    form.setChildren(
+      title.getElement(),
+      this.passwordInput,
+      this.newPasswordInput,
+      buttonSubmit.getElement<HTMLButtonElement>()
+    );
+    this.wrapperForm.setChildren(form.getElement<HTMLFormElement>());
+  }
+
+  async submitSavePassword(event: Event) {
+    event.preventDefault();
+    if (this.passwordInput.getSuccessForSubmit() && this.newPasswordInput.getSuccessForSubmit()) {
+      try {
+        const { version } = (await getUserProfile()).body;
+        await passwordReset(version, this.passwordInput.value, this.newPasswordInput.value);
+        destroyClient();
+        this.router.navigate(PagePath.MAIN);
+        this.router.renderPageView(PagePath.MAIN);
+      } catch (resp) {
+        const err = (resp as ClientResponse).body as ErrorResponse;
+        if ((err as ErrorResponse).errors?.filter((el) => el.code === 'InvalidCurrentPassword')[0]) {
+          [this.passwordInput, this.newPasswordInput].forEach((el) => {
+            el.setErrorInvalidPassword(err.message);
+          });
+          if (event.target instanceof HTMLFormElement) this.setUnSuccess(event.target);
+          [this.passwordInput, this.newPasswordInput].forEach((el) => {
+            el.resetStateForSubmit();
+          });
+        }
+      }
+    } else {
+      [this.passwordInput, this.newPasswordInput].forEach((el) => {
+        if (!el.getSuccessForSubmit()) {
+          el.checkStateForSubmit();
+        }
+      });
     }
   }
 
@@ -153,7 +210,7 @@ export class UserProfilePage extends Page {
     dateOfBirthValue: string,
     emailValue: string
   ) {
-    const title = new Component('h1', [userProfile__title]);
+    const title = new Component('h2', [userProfile__title]);
     title.setTextContent('User Information');
     const form = new Component('form', [userProfile__form]);
     const buttonSubmit = new Component('button', [userProfile__formBtn]);
@@ -164,56 +221,6 @@ export class UserProfilePage extends Page {
     this.surnameInput.value = surnameValue;
     this.dateOfBirthday.value = dateOfBirthValue;
     this.emailInput.value = emailValue;
-
-    const subtitle = new Component('h2', [userProfile__title]);
-    subtitle.setTextContent('Change Password');
-    const button = new Component('button', [userProfile__formBtn]);
-    button.setTextContent('Change Password');
-    button.getElement<HTMLButtonElement>().addEventListener('click', async () => {
-      const passwordInputValue = this.passwordInput.shadowRoot?.children[1].lastChild;
-      const newPasswordInputValue = this.newPasswordInput.shadowRoot?.children[1].lastChild;
-      if (passwordInputValue instanceof HTMLInputElement && newPasswordInputValue instanceof HTMLInputElement) {
-        if (passwordInputValue.classList.contains('success') && newPasswordInputValue.classList.contains('success')) {
-          try {
-            const { version } = (await getUserProfile()).body;
-            await passwordReset(
-              version,
-              (passwordInputValue as HTMLInputElement).value,
-              (newPasswordInputValue as HTMLInputElement).value
-            );
-            destroyClient();
-            this.router.navigate(PagePath.MAIN);
-            this.router.renderPageView(PagePath.MAIN);
-          } catch (resp) {
-            const err = (resp as ClientResponse).body as ErrorResponse;
-            if ((err as ErrorResponse).errors?.filter((el) => el.code === 'InvalidCurrentPassword')[0]) {
-              passwordInputValue.classList.add('unsuccess');
-              passwordInputValue.classList.add('crederror');
-              passwordInputValue.classList.remove('success');
-              this.passwordInput.shadowRoot!.querySelector('.error-message')!.textContent = 'Invalidpassword';
-              newPasswordInputValue.classList.add('unsuccess');
-              newPasswordInputValue.classList.add('crederror');
-              newPasswordInputValue.classList.remove('success');
-              this.newPasswordInput.shadowRoot!.querySelector('.error-message')!.textContent = 'Invalid password';
-            }
-          }
-        } else {
-          if (!passwordInputValue.classList.contains('success')) {
-            passwordInputValue.classList.add('unsuccess');
-            passwordInputValue.classList.add('crederror');
-            passwordInputValue.classList.remove('success');
-            this.passwordInput.shadowRoot!.querySelector('.error-message')!.textContent = 'Enter password';
-          }
-          if (!newPasswordInputValue.classList.contains('success')) {
-            newPasswordInputValue.classList.add('unsuccess');
-            newPasswordInputValue.classList.add('crederror');
-            newPasswordInputValue.classList.remove('success');
-            this.newPasswordInput.shadowRoot!.querySelector('.error-message')!.textContent = 'Enter new password';
-          }
-        }
-      }
-    });
-
     form.setChildren(
       title.getElement(),
       this.nameInput,
@@ -243,13 +250,7 @@ export class UserProfilePage extends Page {
     form
       .getElement<HTMLFormElement>()
       .addEventListener('submit', (e) => this.submitSaveFormPersonalUserInformation(e, buttonSubmit));
-    this.wrapperForm.setChildren(
-      form.getElement<HTMLFormElement>(),
-      subtitle.getElement(),
-      this.passwordInput,
-      this.newPasswordInput,
-      button.getElement()
-    );
+    this.wrapperForm.setChildren(form.getElement<HTMLFormElement>());
   }
 
   async submitSaveFormPersonalUserInformation(event: Event, buttonSubmit: Component) {
@@ -269,6 +270,9 @@ export class UserProfilePage extends Page {
         dateOfBirth: this.dateOfBirthday.value,
       };
       await changeUserProfile(version, firstName, lastName, email, dateOfBirth);
+      if (event.target instanceof HTMLFormElement) {
+        this.setSuccess(event.target);
+      }
       this.nameInput.resetState();
       this.surnameInput.resetState();
       this.emailInput.resetState();
@@ -284,6 +288,192 @@ export class UserProfilePage extends Page {
     }
   }
 
+  createFormToAddAddress() {
+    const form = new Component('form', [userProfile__FormList]);
+    const wrapperDefaultBillingAndShippingCheckbox = new Component('div', [userProfile__wrapperCheckBox_default]);
+    const checkboxDefaultBilling = new Component('input', [
+      userProfile__inputCheck,
+      'default-billing',
+    ]).getElement<HTMLInputElement>();
+    checkboxDefaultBilling.type = 'checkbox';
+    const templateDefaultCheckboxBilling = new Component('label', [userProfile__label]);
+    templateDefaultCheckboxBilling.setTextContent('Default Billing');
+    templateDefaultCheckboxBilling.setChildren(checkboxDefaultBilling);
+    const checkboxDefaultShipping = new Component('input', [
+      userProfile__inputCheck,
+      'default-shipping',
+    ]).getElement<HTMLInputElement>();
+    checkboxDefaultShipping.type = 'checkbox';
+    const templateDefaultCheckboxShipping = new Component('label', [userProfile__label]);
+    templateDefaultCheckboxShipping.setTextContent('Deafult Shipping');
+    templateDefaultCheckboxShipping.setChildren(checkboxDefaultShipping);
+    wrapperDefaultBillingAndShippingCheckbox.setChildren(
+      templateDefaultCheckboxBilling.getElement(),
+      templateDefaultCheckboxShipping.getElement()
+    );
+    const streetName = new InputTextControl('text', streetValidator, 'Street', 'Enter street');
+    const streetNumber = new InputTextControl('text', [], 'Street Number', 'Enter street number');
+    const city = new InputTextControl('text', cityValidator, 'City', 'Enter city');
+    const selectCountry = new SelectNewControl(countries);
+    const wrapperBillingAndShippingCheckbox = new Component('div', [userProfile__wrapperCheckBox]);
+    const checkboxBilling = new Component('input', [userProfile__inputCheck, 'billing']).getElement<HTMLInputElement>();
+    checkboxBilling.type = 'checkbox';
+    const templateCheckboxBilling = new Component('label', [userProfile__label]);
+    templateCheckboxBilling.setTextContent('Billing');
+    templateCheckboxBilling.setChildren(checkboxBilling);
+    const checkboxShipping = new Component('input', [
+      userProfile__inputCheck,
+      'shipping',
+    ]).getElement<HTMLInputElement>();
+    checkboxShipping.type = 'checkbox';
+    const templateCheckboxShipping = new Component('label', [userProfile__label]);
+    templateCheckboxShipping.setTextContent('Shipping');
+    templateCheckboxShipping.setChildren(checkboxShipping);
+    wrapperBillingAndShippingCheckbox.setChildren(
+      templateCheckboxBilling.getElement(),
+      templateCheckboxShipping.getElement()
+    );
+    const buttonSubmit = new Component('button', [userProfile__formBtn, userProfile__listBtn]);
+    buttonSubmit.setTextContent('Save Changes');
+    buttonSubmit.getElement<HTMLButtonElement>().type = 'submit';
+    let postalCode: InputTextControl | undefined;
+    const propertyData = {
+      streetName,
+      streetNumber,
+      city,
+      selectCountry,
+      postalCode,
+    };
+    const propertyDataCheckboxes = {
+      checkboxDefaultBilling,
+      checkboxDefaultShipping,
+      checkboxBilling,
+      checkboxShipping,
+    };
+    form.getElement<HTMLFormElement>().addEventListener(
+      'selectNewValue',
+      (e) => {
+        const target = e as CustomEvent<{ value: string }>;
+        if (target.detail.value) {
+          if (postalCode) postalCode.remove();
+          switch (target.detail.value) {
+            case 'BY':
+              postalCode = new InputTextControl('text', postalCodeBelarusValidator, 'Postal Code', 'Enter postal code');
+              selectCountry.insertAdjacentElement('afterend', postalCode);
+              propertyData.postalCode = postalCode;
+              break;
+            case 'RU':
+              postalCode = new InputTextControl('text', postalCodeRussiaValidator, 'Postal Code', 'Enter postal code');
+              selectCountry.insertAdjacentElement('afterend', postalCode);
+              propertyData.postalCode = postalCode;
+              break;
+            case 'PL':
+              postalCode = new InputTextControl('text', postalCodePolandValidator, 'Postal Code', 'Enter postal code');
+              selectCountry.insertAdjacentElement('afterend', postalCode);
+              propertyData.postalCode = postalCode;
+              break;
+          }
+        }
+      },
+      { capture: true, passive: true }
+    );
+    form
+      .getElement<HTMLFormElement>()
+      .addEventListener('submit', (event) => this.submitFormAddAddress(event, propertyData, propertyDataCheckboxes));
+    form.setChildren(
+      wrapperDefaultBillingAndShippingCheckbox.getElement(),
+      streetName,
+      streetNumber,
+      city,
+      wrapperBillingAndShippingCheckbox.getElement(),
+      selectCountry,
+      buttonSubmit.getElement<HTMLButtonElement>()
+    );
+    return form;
+  }
+  async submitFormAddAddress(event: Event, addressData: dataForChangeAddress, checkboxesData: dataBoxesForAddAddress) {
+    event.preventDefault();
+    const { streetName, streetNumber, city, selectCountry, postalCode } = addressData;
+    const { checkboxDefaultBilling, checkboxDefaultShipping, checkboxBilling, checkboxShipping } = checkboxesData;
+    const arrAddressData = Object.values(addressData) as InputTextControl[] | SelectNewControl[];
+    const arrCheckboxesData = Object.values(checkboxesData) as HTMLInputElement[];
+    if (
+      streetName.getSuccessForSubmit() &&
+      streetNumber.getSuccessForSubmit() &&
+      city.getSuccessForSubmit() &&
+      selectCountry.getSuccessForSubmit()
+    ) {
+      if (postalCode?.getSuccessForSubmit()) {
+        const { version } = (await getUserProfile()).body;
+        const address = {
+          city: city.value,
+          country: selectCountry.getValue(),
+          postalCode: postalCode?.value || '',
+          streetName: streetName.value,
+          streetNumber: streetNumber.value,
+        };
+        await addAddress(version, address);
+        if (checkboxDefaultBilling.checked && checkboxDefaultShipping.checked) {
+          try {
+            const { version, addresses } = (await getUserProfile()).body;
+            const { id } = addresses.slice(addresses.length - 1)[0];
+            await setDefaultBillingAddress(version, id);
+            const { version: newValueVersion } = (await getUserProfile()).body;
+            await setDefaultShippingAddress(newValueVersion, id);
+          } catch (error) {
+            console.error(error);
+          }
+        } else if (checkboxDefaultBilling.checked) {
+          const { version, addresses } = (await getUserProfile()).body;
+          const { id } = addresses.slice(addresses.length - 1)[0];
+          await setDefaultBillingAddress(version, id);
+        } else if (checkboxDefaultShipping.checked) {
+          const { version, addresses } = (await getUserProfile()).body;
+          const { id } = addresses.slice(addresses.length - 1)[0];
+          await setDefaultShippingAddress(version, id);
+        }
+        if (checkboxBilling.checked && checkboxShipping.checked) {
+          try {
+            const { version, addresses } = (await getUserProfile()).body;
+            const { id } = addresses.slice(addresses.length - 1)[0];
+            await addBillingAddress(version, id);
+            const { version: newValueVersion } = (await getUserProfile()).body;
+            await addShippingAddress(newValueVersion, id);
+          } catch (error) {
+            console.error(error);
+          }
+        } else if (checkboxBilling.checked) {
+          const { version, addresses } = (await getUserProfile()).body;
+          const { id } = addresses.slice(addresses.length - 1)[0];
+          await addBillingAddress(version, id);
+        } else if (checkboxShipping.checked) {
+          const { version, addresses } = (await getUserProfile()).body;
+          const { id } = addresses.slice(addresses.length - 1)[0];
+          await addShippingAddress(version, id);
+        }
+        arrCheckboxesData.forEach((el) => (el.checked = false));
+        arrAddressData.forEach((el) => el.resetStateForSubmit());
+        postalCode.remove();
+        if (event.target instanceof HTMLFormElement) {
+          this.setSuccess(event.target);
+        }
+        while (this.addressesList.getElement<HTMLDivElement>().firstChild) {
+          this.addressesList.getElement<HTMLDivElement>().firstChild?.remove();
+        }
+        this.setDataAddressesUserInformation();
+      } else {
+        postalCode?.checkStateForSubmit();
+      }
+    } else {
+      arrAddressData.forEach((el) => {
+        if (el) {
+          if (!el.getSuccessForSubmit()) {
+            el.checkStateForSubmit();
+          }
+        }
+      });
+    }
+  }
   createFormAddressesUserInformation({
     streetNameValue,
     streetNumberValue,
@@ -295,18 +485,7 @@ export class UserProfilePage extends Page {
     shippingValue = false,
     billingValue = false,
     id,
-  }: {
-    streetNameValue: string;
-    streetNumberValue: string;
-    postalCodeValue: string;
-    countryValue: string;
-    cityValue: string;
-    defaultBillingValue?: boolean;
-    defaultShippingValue?: boolean;
-    shippingValue?: boolean;
-    billingValue?: boolean;
-    id: string;
-  }) {
+  }: dataForAddresses) {
     const form = new Component('form', [userProfile__FormList]);
     const btnDelete = new Component('button', [userProfile__btnDelete]);
     const SVGTRASH =
@@ -462,16 +641,11 @@ export class UserProfilePage extends Page {
 
   async submitFormAddressesUserInformation(event: Event, propertyData: dataForChangeAddress, buttonSubmit: Component) {
     event.preventDefault();
-    const { target } = event;
-    if (target instanceof HTMLElement) {
-      console.log(target.getAttribute('id'));
-    }
     const { version } = (await getUserProfile()).body;
     const { streetName, streetNumber, city, selectCountry, postalCode } = propertyData;
     let id;
     if (event.target instanceof HTMLElement) {
       id = event.target.id;
-      console.log(id);
     }
     const address = {
       city: city.value,
@@ -490,6 +664,9 @@ export class UserProfilePage extends Page {
       selectCountry.getSuccess()
     ) {
       await changeAddress(version, address, id);
+      if (event.target instanceof HTMLFormElement) {
+        this.setSuccess(event.target);
+      }
       streetName.resetState();
       streetNumber.resetState();
       city.resetState();
@@ -556,5 +733,18 @@ export class UserProfilePage extends Page {
       await removeAddress(version, id);
       form.remove();
     }
+  }
+
+  setSuccess(target: HTMLFormElement) {
+    target.classList.add(success);
+    setTimeout(() => {
+      target.classList.remove(success);
+    }, 1000);
+  }
+  setUnSuccess(target: HTMLFormElement) {
+    target.classList.add(unsuccess);
+    setTimeout(() => {
+      target.classList.remove(unsuccess);
+    }, 1000);
   }
 }
