@@ -1,5 +1,5 @@
 import { InputTextControl } from '../../components/inputText/inputTextComponent';
-import { getUserProfile, changeUserProfile /*, changeAddress */ } from '../../utils/api/Client';
+import { getUserProfile, changeUserProfile, changeAddress } from '../../utils/api/Client';
 import Component from '../../utils/base-component';
 import Page from '../Page';
 import {
@@ -40,6 +40,18 @@ const {
   // userProfile__footerLink,
   userProfileImgWrapper,
 } = userProfileStyle;
+
+interface dataForChangeAddress {
+  streetName: InputTextControl;
+  streetNumber: InputTextControl;
+  city: InputTextControl;
+  selectCountry: SelectNewControl;
+  postalCode: InputTextControl | undefined;
+  checkboxDefaultBilling: HTMLInputElement;
+  checkboxDefaultShipping: HTMLInputElement;
+  checkboxBilling: HTMLInputElement;
+  checkboxShipping: HTMLInputElement;
+}
 
 export class UserProfilePage extends Page {
   private emailInput = new InputTextControl('email', emailValidator, 'Email address', 'Enter your e-mail', true);
@@ -233,7 +245,7 @@ export class UserProfilePage extends Page {
       templateDefaultCheckboxShipping.getElement(),
       btnDelete.getElement()
     );
-    const street = new InputTextControl('text', streetValidator, 'Street', 'Enter street', true);
+    const streetName = new InputTextControl('text', streetValidator, 'Street', 'Enter street', true);
     const streetNumber = new InputTextControl('text', [], 'Street Number', 'Enter street number', true);
     const city = new InputTextControl('text', cityValidator, 'City', 'Enter city', true);
     const selectCountry = new SelectNewControl(countries);
@@ -262,7 +274,7 @@ export class UserProfilePage extends Page {
     /** Добавление данных */
 
     form.setId(id);
-    street.value = streetNameValue;
+    streetName.value = streetNameValue;
     streetNumber.value = streetNumberValue;
     city.value = cityValue;
     selectCountry.setValue(countryValue);
@@ -308,7 +320,7 @@ export class UserProfilePage extends Page {
     checkboxBilling.checked = billingValue;
     form.setChildren(
       wrapperDefaultBillingAndShippingCheckbox.getElement(),
-      street,
+      streetName,
       streetNumber,
       city,
       wrapperBillingAndShippingCheckbox.getElement(),
@@ -317,19 +329,97 @@ export class UserProfilePage extends Page {
       buttonSubmit.getElement<HTMLButtonElement>()
     );
     buttonSubmit.getElement<HTMLButtonElement>().disabled = true;
+    form.getElement<HTMLFormElement>().addEventListener(
+      'inputStateChange',
+      (e: Event) => {
+        const customEvent = e as CustomEvent<{ state: boolean }>;
+        if (
+          customEvent.detail.state &&
+          streetName.getSuccess() &&
+          streetNumber.getSuccess() &&
+          city.getSuccess() &&
+          postalCode?.getSuccess() &&
+          selectCountry.getSuccess()
+        ) {
+          buttonSubmit.getElement<HTMLButtonElement>().disabled = false;
+        } else {
+          buttonSubmit.getElement<HTMLButtonElement>().disabled = true;
+        }
+      },
+      { capture: true, passive: true }
+    );
     this.addressesList.setChildren(form.getElement<HTMLFormElement>());
-    form.getElement<HTMLFormElement>().addEventListener('submit', (e) => this.submitFormAddressesUserInformation(e));
+    const propertyData = {
+      streetName,
+      streetNumber,
+      city,
+      selectCountry,
+      postalCode,
+      checkboxDefaultBilling,
+      checkboxDefaultShipping,
+      checkboxBilling,
+      checkboxShipping,
+    };
+    form
+      .getElement<HTMLFormElement>()
+      .addEventListener('submit', (e) => this.submitFormAddressesUserInformation(e, propertyData, buttonSubmit));
   }
-  async submitFormAddressesUserInformation(event: Event) {
+  async submitFormAddressesUserInformation(event: Event, propertyData: dataForChangeAddress, buttonSubmit: Component) {
     event.preventDefault();
-    const data = (await getUserProfile()).body;
-    console.log(data);
-    // await changeAddress;
-    // const { firstName, lastName, email, dateOfBirth } = {
-    //   firstName: this.nameInput.value,
-    //   lastName: this.surnameInput.value,
-    //   email: this.emailInput.value,
-    //   dateOfBirth: this.dateOfBirthday.value,
-    // };
+    const { target } = event;
+    if (target instanceof HTMLElement) {
+      console.log(target.getAttribute('id'));
+    }
+    const { version } = (await getUserProfile()).body;
+    // console.log(data);
+    const {
+      streetName,
+      streetNumber,
+      city,
+      selectCountry,
+      postalCode,
+      // checkboxDefaultBilling,
+      // checkboxDefaultShipping,
+      // checkboxShipping,
+      // checkboxBilling,
+    } = propertyData;
+    let id;
+    if (event.target instanceof HTMLElement) {
+      id = event.target.id;
+      console.log(id);
+    }
+    const address = {
+      city: city.value,
+      country: selectCountry.getValue(),
+      id,
+      postalCode: postalCode?.value || '',
+      streetName: streetName.value,
+      streetNumber: streetNumber.value,
+    };
+    const arr = [streetName, streetNumber, city, postalCode];
+    if (
+      streetName.getSuccess() &&
+      streetNumber.getSuccess() &&
+      city.getSuccess() &&
+      postalCode?.getSuccess() &&
+      selectCountry.getSuccess()
+    ) {
+      await changeAddress(version, address, id);
+      streetName.resetState();
+      streetNumber.resetState();
+      city.resetState();
+      postalCode?.resetState();
+      selectCountry.resetState();
+      buttonSubmit.getElement<HTMLButtonElement>().disabled = true;
+    } else {
+      arr.forEach((input) => {
+        if (input) {
+          if (!input.getSuccess()) {
+            input.checkState();
+          }
+        }
+      });
+      buttonSubmit.getElement<HTMLButtonElement>().disabled = true;
+    }
   }
 }

@@ -96,12 +96,23 @@ export class SelectNewControl extends HTMLElement {
     });
   }
 
-  getValue() {
-    this.countries.find((el) => {
+  getValue(): string {
+    let result;
+    this.countries.forEach((el) => {
       if (el.fullCountryName === this.placeholder.getElement<HTMLSpanElement>().textContent) {
-        return el.shortCountryName;
+        result = el.shortCountryName;
       }
     });
+    return result || '';
+  }
+
+  getSuccess() {
+    return this.placeholder.getElement<HTMLSpanElement>().classList.contains('selected');
+  }
+
+  resetState() {
+    const selectValue = this.shadowRoot?.querySelector('.select__value');
+    selectValue?.classList.remove('success');
   }
 }
 customElements.define('select-component', SelectNewControl);
