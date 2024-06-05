@@ -191,7 +191,6 @@ export class UserProfilePage extends Page {
           });
           if (event.target instanceof HTMLFormElement) this.setUnSuccess(event.target);
           [this.passwordInput, this.newPasswordInput].forEach((el) => {
-            // el.resetStateInvalidPassword();
             el.resetStateForSubmit();
           });
         }
