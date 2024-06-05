@@ -15,7 +15,7 @@ $gap-link-burger: 60px;
   color: $headerTextColor;
   max-width: 1440px;
 
-  @media (max-width: 768px) {
+  @media (max-width: 800px) {
     padding: 30px;
   }
 }
@@ -24,7 +24,7 @@ $gap-link-burger: 60px;
   display: flex;
   background-color: $headerBackground;
 
-  @media (max-width: 768px) {
+  @media (max-width: 800px) {
     position: fixed;
     flex-direction: column;
     top: 80px;
@@ -51,7 +51,7 @@ $gap-link-burger: 60px;
   font-size: 16px;
   align-items: center;
 
-  @media (max-width: 768px) {
+  @media (max-width: 800px) {
     padding-top: 20px;
     flex-direction: column;
     height: 100%;
@@ -108,7 +108,7 @@ $gap-link-burger: 60px;
     cursor: pointer;
   }
 
-  @media (max-width: 768px) {
+  @media (max-width: 800px) {
     display: flex;
   }
 }

@@ -3,7 +3,6 @@ import {
   getUserProfile,
   changeUserProfile,
   changeAddress,
-  destroyClient,
   passwordReset,
   setDefaultBillingAddress,
   setDefaultShippingAddress,
@@ -13,6 +12,7 @@ import {
   removeShippingAddress,
   removeAddress,
   addAddress,
+  // loginClient,
 } from '../../utils/api/Client';
 import Component from '../../utils/base-component';
 import Page from '../Page';
@@ -180,7 +180,7 @@ export class UserProfilePage extends Page {
       try {
         const { version } = (await getUserProfile()).body;
         await passwordReset(version, this.passwordInput.value, this.newPasswordInput.value);
-        destroyClient();
+        // await loginClient(this.emailInput.value, this.newPasswordInput.value);
         this.router.navigate(PagePath.MAIN);
         this.router.renderPageView(PagePath.MAIN);
       } catch (resp) {
