@@ -1,4 +1,4 @@
-import SwiperCore from 'swiper/bundle';
+/* import SwiperCore from 'swiper/bundle';
 import 'swiper/swiper-bundle.css';
 
 window.onload = function () {
@@ -17,3 +17,4 @@ window.onload = function () {
     },
   });
 };
+ */

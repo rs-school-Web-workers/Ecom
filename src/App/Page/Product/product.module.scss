@@ -48,6 +48,7 @@ $max-width: 1240px;
   @media (max-width: 767px) {
     flex-direction: column-reverse;
     align-items: center;
+    max-height: 800px;
   }
 
   @media (max-width: 550px) {
@@ -143,7 +144,7 @@ $max-width: 1240px;
   overflow: hidden;
 
   @media (max-width: 767px) {
-    width: 100%;
+    width: 60%;
     max-width: none;
   }
 
@@ -205,6 +206,17 @@ $max-width: 1240px;
 
   @media (max-width: 580px) {
     font-size: 24px;
+  }
+}
+
+.product_brand {
+  font-family: Integral CF;
+  font-size: 20px;
+  font-weight: 500;
+  padding: 0px 15px;
+
+  @media (max-width: 580px) {
+    font-size: 16px;
   }
 }
 

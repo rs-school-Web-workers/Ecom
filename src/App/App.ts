@@ -8,7 +8,7 @@ import Page from './Page/Page';
 import MainPage from './Page/MainPage/MainPage';
 import NotFoundPage from './Page/NotFoundPage/NotFoundPage';
 import LoginPage from './Page/Login/Login';
-import { autoLoginCLient, isLogged } from './utils/api/Client';
+import { autoLoginCLient, getAnonClient, isLogged } from './utils/api/Client';
 import RegistrationPage from './Page/Registration/Registration';
 import { CatalogPage } from './Page/CatalogPage/Catalog';
 import ProductPage from './Page/Product/Product';
@@ -24,9 +24,12 @@ export class App {
   contentContainer: HTMLDivElement;
 
   constructor() {
-    if (localStorage.getItem('token')) autoLoginCLient();
+    if (localStorage.getItem('token')) {
+      autoLoginCLient();
+    } else {
+      getAnonClient();
+    }
     this.container = document.body;
-    console.log(style);
     this.container = new Component('div', [style.app]).getElement<HTMLDivElement>();
     document.body.append(this.container);
     const pages: PageInfo[] = this.initPages();
@@ -85,7 +88,7 @@ export class App {
       {
         pagePath: PagePath.PRODUCTS,
         render: () => {
-          const productPage = new CatalogPage();
+          const productPage = new CatalogPage(this.router);
           this.setPage(productPage);
         },
       },
@@ -97,8 +100,8 @@ export class App {
       },
       {
         pagePath: `${PagePath.PRODUCTS}/${SECTION_NAME}/${ID_ELEMENT}`,
-        render: () => {
-          const product: ProductPage = new ProductPage(this.router);
+        render: (_section_name?: string | undefined, id?: string) => {
+          const product: ProductPage = new ProductPage(this.router, id!);
           this.setPage(product);
         },
       },

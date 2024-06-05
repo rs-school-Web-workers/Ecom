@@ -1,9 +1,7 @@
 import Component from '../../utils/base-component';
-import mydata from '../../../assets/data/mydata.json';
 import Page from '../Page';
 import * as catalogStyle from './catalog.module.scss';
-import loki from '../../../assets/imgs/loki.webp';
-import { CardItem, DreassSizes, DressBrand, DressColors, dresses, sortValue } from './types';
+import { CardItem, sortValue, ICatalogFilter, defaultStateFilter, IFilterVariant, defaultVariantFilter } from './types';
 const {
   catalog,
   catalogContainer,
@@ -24,6 +22,10 @@ import show from '../../../assets/imgs/svg/Vector.svg';
 import unshow from '../../../assets/imgs/svg/Vector2.svg';
 import filter_logo from '../../../assets/imgs/svg/filter.svg';
 import glass from '../../../assets/imgs/svg/glass.svg';
+import { getCategorieById, getClient } from '../../utils/api/Client';
+import { RangeFacetResult, TermFacetResult } from '@commercetools/platform-sdk';
+import { centsToDollar } from '../../utils/helpers';
+import { Router } from '../../Router/Router';
 
 export class CatalogPage extends Page {
   catalogContainer = new Component('div', [catalogContainer]);
@@ -38,14 +40,50 @@ export class CatalogPage extends Page {
   contentContainer: HTMLDivElement = new Component('div', [
     catalogStyle.products_content_container,
   ]).getElement<HTMLDivElement>();
+  stateFilter: ICatalogFilter = Object.create(defaultStateFilter); // хранит состояние активных фильтров
+  variantFilter: IFilterVariant = defaultVariantFilter;
+  router;
+  categories: { slug: string; id: string; name: string; parent: string | undefined }[] | undefined;
+  styles: string[] = [];
+  styleSubcategory: string[][] = [];
 
-  constructor() {
+  constructor(router: Router) {
     super([catalog]);
+    this.router = router;
     this.initCatalogPage();
     this.render();
   }
 
-  initCatalogPage() {
+  async initCatalogPage() {
+    this.categories = (await getClient()?.categories().get().execute())?.body.results.map((el) => {
+      return { id: el.id, name: el.name['en-US'], slug: el.slug['en-US'], parent: el.parent?.id };
+    });
+    const top = this.categories!.filter((el) => !el.parent);
+    this.styles = top.map((el) => el.name);
+    top.forEach((style) => {
+      this.styleSubcategory.push(this.categories!.filter((el) => el.parent === style.id).map((el) => el.name));
+    });
+    const facets = await getClient()
+      ?.productProjections()
+      .search()
+      .get({
+        queryArgs: {
+          facet: [
+            'variants.attributes.size',
+            'variants.attributes.color',
+            'variants.attributes.brand',
+            'variants.price.centAmount:range(0 to 1000000)',
+          ],
+        },
+      })
+      .execute();
+    this.variantFilter = {
+      colors: (facets?.body.facets['variants.attributes.color'] as TermFacetResult).terms.map((el) => el.term),
+      brand: (facets?.body.facets['variants.attributes.brand'] as TermFacetResult).terms.map((el) => el.term),
+      sizes: (facets?.body.facets['variants.attributes.size'] as TermFacetResult).terms.map((el) => el.term),
+      min: (facets?.body.facets['variants.price.centAmount'] as RangeFacetResult).ranges[0].min,
+      max: (facets?.body.facets['variants.price.centAmount'] as RangeFacetResult).ranges[0].max,
+    };
     this.createHeaderCatalog();
     this.createFilterContainer();
     this.createSearchContainer();
@@ -76,6 +114,8 @@ export class CatalogPage extends Page {
 
   changeSearchHandler() {
     //вставить запрос и рендер
+    this.stateFilter.text = (this.searchContainer.children[1] as HTMLInputElement).value;
+    this.render();
   }
 
   createFilterSortContainer() {
@@ -131,6 +171,8 @@ export class CatalogPage extends Page {
     currentSort.textContent = currentElem.textContent;
     this.clickShowHandler(showElem, container);
     //добавить сортировку элементов и рендер
+    this.stateFilter.sort = currentElem.textContent ?? 'asc';
+    this.render();
   }
 
   clickFilterLogoHandler() {
@@ -152,28 +194,84 @@ export class CatalogPage extends Page {
     this.createCardList();
   }
 
-  setTitleContainerProducts(text: string = 'Casual') {
+  setTitleContainerProducts(text: string = '') {
     this.titleContainerProducts.textContent = text;
   }
 
-  createCardList() {
-    mydata.casual[0]['t-shirt']?.forEach(({ brand, name, description, price, image }) => {
+  async createCardList() {
+    // тут еще доделать сортировку фильтрацию и поиск
+    const args: { limit?: number; fuzzy?: boolean; filter?: string[]; sort?: string; 'text.en-US'?: string } = {};
+    args.limit = 500;
+    args.fuzzy = true;
+    args.filter = [];
+    if (this.stateFilter.cloth.length && !this.stateFilter.cloth.includes('All')) {
+      args.filter.push(
+        `categories.id:${this.stateFilter.cloth
+          .map((el) => `"${this.categories!.filter((cat) => cat.name === el.split('_')[1])[0].id}"`)
+          .join(',')}`
+      );
+    }
+    console.log(args.filter);
+    if (this.stateFilter.min >= 0) {
+      args.filter.push(`variants.price.centAmount:range (${this.stateFilter.min} to ${this.stateFilter.max})`);
+    }
+    if (this.stateFilter.brand.length) {
+      args.filter.push(`variants.attributes.brand:${this.stateFilter.brand.map((el) => `"${el}"`).join(',')}`);
+    }
+    if (this.stateFilter.colors.length) {
+      args.filter.push(`variants.attributes.color:${this.stateFilter.colors.map((el) => `"${el}"`).join(',')}`);
+    }
+    if (this.stateFilter.sizes.length) {
+      args.filter.push(`variants.attributes.size:${this.stateFilter.sizes.map((el) => `"${el}"`).join(',')}`);
+    }
+    if (this.stateFilter.sort === 'asc' || this.stateFilter.sort === 'desc') {
+      args.sort = `price ${this.stateFilter.sort}`;
+    } else {
+      args.sort = 'name.en-US asc';
+    }
+    args['text.en-US'] = this.stateFilter.text ?? '';
+    console.log(args.filter);
+    const products = await getClient()?.productProjections().search().get({ queryArgs: args }).execute();
+    console.log(products);
+    const data = await Promise.all<{ [row: string]: string }>(
+      products!.body.results.map(async (el) => {
+        const priceWithDiscount =
+          el.masterVariant.prices![0].discounted?.value.centAmount.toString() ??
+          el.masterVariant.prices![0].value.centAmount.toString();
+        const priceWithoutDiscount = el.masterVariant.prices![0].value.centAmount.toString();
+        return {
+          id: el.id,
+          category: (await getCategorieById(el.categories[0].id)).body.slug['en-US'],
+          name: el.name['en-US'],
+          description: el.description!['en-US'],
+          priceWithDiscount,
+          priceWithoutDiscount: priceWithDiscount === priceWithoutDiscount ? '' : priceWithoutDiscount,
+          imageLink: el.masterVariant.images![0].url,
+          brand: el.masterVariant.attributes!.filter((el) => el.name === 'brand')[0].value,
+        };
+      })
+    );
+    console.log(data);
+    data.forEach(({ id, category, brand, name, description, priceWithDiscount, priceWithoutDiscount, imageLink }) => {
       const dataObject: CardItem = {
-        name: `${brand} ${name}`,
+        id,
+        category,
+        name: `${brand} | ${name}`,
         description,
-        priceWithDiscount: price,
-        priceWithoutDiscount: price,
-        imageLink: loki,
+        priceWithDiscount,
+        priceWithoutDiscount,
+        imageLink,
       };
-      console.log(image);
       const card = this.createCard(dataObject);
       this.listProductsContainer.append(card.getElement());
     });
   }
+
   createCard(data: CardItem) {
     const card = new Component('div', [catalog__card]);
+    const imageCardContainer = new Component('div', [catalogStyle.catalog__cardImgContainer]);
     const imageCard = new Component('img', [catalog__cardImg]);
-    console.log(data);
+    imageCardContainer.setChildren(imageCard.getElement());
     imageCard.getElement<HTMLImageElement>().src = `${data.imageLink}`;
     imageCard.getElement<HTMLImageElement>().alt = data.name;
     const titleCard = new Component('h3', [catalog__cardName]);
@@ -181,9 +279,11 @@ export class CatalogPage extends Page {
     const descriptionCard = new Component('p', [catalog__cardDescription]);
     descriptionCard.setTextContent(data.description);
     const priceWithDiscount = new Component('span', [catalog__cardPrice]);
-    priceWithDiscount.setTextContent(data.priceWithDiscount);
+    priceWithDiscount.setTextContent(`${centsToDollar(Number(data.priceWithDiscount))}$`);
     const priceWithoutDiscount = new Component('span', [catalog__cardPrice, catalog__cardPrice_dashedGrey]);
-    priceWithoutDiscount.setTextContent(data.priceWithoutDiscount);
+    if (data.priceWithoutDiscount !== '') {
+      priceWithoutDiscount.setTextContent(`${centsToDollar(Number(data.priceWithoutDiscount))}$`);
+    }
     const containerForCardPrices = new Component('div', [catalog__cardPriceContainer]);
     containerForCardPrices.setChildren(priceWithDiscount.getElement(), priceWithoutDiscount.getElement());
     const wrapperAboutCard = new Component('div', [catalog__wrapperAbout]);
@@ -192,10 +292,19 @@ export class CatalogPage extends Page {
       descriptionCard.getElement(),
       containerForCardPrices.getElement()
     );
-    card.setChildren(imageCard.getElement<HTMLImageElement>(), wrapperAboutCard.getElement());
+    card.setChildren(imageCardContainer.getElement<HTMLImageElement>(), wrapperAboutCard.getElement());
+    card.getElement<HTMLElement>().addEventListener('click', () => {
+      const path = `/products/${data.category}/${data.id}`;
+      this.router.navigate(path);
+      this.router.renderPageView(path);
+    });
     // const discount = new Component('div', ['catalog__card-discount']);
     return card;
   }
+
+  // clickCardHandler() {
+
+  // }
 
   createFilterContainer() {
     const nameContainer: HTMLDivElement = new Component('div', [
@@ -243,6 +352,7 @@ export class CatalogPage extends Page {
         sizeSelect.push(size.dataset.size);
       }
     });
+    this.stateFilter.sizes = sizeSelect;
     const selectedColorFilter: NodeListOf<HTMLDivElement> = this.containerFilters.querySelectorAll(
       `.${catalogStyle.active_colorBox}`
     );
@@ -252,14 +362,15 @@ export class CatalogPage extends Page {
         colorSelect.push(color.dataset.color);
       }
     });
+    this.stateFilter.colors = colorSelect;
     const minPriceRange: HTMLInputElement | null = this.containerFilters.querySelector(
       `.${catalogStyle.min_range_select}`
     );
     const maxPriceRange: HTMLInputElement | null = this.containerFilters.querySelector(
       `.${catalogStyle.max_range_select}`
     );
-    const min: number = Number(minPriceRange?.value);
-    const max: number = Number(maxPriceRange?.value);
+    this.stateFilter.min = Number(minPriceRange?.value);
+    this.stateFilter.max = Number(maxPriceRange?.value);
     const clothSelect: string[] = [];
     const selectedClothFilter: NodeListOf<HTMLDivElement> = this.containerFilters.querySelectorAll(
       `.${catalogStyle.active_cloth}.${catalogStyle.filter_cloth_line}`
@@ -269,22 +380,23 @@ export class CatalogPage extends Page {
         clothSelect.push(cloth.dataset.clothName);
       }
     });
+    this.stateFilter.cloth = clothSelect;
     const brandSelect: string[] = [];
     const selectedBrandFilter: NodeListOf<HTMLDivElement> = this.containerFilters.querySelectorAll(
-      `.${catalogStyle.active_brand}.${catalogStyle.filter_style_line}`
+      `.${catalogStyle.active_brand}.${catalogStyle.filter_brand_line}`
     );
     selectedBrandFilter.forEach((brand) => {
-      if (brand.dataset.styleName !== undefined) {
-        brandSelect.push(brand.dataset.styleName);
+      if (brand.dataset.brandName !== undefined) {
+        brandSelect.push(brand.dataset.brandName);
       }
     });
+    this.stateFilter.brand = brandSelect;
     console.log(sizeSelect);
     console.log(colorSelect);
     console.log(brandSelect);
     console.log(clothSelect);
-    console.log(min);
-    console.log(max);
     //запрос с данными на фильтрацию
+    this.render();
   }
 
   clickResetHandler() {
@@ -299,8 +411,8 @@ export class CatalogPage extends Page {
     const minPriceElem: HTMLDivElement | null = this.containerFilters.querySelector(`.${catalogStyle.price_min_value}`);
     const maxPriceElem: HTMLDivElement | null = this.containerFilters.querySelector(`.${catalogStyle.price_max_value}`);
     if (minPriceElem !== null && maxPriceElem !== null) {
-      minPriceElem.textContent = '0$';
-      maxPriceElem.textContent = '1000$';
+      minPriceElem.textContent = `${centsToDollar(this.variantFilter.min)}$`;
+      maxPriceElem.textContent = `${centsToDollar(this.variantFilter.max)}$`;
     }
     const minPriceRange: HTMLInputElement | null = this.containerFilters.querySelector(
       `.${catalogStyle.min_range_select}`
@@ -310,8 +422,8 @@ export class CatalogPage extends Page {
     );
     const priceProgress: HTMLDivElement | null = this.containerFilters.querySelector(`.${catalogStyle.price_progress}`);
     if (minPriceRange !== null && maxPriceRange !== null && priceProgress !== null) {
-      minPriceRange.value = '0';
-      maxPriceRange.value = '1000';
+      minPriceRange.value = `${this.variantFilter.min}`;
+      maxPriceRange.value = `${this.variantFilter.max}`;
       this.changeProgressHandler(minPriceRange, maxPriceRange, priceProgress);
     }
     const selectedClothFilter = this.containerFilters.querySelectorAll(`.${catalogStyle.active_cloth}`);
@@ -322,6 +434,7 @@ export class CatalogPage extends Page {
     selectedBrandFilter.forEach((brand) => {
       brand.classList.remove(catalogStyle.active_brand);
     });
+    this.stateFilter = Object.create(defaultStateFilter);
   }
 
   createFilterPrice() {
@@ -358,20 +471,20 @@ export class CatalogPage extends Page {
       catalogStyle.min_range_select,
     ]).getElement<HTMLInputElement>();
     minSelect.type = 'range';
-    minSelect.min = '0';
-    minSelect.max = '1000';
+    minSelect.min = `${this.variantFilter.min}`;
+    minSelect.max = `${this.variantFilter.max}`;
     minSelect.step = '5';
-    minSelect.value = '0';
-    priceMinValue.textContent = `0$`;
+    minSelect.value = `${this.variantFilter.min}`;
+    priceMinValue.textContent = `${centsToDollar(this.variantFilter.min)}$`;
     const maxSelect: HTMLInputElement = new Component('input', [
       catalogStyle.max_range_select,
     ]).getElement<HTMLInputElement>();
     maxSelect.type = 'range';
-    maxSelect.min = '0';
-    maxSelect.max = '1000';
+    maxSelect.min = `${this.variantFilter.min}`;
+    maxSelect.max = `${this.variantFilter.max}`;
     maxSelect.step = '5';
-    maxSelect.value = '1000';
-    priceMaxValue.textContent = `1000$`;
+    maxSelect.value = `${this.variantFilter.max}`;
+    priceMaxValue.textContent = `${centsToDollar(this.variantFilter.max)}$`;
     priceProgress.style.background = `linear-gradient(to right, #dadae5 ${minSelect.value}% , #000000 ${minSelect.value}% , #000000 ${maxSelect.value}%, #dadae5 ${maxSelect.value}%)`;
     minSelect.addEventListener('input', () =>
       this.inputMinInputHandler(minSelect, maxSelect, priceProgress, priceMinValue, priceMaxValue)
@@ -403,8 +516,8 @@ export class CatalogPage extends Page {
       maxInput.value = minInput.value;
     }
     this.changeProgressHandler(minInput, maxInput, progress);
-    min.textContent = minInput.value + `$`;
-    max.textContent = maxInput.value + `$`;
+    min.textContent = centsToDollar(Number(minInput.value)) + `$`;
+    max.textContent = centsToDollar(Number(maxInput.value)) + `$`;
   }
 
   inputMaxInputHandler(
@@ -418,34 +531,111 @@ export class CatalogPage extends Page {
       minInput.value = maxInput.value;
     }
     this.changeProgressHandler(minInput, maxInput, progress);
-    min.textContent = minInput.value + `$`;
-    max.textContent = maxInput.value + `$`;
+    min.textContent = centsToDollar(Number(minInput.value)) + `$`;
+    max.textContent = centsToDollar(Number(maxInput.value)) + `$`;
   }
 
   createFilterCloth() {
     const clothContainer: HTMLDivElement = new Component('div', [
       catalogStyle.filter_cloth_container,
     ]).getElement<HTMLDivElement>();
-    dresses.forEach((dress) => {
-      const clothLineContainer: HTMLDivElement = new Component('div', [
-        catalogStyle.filter_cloth_line_container,
+    const clothNameContainer: HTMLDivElement = new Component('div', [
+      catalogStyle.filter_cloth_name_container,
+    ]).getElement<HTMLDivElement>();
+    const nameDress: HTMLSpanElement = new Component('span', [
+      catalogStyle.filter_cloth_name,
+    ]).getElement<HTMLSpanElement>();
+    nameDress.textContent = 'Dress Style';
+    const showDress = new Component('img', [catalogStyle.filter_cloth_show]).getElement<HTMLImageElement>();
+    showDress.src = unshow;
+    clothNameContainer.append(nameDress, showDress);
+    const clothSelectedContainer: HTMLDivElement = new Component('div', [
+      catalogStyle.filter_style_dress,
+    ]).getElement<HTMLDivElement>();
+    showDress.addEventListener('click', () => this.clickShowHandler(showDress, clothSelectedContainer));
+    this.styles.forEach((style, index) => {
+      const clothStyleLineContainer: HTMLDivElement = new Component('div', [
+        catalogStyle.filter_style_cloth_line_container,
       ]).getElement<HTMLDivElement>();
-      const clothLine: HTMLDivElement = new Component('div', [
-        catalogStyle.filter_cloth_line,
+      const clothStyleNameLineContainer: HTMLDivElement = new Component('div', [
+        catalogStyle.filter_cloth_line_name_container,
       ]).getElement<HTMLDivElement>();
-      clothLine.textContent = dress;
-      const clothLineSymbol: HTMLDivElement = new Component('div', [
-        catalogStyle.filter_cloth_line_symbol,
+      const clothStyleLine: HTMLDivElement = new Component('div', [
+        catalogStyle.filter_style_name,
       ]).getElement<HTMLDivElement>();
-      clothLineSymbol.textContent = '>';
-      clothLine.dataset.clothName = dress.toLowerCase();
-      clothLineContainer.append(clothLine, clothLineSymbol);
-      clothContainer.addEventListener('click', (event) =>
-        this.clickFilterElemHandler(event, catalogStyle.active_cloth)
+      clothStyleLine.textContent = style;
+      const clothStyleLineSymbol: HTMLImageElement = new Component('img', [
+        catalogStyle.filter_style_show,
+      ]).getElement<HTMLImageElement>();
+      clothStyleLineSymbol.src = unshow;
+      clothStyleNameLineContainer.append(clothStyleLine, clothStyleLineSymbol);
+      const selectStyleClothContainer: HTMLDivElement = new Component('div', [
+        catalogStyle.filter_style_cloth_dress,
+      ]).getElement<HTMLDivElement>();
+      clothStyleLineSymbol.addEventListener('click', () =>
+        this.clickShowHandler(clothStyleLineSymbol, selectStyleClothContainer)
       );
-      clothContainer.append(clothLineContainer);
+      this.styleSubcategory[index].forEach((dress) => {
+        const clothLineContainer: HTMLDivElement = new Component('div', [
+          catalogStyle.filter_cloth_line_container,
+        ]).getElement<HTMLDivElement>();
+        const clothLine: HTMLDivElement = new Component('div', [
+          catalogStyle.filter_cloth_line,
+        ]).getElement<HTMLDivElement>();
+        clothLine.textContent = dress;
+        clothLine.dataset.clothName = `${style}_${dress}`;
+        const clothLineSymbol: HTMLDivElement = new Component('div', [
+          catalogStyle.filter_cloth_line_symbol,
+        ]).getElement<HTMLDivElement>();
+        clothLineSymbol.textContent = '>';
+        clothLineContainer.append(clothLine, clothLineSymbol);
+        selectStyleClothContainer.append(clothLineContainer);
+      });
+      selectStyleClothContainer.addEventListener('click', (event) => {
+        this.clickFilterClothHandler(event, catalogStyle.active_cloth);
+      });
+      clothStyleLineContainer.append(clothStyleNameLineContainer, selectStyleClothContainer);
+      clothSelectedContainer.append(clothStyleLineContainer);
     });
+    const clothStyleLineContainer: HTMLDivElement = new Component('div', [
+      catalogStyle.filter_style_cloth_line_container,
+    ]).getElement<HTMLDivElement>();
+    const clothStyleNameLineContainer: HTMLDivElement = new Component('div', [
+      catalogStyle.filter_cloth_line_name_container,
+    ]).getElement<HTMLDivElement>();
+    const clothStyleLine: HTMLDivElement = new Component('div', [
+      catalogStyle.filter_style_name,
+      catalogStyle.filter_cloth_line,
+    ]).getElement<HTMLDivElement>();
+    clothStyleLine.textContent = 'All';
+    clothStyleLine.dataset.clothName = `All`;
+    clothStyleNameLineContainer.append(clothStyleLine);
+    clothStyleNameLineContainer.addEventListener('click', (event) =>
+      this.clickFilterClothHandler(event, catalogStyle.active_cloth)
+    );
+    clothStyleLineContainer.append(clothStyleNameLineContainer);
+    clothSelectedContainer.append(clothStyleLineContainer);
+    clothContainer.append(clothNameContainer, clothSelectedContainer);
     return clothContainer;
+  }
+
+  clickFilterClothHandler(event: Event, className: string) {
+    const elem: HTMLButtonElement = <HTMLButtonElement>event.target;
+    elem.classList.toggle(className);
+    const currentCategory = elem.dataset.clothName?.split('_')[0];
+    const selectedClothFilter: NodeListOf<HTMLDivElement> = this.containerFilters.querySelectorAll(
+      `.${catalogStyle.active_cloth}.${catalogStyle.filter_cloth_line}`
+    );
+    selectedClothFilter.forEach((cloth) => {
+      if (cloth.dataset.clothName !== undefined) {
+        const clothCategory = cloth.dataset.clothName?.split('_')[0];
+        /* console.log(currentCategory);
+        console.log(clothCategory); */
+        if (currentCategory !== clothCategory) {
+          cloth.classList.remove(catalogStyle.active_cloth);
+        }
+      }
+    });
   }
 
   createFilterDress() {
@@ -464,19 +654,19 @@ export class CatalogPage extends Page {
     const dressSelectedContainer: HTMLDivElement = new Component('div', [
       catalogStyle.filter_select_dress,
     ]).getElement<HTMLDivElement>();
-    DressBrand.forEach((styleName) => {
+    this.variantFilter.brand.forEach((brandName) => {
       const styleLineContainer: HTMLDivElement = new Component('div', [
-        catalogStyle.filter_style_line_container,
+        catalogStyle.filter_brand_line_container,
       ]).getElement<HTMLDivElement>();
       const styleLine: HTMLDivElement = new Component('div', [
-        catalogStyle.filter_style_line,
+        catalogStyle.filter_brand_line,
       ]).getElement<HTMLDivElement>();
-      styleLine.textContent = styleName;
+      styleLine.textContent = brandName;
       const styleLineSymbol: HTMLDivElement = new Component('div', [
-        catalogStyle.filter_style_line_symbol,
+        catalogStyle.filter_brand_line_symbol,
       ]).getElement<HTMLDivElement>();
       styleLineSymbol.textContent = '>';
-      styleLine.dataset.styleName = styleName;
+      styleLine.dataset.brandName = brandName;
       styleLineContainer.append(styleLine, styleLineSymbol);
       styleLineContainer.addEventListener('click', (event) =>
         this.clickFilterElemHandler(event, catalogStyle.active_brand)
@@ -505,7 +695,7 @@ export class CatalogPage extends Page {
     const colorSelectContainer: HTMLDivElement = new Component('div', [
       catalogStyle.filter_select_colors,
     ]).getElement<HTMLDivElement>();
-    DressColors.forEach((color) => {
+    this.variantFilter.colors.forEach((color) => {
       const colorBox: HTMLDivElement = new Component('div', [
         catalogStyle.filter_color_box,
       ]).getElement<HTMLDivElement>();
@@ -540,7 +730,7 @@ export class CatalogPage extends Page {
     const sizeSelectContainer: HTMLDivElement = new Component('div', [
       catalogStyle.filter_select_sizes,
     ]).getElement<HTMLDivElement>();
-    DreassSizes.forEach((size) => {
+    this.variantFilter.sizes.forEach((size) => {
       const sizeBox: HTMLButtonElement = new Component('button', [
         catalogStyle.filter_size_box,
       ]).getElement<HTMLButtonElement>();

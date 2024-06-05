@@ -2,15 +2,14 @@ import { Router } from '../../Router/Router';
 import Component from '../../utils/base-component';
 import Page from '../Page';
 import * as style from './product.module.scss';
-import data from '../../../assets/data/products.json';
 import { IProduct } from './types';
 import { isNull } from '../../utils/base-methods';
 import { ProductModal } from '../../Modal/ProductModal/ProductModal';
-
+import { getProductById } from '../../utils/api/Client';
+import type { Variant } from './types';
+import { PagePath } from '../../Router/types';
 export default class ProductPage extends Page {
   router: Router;
-
-  product: IProduct | null;
 
   currentSlide: number = 0;
 
@@ -19,40 +18,94 @@ export default class ProductPage extends Page {
   startTouch: number = 0;
 
   modal: ProductModal | null;
+  info: { name?: string; definition?: string } = {};
+  variants: Variant[] = [];
+  index = 0;
+  products: IProduct[] = [];
+  colors: string[] = [];
 
-  constructor(router: Router) {
+  imagesContainer: HTMLDivElement = new Component('div', [style.img_container]).getElement<HTMLDivElement>();
+
+  sizeContainer: HTMLDivElement = new Component('div', [style.product_sizes]).getElement<HTMLDivElement>();
+
+  priceContainer: HTMLDivElement = new Component('div', [style.price_container]).getElement<HTMLDivElement>();
+
+  constructor(router: Router, id: string) {
     super([style.product]);
     this.router = router;
-    this.product = null;
     this.modal = null;
-    this.initProductInfo();
-    this.initPage();
+    this.initProductInfo(id).then(() => this.initPage());
   }
 
-  initProductInfo() {
-    // запрос информации продукта
-    this.product = data.products[0];
+  async initProductInfo(id: string) {
+    try {
+      const response = await getProductById(id);
+      this.colors = [response.body.masterData.current.masterVariant]
+        .concat(response.body.masterData.current.variants)
+        .map((el) => {
+          return el.attributes?.filter((attr) => attr.name === 'color')[0].value[0];
+        });
+      this.info = {
+        name: response.body.masterData.current.name['en-US'],
+        definition: response.body.masterData.current.description!['en-US'],
+      };
+      this.variants = [response.body.masterData.current.masterVariant]
+        .concat(response.body.masterData.current.variants)
+        .map((el) => {
+          const res: Variant = {
+            color: el.attributes?.filter((attr) => attr.name === 'color')[0].value[0],
+            price: el.prices![0].value.centAmount,
+            brand: el.attributes?.filter((attr) => attr.name === 'brand')[0].value,
+            images: el.images?.map((img) => img.url) ?? [],
+            sizes: el.attributes?.filter((attr) => attr.name === 'size')[0].value,
+          };
+          if (el.prices![0].discounted) {
+            res.discounted = el.prices![0].discounted?.value.centAmount;
+          }
+          return res;
+        });
+      this.products = this.variants.map((el) => {
+        return {
+          name: this.info.name!,
+          price: el.price.toString(),
+          discount: el.discounted ? ((el.discounted * 100) / el.price).toString() : '',
+          definition: this.info.definition!,
+          colors: [el.color],
+          sizes: el.sizes,
+          images: el.images,
+          brand: el.brand,
+        };
+      });
+    } catch {
+      this.router.navigate(PagePath.NOT_FOUND);
+      this.router.renderPageView(PagePath.NOT_FOUND);
+    }
   }
 
   initPage() {
     this.createPathChain();
     this.createProductDetail();
-    if (this.product !== null) {
-      this.modal = new ProductModal('product', this.product?.images);
+  }
+
+  renderProductPage() {
+    this.createSizeSelect();
+    this.createImgContainer();
+    this.createPriceContainer();
+    if (this.variants[this.index] != null) {
+      this.modal = new ProductModal('product', this.variants[this.index].images);
       this.container?.append(this.modal.background);
     }
   }
-
   createProductDetail() {
     const container: HTMLDivElement = new Component('div', [style.product_detail]).getElement<HTMLDivElement>();
     const infoContainer: HTMLDivElement = new Component('div', [style.product_info]).getElement<HTMLDivElement>();
-    infoContainer.append(this.createImgContainer(), this.createProductDefinition());
+    infoContainer.append(this.imagesContainer, this.createProductDefinition());
     container.append(this.createPathChain(), infoContainer);
     this.container?.append(container);
   }
 
   createImgContainer() {
-    const container: HTMLDivElement = new Component('div', [style.img_container]).getElement<HTMLDivElement>();
+    this.imagesContainer.replaceChildren();
     const smallImgsContainer: HTMLDivElement = new Component('div', [
       style.small_imgs_container,
     ]).getElement<HTMLDivElement>();
@@ -68,15 +121,15 @@ export default class ProductPage extends Page {
       style.arrow,
       style.arrow_bottom,
     ]).getElement<HTMLDivElement>();
-    if (this.product !== null && this.product.images.length > 3) {
+    if (this.variants[this.index] != null && this.variants[this.index].images.length > 3) {
       scrollContainer.append(arrow_left, arrow_right);
     }
-    mainImgContainer.src = `https://raw.githubusercontent.com/rolling-scopes-school/rss-puzzle-data/main/images/${this.product?.images[0]}`;
-    this.product?.images.forEach((img, index) => {
+    mainImgContainer.src = `${this.variants[this.index].images[0]}`;
+    this.variants[this.index].images.forEach((img, index) => {
       const imgContainer: HTMLDivElement = new Component('div', [style.small_img]).getElement<HTMLDivElement>();
       const imgBox: HTMLImageElement = new Component('img', []).getElement<HTMLImageElement>();
       imgBox.dataset.slide = (index + 1).toString();
-      imgBox.src = `https://raw.githubusercontent.com/rolling-scopes-school/rss-puzzle-data/main/images/${img}`;
+      imgBox.src = `${img}`;
       imgBox.addEventListener('click', (event: Event) =>
         this.clickSmallImgHandler(event, mainImgContainer, smallImgsContainer)
       );
@@ -95,8 +148,7 @@ export default class ProductPage extends Page {
     });
     mainImgContainer.addEventListener('click', () => this.clickMainImgHandler());
     scrollContainer.append(smallImgsContainer);
-    container.append(scrollContainer, mainImgContainer);
-    return container;
+    this.imagesContainer.append(scrollContainer, mainImgContainer);
   }
 
   clickMainImgHandler() {
@@ -106,9 +158,11 @@ export default class ProductPage extends Page {
   clickSmallImgHandler(event: Event, mainImg: HTMLImageElement, container: HTMLDivElement) {
     const elem: HTMLImageElement = <HTMLImageElement>event.target;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const swiper: any = document.querySelector('.swiper-container');
+    /* const swiper: any = document.querySelector('.swiper-container');
     console.log(elem.dataset.slide);
-    swiper.swiper.slideTo(elem.dataset.slide);
+    console.log(swiper.swiper); */
+    this.modal?.swiper?.slideTo(Number(elem.dataset.slide) - 1);
+    console.log(elem.dataset.slide);
     const pastActiveElem: HTMLButtonElement | null = container.querySelector(`.${style.active_small_img}`);
     mainImg.src = elem.src;
     isNull(pastActiveElem);
@@ -131,7 +185,7 @@ export default class ProductPage extends Page {
   }
 
   clickNextHandler(slide: HTMLDivElement, container: HTMLDivElement) {
-    const amount: number | undefined = this.product?.images.length;
+    const amount: number | undefined = this.variants[this.index].images.length;
     const sizeWindow = document.documentElement.getBoundingClientRect().width;
     if (amount !== undefined && this.currentSlide < amount - 3) {
       this.currentSlide++;
@@ -164,42 +218,46 @@ export default class ProductPage extends Page {
   createProductDefinition() {
     const container: HTMLDivElement = new Component('div', [style.product_definition]).getElement<HTMLDivElement>();
     const name: HTMLHeadingElement = new Component('h3', [style.product_name]).getElement<HTMLHeadingElement>();
-    isNull(this.product);
-    name.textContent = this.product?.name;
-    const textDefinition: HTMLDivElement = new Component('div', [
-      style.product_text_definition,
-    ]).getElement<HTMLDivElement>();
-    textDefinition.textContent = this.product.definition;
-    container.append(
-      name,
-      this.createPriceContainer(),
-      textDefinition,
-      this.createColorsSelect(),
-      this.createSizeSelect(),
-      this.createCartButton()
-    );
+    if (this.variants[this.index] != null) {
+      name.textContent = this.info.name ?? 'error';
+      const brand: HTMLDivElement = new Component('div', [style.product_brand]).getElement<HTMLDivElement>();
+      brand.textContent = this.variants[this.index].brand;
+      const textDefinition: HTMLDivElement = new Component('div', [
+        style.product_text_definition,
+      ]).getElement<HTMLDivElement>();
+      textDefinition.textContent = this.info.definition ?? 'error';
+      container.append(
+        name,
+        brand,
+        this.priceContainer,
+        textDefinition,
+        this.createColorsSelect(),
+        this.sizeContainer,
+        this.createCartButton()
+      );
+      this.renderProductPage();
+    }
     return container;
   }
 
   createPriceContainer() {
-    const container: HTMLDivElement = new Component('div', [style.price_container]).getElement<HTMLDivElement>();
+    this.priceContainer.replaceChildren();
     const currentPrice: HTMLDivElement = new Component('div', [style.current_price]).getElement<HTMLDivElement>();
     const allPrice: HTMLDivElement = new Component('div', [style.all_price]).getElement<HTMLDivElement>();
     const discountContainer: HTMLDivElement = new Component('div', [
       style.discount_container,
     ]).getElement<HTMLDivElement>();
     const discountText: HTMLSpanElement = new Component('div', [style.discount_text]).getElement<HTMLDivElement>();
-    if (this.product?.discount !== '') {
-      allPrice.textContent = `$${this.product?.price}`;
-      currentPrice.textContent = `$${Number(this.product?.price) * (1 - Number(this.product?.discount))}`;
-      discountText.textContent = `-${Number(this.product?.discount) * 100}%`;
+    if (this.variants[this.index].discounted) {
+      allPrice.textContent = `$${(Number(this.variants[this.index].price) / 100).toFixed(2)}`;
+      currentPrice.textContent = `$${(Number(this.variants[this.index].discounted) / 100).toFixed(2)}`;
+      discountText.textContent = `-${Math.ceil(Number(this.variants[this.index].discounted) * 100) / Number(this.variants[this.index].price)}%`;
       discountContainer.append(discountText);
-      container.append(currentPrice, allPrice, discountContainer);
+      this.priceContainer.append(currentPrice, allPrice, discountContainer);
     } else {
-      currentPrice.textContent = `$${this.product.price}`;
-      container.append(currentPrice);
+      currentPrice.textContent = `$${(Number(this.variants[this.index].price) / 100).toFixed(2)}`;
+      this.priceContainer.append(currentPrice);
     }
-    return container;
   }
 
   createPathChain() {
@@ -247,10 +305,11 @@ export default class ProductPage extends Page {
     const colorSelectContainer: HTMLDivElement = new Component('div', [
       style.product_select_colors,
     ]).getElement<HTMLDivElement>();
-    this.product?.colors.forEach((color, index) => {
+    this.colors.forEach((color, index) => {
       const colorBox: HTMLDivElement = new Component('div', [style.color_box]).getElement<HTMLDivElement>();
       const checkBox: HTMLDivElement = new Component('div', [style.color_checkbox]).getElement<HTMLDivElement>();
       colorBox.dataset.color = color;
+      colorBox.dataset.id = index.toString();
       colorBox.style.backgroundColor = color;
       colorBox.append(checkBox);
       if (index === 0) {
@@ -266,37 +325,40 @@ export default class ProductPage extends Page {
   clickColorHandler(event: Event, container: HTMLDivElement) {
     const elem: HTMLDivElement = <HTMLDivElement>event.currentTarget;
     const pastActiveElem: HTMLButtonElement | null = container.querySelector(`.${style.active_colorBox}`);
-    isNull(pastActiveElem);
-    pastActiveElem.classList.remove(style.active_colorBox);
+    if (pastActiveElem !== null) {
+      pastActiveElem.classList.remove(style.active_colorBox);
+    }
     elem.classList.add(style.active_colorBox);
+    this.index = Number(elem.dataset.id);
+    this.renderProductPage();
   }
 
   createSizeSelect() {
-    const sizesContainer: HTMLDivElement = new Component('div', [style.product_sizes]).getElement<HTMLDivElement>();
+    this.sizeContainer.replaceChildren();
     const sizeName: HTMLDivElement = new Component('div', [style.product_sizes_name]).getElement<HTMLDivElement>();
     sizeName.textContent = 'Choose Size';
     const sizeSelectContainer: HTMLDivElement = new Component('div', [
       style.product_select_sizes,
     ]).getElement<HTMLDivElement>();
-    this.product?.sizes.forEach((size, index) => {
+    this.variants[this.index].sizes.forEach((size, index) => {
       const sizeBox: HTMLButtonElement = new Component('button', [style.size_box]).getElement<HTMLButtonElement>();
       sizeBox.textContent = size.at(0)?.toUpperCase() + size.slice(1);
       sizeBox.dataset.size = size;
       if (index === 0) {
         sizeBox.classList.add(style.active_sizebox);
       }
+      sizeBox.addEventListener('click', (event) => this.clickSizeboxHandler(event, this.sizeContainer));
       sizeSelectContainer.append(sizeBox);
     });
-    sizesContainer.addEventListener('click', (event) => this.clickSizeboxHandler(event, sizesContainer));
-    sizesContainer.append(sizeName, sizeSelectContainer);
-    return sizesContainer;
+    this.sizeContainer.append(sizeName, sizeSelectContainer);
   }
 
   clickSizeboxHandler(event: Event, container: HTMLDivElement) {
-    const elem: HTMLButtonElement = <HTMLButtonElement>event.target;
+    const elem: HTMLButtonElement = <HTMLButtonElement>event.currentTarget;
     const pastActiveElem: HTMLButtonElement | null = container.querySelector(`.${style.active_sizebox}`);
-    isNull(pastActiveElem);
-    pastActiveElem.classList.remove(style.active_sizebox);
+    if (pastActiveElem !== null) {
+      pastActiveElem.classList.remove(style.active_sizebox);
+    }
     elem.classList.add(style.active_sizebox);
   }
 

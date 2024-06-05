@@ -1,7 +1,5 @@
 import { BaseAddress, ByProjectKeyRequestBuilder, createApiBuilderFromCtpClient } from '@commercetools/platform-sdk';
 import { ClientBuilder, TokenCache, TokenStore } from '@commercetools/sdk-client-v2';
-import type { /* SearchQuery, */ SearchSorting } from '@commercetools/platform-sdk';
-import type { QueryExpression, SearchQuery } from './types.ts';
 
 let inst: ByProjectKeyRequestBuilder | null = null;
 const projectKey = process.env.PROJECT_KEY;
@@ -10,6 +8,13 @@ const clientId = process.env.CLIENT_ID;
 const clientSecret = process.env.CLIENT_SECRET;
 const clientScopes = process.env.CLIENT_SCOPES;
 const scopes = clientScopes?.split(' ');
+
+const projectKeyAnon = process.env.ANON_PROJECT_KEY;
+const regionAnon = process.env.ANON_REGION;
+const clientIdAnon = process.env.ANON_CLIENT_ID;
+const clientSecretAnon = process.env.ANON_CLIENT_SECRET;
+const clientScopesAnon = process.env.ANON_SCOPES;
+const scopesAnon = clientScopesAnon?.split(' ');
 
 class MyTokenCache implements TokenCache {
   myCaсhe: TokenStore = {
@@ -34,7 +39,7 @@ export function getClient() {
 }
 
 export function getAnonClient() {
-  if (!projectKey || !region || !clientId || !clientSecret || !clientScopes) {
+  if (!projectKeyAnon || !regionAnon || !clientIdAnon || !clientSecretAnon || !clientScopesAnon) {
     throw new Error('Env parameters are undefined');
   }
   if (inst !== null) {
@@ -42,20 +47,20 @@ export function getAnonClient() {
   }
   const ctpClient = new ClientBuilder()
     .withAnonymousSessionFlow({
-      host: `https://auth.${region}.gcp.commercetools.com`,
-      projectKey,
+      host: `https://auth.${regionAnon}.gcp.commercetools.com`,
+      projectKey: projectKeyAnon,
       credentials: {
-        clientId,
-        clientSecret,
+        clientId: clientIdAnon,
+        clientSecret: clientSecretAnon,
       },
-      scopes,
+      scopes: scopesAnon,
       fetch,
     })
     .withHttpMiddleware({
-      host: `https://api.${region}.gcp.commercetools.com`,
+      host: `https://api.${regionAnon}.gcp.commercetools.com`,
       fetch,
     });
-  inst = createApiBuilderFromCtpClient(ctpClient.build()).withProjectKey({ projectKey });
+  inst = createApiBuilderFromCtpClient(ctpClient.build()).withProjectKey({ projectKey: projectKeyAnon });
   return inst;
 }
 
@@ -88,9 +93,9 @@ export function autoLoginCLient() {
   inst
     .get()
     .execute()
-    .catch((err) => {
-      inst = null;
-      throw err;
+    .catch(() => {
+      destroyClient();
+      getAnonClient();
     });
   return inst;
 }
@@ -259,19 +264,29 @@ export async function getCategorieById(id: string) {
  * @returns
  */
 export async function searchProducts(
-  query?: SearchQuery | QueryExpression,
-  sort?: SearchSorting[],
-  limit?: number,
+  text: string,
+  filter?: string[],
+  sort?: string[],
+  facet?: string[],
+  limit: number = 0,
   offset?: number
 ) {
   if (inst === null) {
     throw new Error('client instance not found');
   }
   return await inst
-    .products()
+    .productProjections()
     .search()
-    .post({
-      body: { query, sort, limit, offset },
+    .get({
+      queryArgs: {
+        'text.en': text,
+        fuzzy: true,
+        filter,
+        sort,
+        facet,
+        limit,
+        offset,
+      },
     })
     .execute();
 }
