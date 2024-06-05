@@ -1,5 +1,10 @@
 import { InputTextControl } from '../../components/inputText/inputTextComponent';
-import { getUserProfile, changeUserProfile /*, changeAddress */ } from '../../utils/api/Client';
+import {
+  getUserProfile,
+  changeUserProfile,
+  /*, changeAddress */ passwordReset,
+  destroyClient,
+} from '../../utils/api/Client';
 import Component from '../../utils/base-component';
 import Page from '../Page';
 import {
@@ -7,17 +12,21 @@ import {
   dateOfBirthdayValidator,
   emailValidator,
   nameValidator,
-  passwordValidator,
   postalCodeBelarusValidator,
   postalCodePolandValidator,
   postalCodeRussiaValidator,
   streetValidator,
   surnameValidator,
 } from '../../utils/validationsInputText';
+import { passwordValidator as passwordValidatorOld } from '../../utils/validations';
 import * as userProfileStyle from './userprofile.module.scss';
 import { countries } from '../../utils/countries';
 import { addressItem, getUserProfileData /*, changeAddress */ } from './types';
 import { SelectNewControl } from '../../components/selectNew/selectNewComponent';
+import { createInputView } from '../../components/input/inputComponent';
+import { ClientResponse, ErrorResponse } from '@commercetools/platform-sdk';
+import { Router } from '../../Router/Router';
+import { PagePath } from '../../Router/types';
 
 const {
   userProfile,
@@ -43,7 +52,8 @@ const {
 
 export class UserProfilePage extends Page {
   private emailInput = new InputTextControl('email', emailValidator, 'Email address', 'Enter your e-mail', true);
-  private passwordInput = new InputTextControl('password', passwordValidator, 'Password', 'Enter your password', true);
+  private passwordInput = createInputView('password', passwordValidatorOld, 'Password', 'Enter your password');
+  private newPasswordInput = createInputView('password', passwordValidatorOld, 'New Password', 'Enter new password');
   private nameInput = new InputTextControl('text', nameValidator, 'Name', 'Enter your name', true);
   private surnameInput = new InputTextControl('text', surnameValidator, 'Surname', 'Enter your surname', true);
   private dateOfBirthday = new InputTextControl('date', dateOfBirthdayValidator, 'Date of birth', '', true);
@@ -51,9 +61,11 @@ export class UserProfilePage extends Page {
   private addressesContainer = new Component('div', [userProfile__addressesContainer]);
   private addressesList = new Component('div', [userProfile__formContainer_addresses]);
   private containerImg = new Component('div', [userProfileImgWrapper]);
+  private router;
 
-  constructor() {
+  constructor(router: Router) {
     super([userProfile]);
+    this.router = router;
     this.container?.append(
       this.wrapperForm.getElement<HTMLDivElement>(),
       this.addressesContainer.getElement<HTMLDivElement>(),
@@ -61,6 +73,8 @@ export class UserProfilePage extends Page {
     );
     this.initAddressesContainer();
     this.setData();
+    this.passwordInput.addEventListener('focus', () => this.toggler());
+    this.newPasswordInput.addEventListener('focus', () => this.toggler());
   }
 
   async setData() {
@@ -101,6 +115,22 @@ export class UserProfilePage extends Page {
     this.addressesContainer.setChildren(title.getElement(), titleList.getElement(), this.addressesList.getElement());
   }
 
+  toggler() {
+    const passwordInputValue = this.emailInput.shadowRoot?.children[1].lastChild;
+    const newPasswordInputValue = this.newPasswordInput.shadowRoot?.children[1].lastChild;
+    if (
+      passwordInputValue instanceof HTMLInputElement &&
+      newPasswordInputValue instanceof HTMLInputElement &&
+      passwordInputValue.classList.contains('crederror') &&
+      newPasswordInputValue.classList.contains('crederror')
+    ) {
+      passwordInputValue.dispatchEvent(new Event('validate'));
+      newPasswordInputValue.dispatchEvent(new Event('validate'));
+      passwordInputValue.classList.remove('crederror');
+      newPasswordInputValue.classList.remove('crederror');
+    }
+  }
+
   createFormPersonalUserInformation(
     nameValue: string,
     surnameValue: string,
@@ -118,6 +148,56 @@ export class UserProfilePage extends Page {
     this.surnameInput.value = surnameValue;
     this.dateOfBirthday.value = dateOfBirthValue;
     this.emailInput.value = emailValue;
+
+    const subtitle = new Component('h2', [userProfile__title]);
+    subtitle.setTextContent('Change Password');
+    const button = new Component('button', [userProfile__formBtn]);
+    button.setTextContent('Change Password');
+    button.getElement<HTMLButtonElement>().addEventListener('click', async () => {
+      const passwordInputValue = this.passwordInput.shadowRoot?.children[1].lastChild;
+      const newPasswordInputValue = this.newPasswordInput.shadowRoot?.children[1].lastChild;
+      if (passwordInputValue instanceof HTMLInputElement && newPasswordInputValue instanceof HTMLInputElement) {
+        if (passwordInputValue.classList.contains('success') && newPasswordInputValue.classList.contains('success')) {
+          try {
+            const { version } = (await getUserProfile()).body;
+            await passwordReset(
+              version,
+              (passwordInputValue as HTMLInputElement).value,
+              (newPasswordInputValue as HTMLInputElement).value
+            );
+            destroyClient();
+            this.router.navigate(PagePath.MAIN);
+            this.router.renderPageView(PagePath.MAIN);
+          } catch (resp) {
+            const err = (resp as ClientResponse).body as ErrorResponse;
+            if ((err as ErrorResponse).errors?.filter((el) => el.code === 'InvalidCurrentPassword')[0]) {
+              passwordInputValue.classList.add('unsuccess');
+              passwordInputValue.classList.add('crederror');
+              passwordInputValue.classList.remove('success');
+              this.passwordInput.shadowRoot!.querySelector('.error-message')!.textContent = 'Invalidpassword';
+              newPasswordInputValue.classList.add('unsuccess');
+              newPasswordInputValue.classList.add('crederror');
+              newPasswordInputValue.classList.remove('success');
+              this.newPasswordInput.shadowRoot!.querySelector('.error-message')!.textContent = 'Invalid password';
+            }
+          }
+        } else {
+          if (!passwordInputValue.classList.contains('success')) {
+            passwordInputValue.classList.add('unsuccess');
+            passwordInputValue.classList.add('crederror');
+            passwordInputValue.classList.remove('success');
+            this.passwordInput.shadowRoot!.querySelector('.error-message')!.textContent = 'Enter password';
+          }
+          if (!newPasswordInputValue.classList.contains('success')) {
+            newPasswordInputValue.classList.add('unsuccess');
+            newPasswordInputValue.classList.add('crederror');
+            newPasswordInputValue.classList.remove('success');
+            this.newPasswordInput.shadowRoot!.querySelector('.error-message')!.textContent = 'Enter new password';
+          }
+        }
+      }
+    });
+
     form.setChildren(
       title.getElement(),
       this.nameInput,
@@ -147,7 +227,13 @@ export class UserProfilePage extends Page {
     form
       .getElement<HTMLFormElement>()
       .addEventListener('submit', (e) => this.submitSaveFormPersonalUserInformation(e, buttonSubmit));
-    this.wrapperForm.setChildren(form.getElement<HTMLFormElement>());
+    this.wrapperForm.setChildren(
+      form.getElement<HTMLFormElement>(),
+      subtitle.getElement(),
+      this.passwordInput,
+      this.newPasswordInput,
+      button.getElement()
+    );
   }
 
   async submitSaveFormPersonalUserInformation(event: Event, buttonSubmit: Component) {
