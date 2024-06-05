@@ -38,7 +38,6 @@ export class InputTextControl extends HTMLElement {
   ) {
     super();
     this.input.setAttribute('type', type);
-    this.input.disabled = true;
     const shadow = this.attachShadow({ mode: 'open' });
     const style = document.createElement('style');
     style.textContent = styles;
@@ -76,6 +75,7 @@ export class InputTextControl extends HTMLElement {
     if (setEdit) {
       this.btnEdit.innerHTML = SVGEDIT;
       this.btnCheck.innerHTML = SVGCHECK;
+      this.input.disabled = true;
       this.wrapperSvg.append(this.btnEdit, this.btnCheck);
       this.btnCheck.disabled = true;
       this.btnEdit.onclick = () => this.editProperty();
@@ -115,6 +115,17 @@ export class InputTextControl extends HTMLElement {
       this.btnCheck.disabled = true;
     }
   }
+  checkStateForAddAddress() {
+    this.validateInput(this.validationArray);
+    if (this.input.classList.contains('unsuccess')) {
+      this.input.classList.add('shake');
+      this.errMsg.classList.add('shake');
+      setTimeout(() => {
+        this.input.classList.remove('shake');
+        this.errMsg.classList.remove('shake');
+      }, 500);
+    }
+  }
   connectedCallback() {
     this.input.addEventListener('input', () => this.validateInput(this.validationArray));
   }
@@ -138,13 +149,18 @@ export class InputTextControl extends HTMLElement {
       this.input.classList.remove('success');
     }
   }
-
+  getSuccessForAddAddress() {
+    return this.input.classList.contains('success');
+  }
   getSuccess() {
     return (this.input.classList.contains('success') && this.input.disabled === true) || this.input.disabled === true;
   }
-
   resetState() {
     this.input.classList.remove('success');
+  }
+  resetStateForAddress() {
+    this.resetState();
+    this.input.value = '';
   }
   changeValidations(newValidation: Validation[]) {
     this.validationArray = newValidation;

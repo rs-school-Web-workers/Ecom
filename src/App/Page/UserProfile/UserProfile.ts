@@ -12,6 +12,7 @@ import {
   addShippingAddress,
   removeShippingAddress,
   removeAddress,
+  addAddress,
 } from '../../utils/api/Client';
 import Component from '../../utils/base-component';
 import Page from '../Page';
@@ -64,6 +65,18 @@ interface dataForChangeAddress {
   city: InputTextControl;
   selectCountry: SelectNewControl;
   postalCode: InputTextControl | undefined;
+}
+interface dataForAddresses {
+  streetNameValue: string;
+  streetNumberValue: string;
+  postalCodeValue: string;
+  countryValue: string;
+  cityValue: string;
+  defaultBillingValue?: boolean;
+  defaultShippingValue?: boolean;
+  shippingValue?: boolean;
+  billingValue?: boolean;
+  id?: string;
 }
 
 export class UserProfilePage extends Page {
@@ -125,10 +138,22 @@ export class UserProfilePage extends Page {
 
   initAddressesContainer() {
     const title = new Component('h1', [userProfile__title]);
+    const titleForAdd = new Component('h1', [userProfile__title]);
+    titleForAdd.setTextContent('Add address');
     title.setTextContent('User Addresses');
-    const titleList = new Component('h3', [userProfile__aboutText]);
-    titleList.setTextContent('Your List of Addresses');
-    this.addressesContainer.setChildren(title.getElement(), titleList.getElement(), this.addressesList.getElement());
+    const subtitleList = new Component('h3', [userProfile__aboutText]);
+    const subtitleForAdd = new Component('h3', [userProfile__aboutText]);
+    subtitleList.setTextContent('Your List of Addresses');
+    subtitleForAdd.setTextContent('Enter all necessary data to add a form');
+    const formAddAddress = this.createFormToAddAddress();
+    this.addressesContainer.setChildren(
+      titleForAdd.getElement(),
+      subtitleForAdd.getElement(),
+      formAddAddress.getElement<HTMLFormElement>(),
+      title.getElement(),
+      subtitleList.getElement(),
+      this.addressesList.getElement()
+    );
   }
 
   toggler() {
@@ -153,7 +178,7 @@ export class UserProfilePage extends Page {
     dateOfBirthValue: string,
     emailValue: string
   ) {
-    const title = new Component('h1', [userProfile__title]);
+    const title = new Component('h2', [userProfile__title]);
     title.setTextContent('User Information');
     const form = new Component('form', [userProfile__form]);
     const buttonSubmit = new Component('button', [userProfile__formBtn]);
@@ -284,6 +309,138 @@ export class UserProfilePage extends Page {
     }
   }
 
+  createFormToAddAddress() {
+    const form = new Component('form', [userProfile__FormList]);
+    const wrapperDefaultBillingAndShippingCheckbox = new Component('div', [userProfile__wrapperCheckBox_default]);
+    const checkboxDefaultBilling = new Component('input', [
+      userProfile__inputCheck,
+      'default-billing',
+    ]).getElement<HTMLInputElement>();
+    checkboxDefaultBilling.type = 'checkbox';
+    const templateDefaultCheckboxBilling = new Component('label', [userProfile__label]);
+    templateDefaultCheckboxBilling.setTextContent('Default Billing');
+    templateDefaultCheckboxBilling.setChildren(checkboxDefaultBilling);
+    const checkboxDefaultShipping = new Component('input', [
+      userProfile__inputCheck,
+      'default-shipping',
+    ]).getElement<HTMLInputElement>();
+    checkboxDefaultShipping.type = 'checkbox';
+    const templateDefaultCheckboxShipping = new Component('label', [userProfile__label]);
+    templateDefaultCheckboxShipping.setTextContent('Deafult Shipping');
+    templateDefaultCheckboxShipping.setChildren(checkboxDefaultShipping);
+    wrapperDefaultBillingAndShippingCheckbox.setChildren(
+      templateDefaultCheckboxBilling.getElement(),
+      templateDefaultCheckboxShipping.getElement()
+    );
+    const streetName = new InputTextControl('text', streetValidator, 'Street', 'Enter street');
+    const streetNumber = new InputTextControl('text', [], 'Street Number', 'Enter street number');
+    const city = new InputTextControl('text', cityValidator, 'City', 'Enter city');
+    const selectCountry = new SelectNewControl(countries);
+    const wrapperBillingAndShippingCheckbox = new Component('div', [userProfile__wrapperCheckBox]);
+    const checkboxBilling = new Component('input', [userProfile__inputCheck, 'billing']).getElement<HTMLInputElement>();
+    checkboxBilling.type = 'checkbox';
+    const templateCheckboxBilling = new Component('label', [userProfile__label]);
+    templateCheckboxBilling.setTextContent('Billing');
+    templateCheckboxBilling.setChildren(checkboxBilling);
+    const checkboxShipping = new Component('input', [
+      userProfile__inputCheck,
+      'shipping',
+    ]).getElement<HTMLInputElement>();
+    checkboxShipping.type = 'checkbox';
+    const templateCheckboxShipping = new Component('label', [userProfile__label]);
+    templateCheckboxShipping.setTextContent('Shipping');
+    templateCheckboxShipping.setChildren(checkboxShipping);
+    wrapperBillingAndShippingCheckbox.setChildren(
+      templateCheckboxBilling.getElement(),
+      templateCheckboxShipping.getElement()
+    );
+    const buttonSubmit = new Component('button', [userProfile__formBtn, userProfile__listBtn]);
+    buttonSubmit.setTextContent('Save Changes');
+    buttonSubmit.getElement<HTMLButtonElement>().type = 'submit';
+    let postalCode: InputTextControl | undefined;
+    const propertyData = {
+      streetName,
+      streetNumber,
+      city,
+      selectCountry,
+      postalCode,
+    };
+    form.getElement<HTMLFormElement>().addEventListener(
+      'selectNewValue',
+      (e) => {
+        const target = e as CustomEvent<{ value: string }>;
+        if (target.detail.value) {
+          if (postalCode) postalCode.remove();
+          switch (target.detail.value) {
+            case 'BY':
+              postalCode = new InputTextControl('text', postalCodeBelarusValidator, 'Postal Code', 'Enter postal code');
+              selectCountry.insertAdjacentElement('afterend', postalCode);
+              propertyData.postalCode = postalCode;
+              break;
+            case 'RU':
+              postalCode = new InputTextControl('text', postalCodeRussiaValidator, 'Postal Code', 'Enter postal code');
+              selectCountry.insertAdjacentElement('afterend', postalCode);
+              propertyData.postalCode = postalCode;
+              break;
+            case 'PL':
+              postalCode = new InputTextControl('text', postalCodePolandValidator, 'Postal Code', 'Enter postal code');
+              selectCountry.insertAdjacentElement('afterend', postalCode);
+              propertyData.postalCode = postalCode;
+              break;
+          }
+        }
+      },
+      { capture: true, passive: true }
+    );
+    form
+      .getElement<HTMLFormElement>()
+      .addEventListener('submit', (event) => this.submitFormAddAddress(event, propertyData));
+    form.setChildren(
+      wrapperDefaultBillingAndShippingCheckbox.getElement(),
+      streetName,
+      streetNumber,
+      city,
+      wrapperBillingAndShippingCheckbox.getElement(),
+      selectCountry,
+      buttonSubmit.getElement<HTMLButtonElement>()
+    );
+    return form;
+  }
+  async submitFormAddAddress(event: Event, addressData: dataForChangeAddress) {
+    event.preventDefault();
+    const { version } = (await getUserProfile()).body;
+    const { streetName, streetNumber, city, selectCountry, postalCode } = addressData;
+    const arrAddressData = Object.values(addressData);
+    if (
+      streetName.getSuccessForAddAddress() &&
+      streetNumber.getSuccessForAddAddress() &&
+      city.getSuccessForAddAddress() &&
+      selectCountry.getSuccessForAddAddress()
+    ) {
+      if (postalCode?.getSuccessForAddAddress()) {
+        const address = {
+          city: city.value,
+          country: selectCountry.getValue(),
+          postalCode: postalCode?.value || '',
+          streetName: streetName.value,
+          streetNumber: streetNumber.value,
+        };
+        await addAddress(version, address);
+        arrAddressData.forEach((el) => el.resetStateForAddress());
+        postalCode.remove();
+      } else {
+        postalCode?.checkStateForAddAddress();
+      }
+    } else {
+      arrAddressData.forEach((el) => {
+        if (el) {
+          if (!el.getSuccessForAddAddress()) {
+            el.checkStateForAddAddress();
+          }
+        }
+      });
+    }
+  }
   createFormAddressesUserInformation({
     streetNameValue,
     streetNumberValue,
@@ -295,18 +452,7 @@ export class UserProfilePage extends Page {
     shippingValue = false,
     billingValue = false,
     id,
-  }: {
-    streetNameValue: string;
-    streetNumberValue: string;
-    postalCodeValue: string;
-    countryValue: string;
-    cityValue: string;
-    defaultBillingValue?: boolean;
-    defaultShippingValue?: boolean;
-    shippingValue?: boolean;
-    billingValue?: boolean;
-    id: string;
-  }) {
+  }: dataForAddresses) {
     const form = new Component('form', [userProfile__FormList]);
     const btnDelete = new Component('button', [userProfile__btnDelete]);
     const SVGTRASH =
@@ -471,7 +617,6 @@ export class UserProfilePage extends Page {
     let id;
     if (event.target instanceof HTMLElement) {
       id = event.target.id;
-      console.log(id);
     }
     const address = {
       city: city.value,
