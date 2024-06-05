@@ -12,7 +12,9 @@ import {
   removeShippingAddress,
   removeAddress,
   addAddress,
-  // loginClient,
+  isLogged,
+  destroyClient,
+  loginClient,
 } from '../../utils/api/Client';
 import Component from '../../utils/base-component';
 import Page from '../Page';
@@ -33,8 +35,6 @@ import { countries } from '../../utils/countries';
 import { addressItem, getUserProfileData /*, changeAddress */ } from './types';
 import { SelectNewControl } from '../../components/selectNew/selectNewComponent';
 import { ClientResponse, ErrorResponse } from '@commercetools/platform-sdk';
-import { Router } from '../../Router/Router';
-import { PagePath } from '../../Router/types';
 
 const {
   userProfile,
@@ -97,11 +97,9 @@ export class UserProfilePage extends Page {
   private addressesContainer = new Component('div', [userProfile__addressesContainer]);
   private addressesList = new Component('div', [userProfile__formContainer_addresses]);
   private containerImg = new Component('div', [userProfileImgWrapper]);
-  private router;
 
-  constructor(router: Router) {
+  constructor() {
     super([userProfile]);
-    this.router = router;
     this.container?.append(
       this.wrapperForm.getElement<HTMLDivElement>(),
       this.addressesContainer.getElement<HTMLDivElement>(),
@@ -180,9 +178,14 @@ export class UserProfilePage extends Page {
       try {
         const { version } = (await getUserProfile()).body;
         await passwordReset(version, this.passwordInput.value, this.newPasswordInput.value);
-        // await loginClient(this.emailInput.value, this.newPasswordInput.value);
-        this.router.navigate(PagePath.MAIN);
-        this.router.renderPageView(PagePath.MAIN);
+        if (isLogged()) {
+          destroyClient();
+          await loginClient(this.emailInput.value, this.newPasswordInput.value);
+          if (event.target instanceof HTMLFormElement) this.setSuccess(event.target);
+          [this.passwordInput, this.newPasswordInput].forEach((el) => {
+            el.resetStateForSubmit();
+          });
+        }
       } catch (resp) {
         const err = (resp as ClientResponse).body as ErrorResponse;
         if ((err as ErrorResponse).errors?.filter((el) => el.code === 'InvalidCurrentPassword')[0]) {

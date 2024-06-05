@@ -71,15 +71,13 @@ export class App {
       {
         pagePath: PagePath.USERPROFILE,
         render: () => {
-          const userProfilePage = new UserProfilePage(this.router);
-          this.setPage(userProfilePage);
-          // if (isLogged()) {
-          //   this.router.navigate(PagePath.MAIN);
-          //   this.router.renderPageView(PagePath.MAIN);
-          // } else {
-          //   const loginPage: LoginPage = new LoginPage(this.router);
-          //   this.setPage(loginPage);
-          // }
+          if (isLogged()) {
+            const userProfilePage = new UserProfilePage();
+            this.setPage(userProfilePage);
+          } else {
+            this.router.navigate(PagePath.MAIN);
+            this.router.renderPageView(PagePath.MAIN);
+          }
         },
       },
       {
