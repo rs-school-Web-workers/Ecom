@@ -1,7 +1,7 @@
 import { BaseAddress, ByProjectKeyRequestBuilder, createApiBuilderFromCtpClient } from '@commercetools/platform-sdk';
 import { ClientBuilder, TokenCache, TokenStore } from '@commercetools/sdk-client-v2';
-import type { /* SearchQuery, */ SearchSorting } from '@commercetools/platform-sdk';
-import type { QueryExpression, SearchQuery } from './types';
+// import type { /* SearchQuery, */ SearchSorting } from '@commercetools/platform-sdk';
+// import type { QueryExpression, SearchQuery } from './types';
 
 let inst: ByProjectKeyRequestBuilder | null = null;
 const projectKey = process.env.PROJECT_KEY;
