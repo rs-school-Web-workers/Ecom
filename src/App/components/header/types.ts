@@ -13,6 +13,7 @@ export enum headerLinkNames {
   REGISTRATION = 'Register',
   LOGOUT = 'Logout',
   USERPROFILE = 'My Profile',
+  PRODUCTS = 'Products',
 }
 
 export const NAV_CONTAINER = 'nav-container';
