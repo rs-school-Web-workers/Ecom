@@ -9,6 +9,7 @@ $linkColor: #0f3dde;
   padding-left: 80px;
   height: 100%;
   .userProfile__formContainer {
+    flex-direction: column;
     display: flex;
     flex: 1 1 auto;
     padding: 0px 20px;

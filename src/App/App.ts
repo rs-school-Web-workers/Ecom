@@ -63,7 +63,7 @@ export class App {
       {
         pagePath: PagePath.USERPROFILE,
         render: () => {
-          const userProfilePage = new UserProfilePage();
+          const userProfilePage = new UserProfilePage(this.router);
           this.setPage(userProfilePage);
           // if (isLogged()) {
           //   this.router.navigate(PagePath.MAIN);
