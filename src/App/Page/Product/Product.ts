@@ -282,6 +282,7 @@ export default class ProductPage extends Page {
   createChainLink(nameLink: string, path: string, label: boolean) {
     const container: HTMLDivElement = new Component('div', [style.chain_link_container]).getElement<HTMLDivElement>();
     const link: HTMLAnchorElement = new Component('a', [style.chain_link]).getElement<HTMLAnchorElement>();
+    link.addEventListener('click', (event) => this.clickLinkHandler(event));
     link.textContent = nameLink.at(0)?.toUpperCase() + nameLink.slice(1);
     console.log(path);
     link.setAttribute('href', `${path}`);
@@ -293,6 +294,14 @@ export default class ProductPage extends Page {
     }
     container.append(link, vectorElem);
     return container;
+  }
+
+  clickLinkHandler(event: Event) {
+    event.preventDefault();
+    const elem: HTMLAnchorElement = <HTMLAnchorElement>event.currentTarget;
+    const link: string = '/' + elem.href.split('/').slice(3).join('/');
+    this.router.navigate(link);
+    this.router.renderPageView(link);
   }
 
   createColorsSelect() {
