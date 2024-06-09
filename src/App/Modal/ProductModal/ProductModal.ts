@@ -1,7 +1,6 @@
 import Component from '../../utils/base-component';
 import { Modal } from '../Modal';
 import * as style from './productModal.module.scss';
-import './slider';
 import './slider.css';
 import SwiperCore from 'swiper/bundle';
 import 'swiper/swiper-bundle.css';
@@ -56,7 +55,6 @@ export class ProductModal extends Modal {
       this.swiper = new SwiperCore(sliderContainer, {
         direction: 'horizontal',
         grabCursor: true,
-        // loop: true,
         freeMode: false,
         followFinger: false,
         observer: true,

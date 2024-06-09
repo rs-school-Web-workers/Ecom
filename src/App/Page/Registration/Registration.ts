@@ -213,9 +213,7 @@ export default class RegistrationPage extends Page {
 
             if (sSelectCountryValue?.classList.contains('success')) {
               const sPostalCode = this.sPostalCode?.shadowRoot?.children[1].lastChild as HTMLInputElement;
-              if (sPostalCode.classList.contains('success')) {
-                console.log('success');
-              } else {
+              if (!sPostalCode.classList.contains('success')) {
                 sPostalCode.classList.add('unsuccess');
               }
             } else {
@@ -250,7 +248,6 @@ export default class RegistrationPage extends Page {
               sPostalCode.classList.contains('success') &&
               (this.сheckboxForBothAddresses.checked || bPostalCode.classList.contains('success'))
             ) {
-              console.log('success Full Validations');
               const defaultBilling = this.bCheckbox.checked ? 1 : undefined;
               const defaultShipping = this.sCheckbox.checked ? 0 : undefined;
               const address = [

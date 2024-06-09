@@ -49,14 +49,11 @@ const {
   userProfile__aboutText,
   success,
   unsuccess,
-  // userProfile__btnListShow,
   userProfile__FormList,
   userProfile__label,
   userProfile__inputCheck,
   userProfile__formBtn,
   userProfile__listBtn,
-  // userProfile__footer,
-  // userProfile__footerLink,
   userProfileImgWrapper,
 } = userProfileStyle;
 

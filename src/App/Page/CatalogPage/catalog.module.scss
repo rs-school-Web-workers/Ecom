@@ -48,7 +48,6 @@ $border-bottom-color: rgb(0, 0, 0, 0.1);
       overflow: hidden;
       display: none;
       z-index: 3;
-      
       &.active_filter {
         display: flex;
       }
@@ -110,7 +109,6 @@ $border-bottom-color: rgb(0, 0, 0, 0.1);
   .catalog__cardName {
     font-family: Satoshi;
     font-weight: 700;
-    // flex: 1 0 auto;
   }
   .catalog__cardDescription {
     -webkit-line-clamp: 2;
@@ -126,13 +124,10 @@ $border-bottom-color: rgb(0, 0, 0, 0.1);
   .catalog__wrapperAbout {
     display: flex;
     flex-direction: column;
-    // justify-content: space-between;
     gap: $gapWrapperAbout;
     border-bottom-left-radius: 20px;
     border-bottom-right-radius: 20px;
-    // height: 100%;
     padding: 0px 10px;
-    // background-color: yellow;
   }
   .catalog__cardPriceContainer {
     display: inline-flex;
@@ -455,7 +450,6 @@ $border-bottom-color: rgb(0, 0, 0, 0.1);
 .price_progress {
   width: 100%;
   height: 5px;
-  // background-color: transparent;
   border-radius: 5px;
 }
 
