@@ -221,13 +221,6 @@ export async function signinClient(
   return inst;
 }
 
-export async function getProducts() {
-  if (inst === null) {
-    throw new Error('client instance not found');
-  }
-  return await inst.products().get().execute();
-}
-
 export async function getProductById(id: string) {
   if (inst === null) {
     throw new Error('client instance not found');
@@ -263,33 +256,6 @@ export async function getCategorieById(id: string) {
  * @param offset смещение в общем массиве данных относительно начала
  * @returns
  */
-export async function searchProducts(
-  text: string,
-  filter?: string[],
-  sort?: string[],
-  facet?: string[],
-  limit: number = 0,
-  offset?: number
-) {
-  if (inst === null) {
-    throw new Error('client instance not found');
-  }
-  return await inst
-    .productProjections()
-    .search()
-    .get({
-      queryArgs: {
-        'text.en': text,
-        fuzzy: true,
-        filter,
-        sort,
-        facet,
-        limit,
-        offset,
-      },
-    })
-    .execute();
-}
 
 export async function getUserProfile() {
   if (inst === null) {
