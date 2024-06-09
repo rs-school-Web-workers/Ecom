@@ -1,7 +1,7 @@
 import { Router } from './Router/Router';
 import { ID_ELEMENT, PageInfo, PagePath, SECTION_NAME } from './Router/types';
 import '../assets/css/normalize.css';
-import Header, { showLogoutButton } from './components/header/Header';
+import Header, { showLogoutButton, showUserProfileLink } from './components/header/Header';
 import Component from './utils/base-component';
 import { isNull } from './utils/base-methods';
 import Page from './Page/Page';
@@ -10,6 +10,7 @@ import NotFoundPage from './Page/NotFoundPage/NotFoundPage';
 import LoginPage from './Page/Login/Login';
 import { autoLoginCLient, getAnonClient, isLogged } from './utils/api/Client';
 import RegistrationPage from './Page/Registration/Registration';
+import { UserProfilePage } from './Page/UserProfile/UserProfile';
 import { CatalogPage } from './Page/CatalogPage/Catalog';
 import ProductPage from './Page/Product/Product';
 import * as style from './app.module.scss';
@@ -43,6 +44,7 @@ export class App {
     const header: HTMLElement = this.header.container;
     this.container.append(header, this.contentContainer);
     showLogoutButton();
+    showUserProfileLink();
   }
 
   initPages() {
@@ -63,6 +65,18 @@ export class App {
           } else {
             const loginPage: LoginPage = new LoginPage(this.router);
             this.setPage(loginPage);
+          }
+        },
+      },
+      {
+        pagePath: PagePath.USERPROFILE,
+        render: () => {
+          if (isLogged()) {
+            const userProfilePage = new UserProfilePage();
+            this.setPage(userProfilePage);
+          } else {
+            this.router.navigate(PagePath.MAIN);
+            this.router.renderPageView(PagePath.MAIN);
           }
         },
       },
@@ -95,7 +109,8 @@ export class App {
       {
         pagePath: `${PagePath.PRODUCTS}/${SECTION_NAME}`,
         render: (section_name: string = '') => {
-          this.contentContainer.textContent = 'This is ' + PagePath.PRODUCTS + `/${section_name}`;
+          const productPage = new CatalogPage(this.router, section_name);
+          this.setPage(productPage);
         },
       },
       {

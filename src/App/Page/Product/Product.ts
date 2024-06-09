@@ -83,7 +83,7 @@ export default class ProductPage extends Page {
   }
 
   initPage() {
-    this.createPathChain();
+    // this.createPathChain();
     this.createProductDetail();
   }
 
@@ -269,16 +269,12 @@ export default class ProductPage extends Page {
         if (chain === '') {
           chainContainer.append(this.createChainLink('main', 'main', true));
         } else {
-          chainContainer.append(this.createChainLink(chain, chainArray.slice(0, index).join('/'), true));
+          chainContainer.append(this.createChainLink(chain, chainArray.slice(0, index + 1).join('/'), true));
         }
       }
     });
     chainContainer.append(
-      this.createChainLink(
-        chainArray[chainArray.length - 1],
-        chainArray.slice(0, chainArray.length - 1).join('/'),
-        false
-      )
+      this.createChainLink(chainArray[chainArray.length - 1], chainArray.slice(0, chainArray.length).join('/'), false)
     );
     return chainContainer;
   }
@@ -286,8 +282,10 @@ export default class ProductPage extends Page {
   createChainLink(nameLink: string, path: string, label: boolean) {
     const container: HTMLDivElement = new Component('div', [style.chain_link_container]).getElement<HTMLDivElement>();
     const link: HTMLAnchorElement = new Component('a', [style.chain_link]).getElement<HTMLAnchorElement>();
+    link.addEventListener('click', (event) => this.clickLinkHandler(event));
     link.textContent = nameLink.at(0)?.toUpperCase() + nameLink.slice(1);
-    link.setAttribute('href', `/${path}`);
+    console.log(path);
+    link.setAttribute('href', `${path}`);
     const vectorElem: HTMLSpanElement = new Component('span', [style.chain_symbol_to]).getElement<HTMLSpanElement>();
     if (label) {
       vectorElem.textContent = '>';
@@ -296,6 +294,14 @@ export default class ProductPage extends Page {
     }
     container.append(link, vectorElem);
     return container;
+  }
+
+  clickLinkHandler(event: Event) {
+    event.preventDefault();
+    const elem: HTMLAnchorElement = <HTMLAnchorElement>event.currentTarget;
+    const link: string = '/' + elem.href.split('/').slice(3).join('/');
+    this.router.navigate(link);
+    this.router.renderPageView(link);
   }
 
   createColorsSelect() {
