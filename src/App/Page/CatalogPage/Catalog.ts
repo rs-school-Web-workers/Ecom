@@ -59,7 +59,6 @@ export class CatalogPage extends Page {
   initCategory() {
     if (this.category !== '') {
       this.stateFilter.cloth = [`${this.category}_${this.category}`];
-      console.log(this.stateFilter.cloth);
     }
   }
 
@@ -70,9 +69,7 @@ export class CatalogPage extends Page {
     if (this.category !== '') {
       const name = this.categories?.filter((category) => category.slug === this.category)[0].name;
       this.stateFilter.cloth = [`${name}_${name}`];
-      console.log(this.stateFilter.cloth);
     }
-    // this.stateFilter.cloth = this.categories?.filter((category) => category.slug === this.category);
     const top = this.categories!.filter((el) => !el.parent);
     this.styles = top.map((el) => el.name);
     top.forEach((style) => {
@@ -129,7 +126,6 @@ export class CatalogPage extends Page {
   }
 
   changeSearchHandler() {
-    //вставить запрос и рендер
     this.stateFilter.text = (this.searchContainer.children[1] as HTMLInputElement).value;
     this.render();
   }
@@ -186,7 +182,6 @@ export class CatalogPage extends Page {
     const currentElem: HTMLSpanElement = <HTMLSpanElement>event.currentTarget;
     currentSort.textContent = currentElem.textContent;
     this.clickShowHandler(showElem, container);
-    //добавить сортировку элементов и рендер
     this.stateFilter.sort = currentElem.textContent ?? 'asc';
     this.render();
   }
@@ -215,7 +210,6 @@ export class CatalogPage extends Page {
   }
 
   async createCardList() {
-    // тут еще доделать сортировку фильтрацию и поиск
     const args: { limit?: number; fuzzy?: boolean; filter?: string[]; sort?: string; 'text.en-US'?: string } = {};
     args.limit = 500;
     args.fuzzy = true;
@@ -227,7 +221,6 @@ export class CatalogPage extends Page {
           .join(',')}`
       );
     }
-    console.log(args.filter);
     if (this.stateFilter.min >= 0) {
       args.filter.push(`variants.price.centAmount:range (${this.stateFilter.min} to ${this.stateFilter.max})`);
     }
@@ -246,9 +239,7 @@ export class CatalogPage extends Page {
       args.sort = 'name.en-US asc';
     }
     args['text.en-US'] = this.stateFilter.text ?? '';
-    console.log(args.filter);
     const products = await getClient()?.productProjections().search().get({ queryArgs: args }).execute();
-    console.log(products);
     const data = await Promise.all<{ [row: string]: string }>(
       products!.body.results.map(async (el) => {
         const priceWithDiscount =
@@ -267,7 +258,6 @@ export class CatalogPage extends Page {
         };
       })
     );
-    console.log(data);
     data.forEach(({ id, category, brand, name, description, priceWithDiscount, priceWithoutDiscount, imageLink }) => {
       const dataObject: CardItem = {
         id,
@@ -314,13 +304,8 @@ export class CatalogPage extends Page {
       this.router.navigate(path);
       this.router.renderPageView(path);
     });
-    // const discount = new Component('div', ['catalog__card-discount']);
     return card;
   }
-
-  // clickCardHandler() {
-
-  // }
 
   createFilterContainer() {
     const nameContainer: HTMLDivElement = new Component('div', [
@@ -407,7 +392,6 @@ export class CatalogPage extends Page {
       }
     });
     this.stateFilter.brand = brandSelect;
-    //запрос с данными на фильтрацию
     this.render();
   }
 
@@ -641,8 +625,6 @@ export class CatalogPage extends Page {
     selectedClothFilter.forEach((cloth) => {
       if (cloth.dataset.clothName !== undefined) {
         const clothCategory = cloth.dataset.clothName?.split('_')[0];
-        /* console.log(currentCategory);
-        console.log(clothCategory); */
         if (currentCategory !== clothCategory) {
           cloth.classList.remove(catalogStyle.active_cloth);
         }

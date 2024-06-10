@@ -32,7 +32,7 @@ import {
 } from '../../utils/validationsInputText';
 import * as userProfileStyle from './userprofile.module.scss';
 import { countries } from '../../utils/countries';
-import { addressItem, getUserProfileData /*, changeAddress */ } from './types';
+import { addressItem, getUserProfileData } from './types';
 import { SelectNewControl } from '../../components/selectNew/selectNewComponent';
 import { ClientResponse, ErrorResponse } from '@commercetools/platform-sdk';
 
@@ -49,14 +49,11 @@ const {
   userProfile__aboutText,
   success,
   unsuccess,
-  // userProfile__btnListShow,
   userProfile__FormList,
   userProfile__label,
   userProfile__inputCheck,
   userProfile__formBtn,
   userProfile__listBtn,
-  // userProfile__footer,
-  // userProfile__footerLink,
   userProfileImgWrapper,
 } = userProfileStyle;
 

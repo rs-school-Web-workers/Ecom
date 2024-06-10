@@ -83,7 +83,6 @@ export default class ProductPage extends Page {
   }
 
   initPage() {
-    // this.createPathChain();
     this.createProductDetail();
   }
 
@@ -157,12 +156,7 @@ export default class ProductPage extends Page {
 
   clickSmallImgHandler(event: Event, mainImg: HTMLImageElement, container: HTMLDivElement) {
     const elem: HTMLImageElement = <HTMLImageElement>event.target;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    /* const swiper: any = document.querySelector('.swiper-container');
-    console.log(elem.dataset.slide);
-    console.log(swiper.swiper); */
     this.modal?.swiper?.slideTo(Number(elem.dataset.slide) - 1);
-    console.log(elem.dataset.slide);
     const pastActiveElem: HTMLButtonElement | null = container.querySelector(`.${style.active_small_img}`);
     mainImg.src = elem.src;
     isNull(pastActiveElem);
@@ -284,7 +278,6 @@ export default class ProductPage extends Page {
     const link: HTMLAnchorElement = new Component('a', [style.chain_link]).getElement<HTMLAnchorElement>();
     link.addEventListener('click', (event) => this.clickLinkHandler(event));
     link.textContent = nameLink.at(0)?.toUpperCase() + nameLink.slice(1);
-    console.log(path);
     link.setAttribute('href', `${path}`);
     const vectorElem: HTMLSpanElement = new Component('span', [style.chain_symbol_to]).getElement<HTMLSpanElement>();
     if (label) {
