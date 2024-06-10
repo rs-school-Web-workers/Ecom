@@ -228,13 +228,6 @@ export async function getProductById(id: string) {
   return await inst.products().withId({ ID: id }).get().execute();
 }
 
-export async function getCategories() {
-  if (inst === null) {
-    throw new Error('client instance not found');
-  }
-  return await inst.categories().get().execute();
-}
-
 export async function getCategorieById(id: string) {
   if (inst === null) {
     throw new Error('client instance not found');
@@ -383,6 +376,7 @@ export async function addBillingAddress(version: number, addressId?: string, add
     })
     .execute();
 }
+
 export async function removeBillingAddress(version: number, addressId?: string, addressKey?: string) {
   if (inst === null) {
     throw new Error('client instance not found');
@@ -436,6 +430,7 @@ export async function addShippingAddress(version: number, addressId?: string, ad
     })
     .execute();
 }
+
 export async function removeShippingAddress(version: number, addressId?: string, addressKey?: string) {
   if (inst === null) {
     throw new Error('client instance not found');

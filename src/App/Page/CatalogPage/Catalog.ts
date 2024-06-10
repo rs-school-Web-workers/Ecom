@@ -126,7 +126,6 @@ export class CatalogPage extends Page {
   }
 
   changeSearchHandler() {
-    //вставить запрос и рендер
     this.stateFilter.text = (this.searchContainer.children[1] as HTMLInputElement).value;
     this.render();
   }
@@ -183,7 +182,6 @@ export class CatalogPage extends Page {
     const currentElem: HTMLSpanElement = <HTMLSpanElement>event.currentTarget;
     currentSort.textContent = currentElem.textContent;
     this.clickShowHandler(showElem, container);
-    //добавить сортировку элементов и рендер
     this.stateFilter.sort = currentElem.textContent ?? 'asc';
     this.render();
   }
@@ -212,7 +210,6 @@ export class CatalogPage extends Page {
   }
 
   async createCardList() {
-    // тут еще доделать сортировку фильтрацию и поиск
     const args: { limit?: number; fuzzy?: boolean; filter?: string[]; sort?: string; 'text.en-US'?: string } = {};
     args.limit = 500;
     args.fuzzy = true;
@@ -395,7 +392,6 @@ export class CatalogPage extends Page {
       }
     });
     this.stateFilter.brand = brandSelect;
-    //запрос с данными на фильтрацию
     this.render();
   }
 

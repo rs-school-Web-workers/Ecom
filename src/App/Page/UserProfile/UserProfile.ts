@@ -32,7 +32,7 @@ import {
 } from '../../utils/validationsInputText';
 import * as userProfileStyle from './userprofile.module.scss';
 import { countries } from '../../utils/countries';
-import { addressItem, getUserProfileData /*, changeAddress */ } from './types';
+import { addressItem, getUserProfileData } from './types';
 import { SelectNewControl } from '../../components/selectNew/selectNewComponent';
 import { ClientResponse, ErrorResponse } from '@commercetools/platform-sdk';
 

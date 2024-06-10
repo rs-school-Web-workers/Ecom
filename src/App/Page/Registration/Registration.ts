@@ -327,24 +327,6 @@ export default class RegistrationPage extends Page {
         );
       }
     }
-    /** ЕСЛИ НАДО ПРОВЕРКА ЧТО
-     * emailInputValue instanceof HTMLInputElement &&
-      passwordInputValue instanceof HTMLInputElement &&
-      nameInputValue instanceof HTMLInputElement &&
-      dateOfBirthdayValue instanceof HTMLInputElement &&
-      surnameInputValue instanceof HTMLInputElement &&
-      sStreet instanceof HTMLInputElement &&
-      sStreetNumber instanceof HTMLInputElement &&
-      sCity instanceof HTMLInputElement &&
-      bStreet instanceof HTMLInputElement &&
-      bStreetNumber instanceof HTMLInputElement &&
-      bCity instanceof HTMLInputElement
-
-      то добавь else {
-        ''
-      }
-      выше этой записи
-    */
   }
 
   successRegister(msg: string) {
