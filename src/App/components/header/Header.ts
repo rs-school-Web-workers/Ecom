@@ -77,10 +77,11 @@ export default class Header {
     );
     const logoutLink: HTMLAnchorElement = this.createNavigateLink(headerLinkNames.LOGOUT, PagePath.LOGIN);
     const profileLink: HTMLAnchorElement = this.createNavigateLink(headerLinkNames.USERPROFILE, PagePath.USERPROFILE);
+    const aboutUsLink: HTMLAnchorElement = this.createNavigateLink(headerLinkNames.ABOUTUS, PagePath.ABOUTUS);
     logoutLink.classList.add(headerClassNames.LOGOUT_BUTTON);
     profileLink.innerHTML = `My profile${USERPROFILESVG}`;
     profileLink.classList.add(headerClassNames.USERPROFILE_LINK);
-    navElement.setChildren(productsLink, menuLink, loginLink, registrationLink, profileLink, logoutLink);
+    navElement.setChildren(productsLink, menuLink, aboutUsLink, loginLink, registrationLink, profileLink, logoutLink);
     navContainer.setChildren(navElement.getElement<HTMLElement>());
     return navContainer.getElement<HTMLDivElement>();
   }

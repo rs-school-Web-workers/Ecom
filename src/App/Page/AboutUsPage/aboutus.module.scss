@@ -1,0 +1,43 @@
+$lightBlack: rgba(12, 12, 14, 0.6);
+
+.aboutUs {
+  display: flex;
+  flex-direction: column;
+  gap: 100px;
+  margin-left: 100px;
+  .aboutUsTitle {
+    font-family: Integral CF;
+    padding: 0px 100px;
+  }
+}
+.aboutUsAbout {
+  background: linear-gradient($lightBlack, $lightBlack), url(../../../assets/imgs/bgImageAboutUs.jpg);
+  background-repeat: no-repeat;
+  background-position: 100% 27%;
+  background-size: cover;
+  height: 320px;
+  display: flex;
+  align-items: center;
+  // justify-content: center;
+  padding: 50px 100px;
+  .aboutUsAboutContainer {
+    display: flex;
+    flex-direction: column;
+    max-width: 500px;
+    gap: 10px;
+    background-color: rgba(0, 0, 0, 0.2);
+    padding: 10px;
+    border-radius: 8px;
+  }
+  .aboutUsAboutTitle {
+    color: rgb(201, 226, 205);
+    font-family: Integral CF;
+  }
+  .aboutUsAboutText{
+    font-family: Satoshi;
+    color: white;
+  }
+}
+.aboutUsTeam {
+  
+}
