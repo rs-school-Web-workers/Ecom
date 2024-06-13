@@ -8,6 +8,7 @@ import { ProductModal } from '../../Modal/ProductModal/ProductModal';
 import { getProductById } from '../../utils/api/Client';
 import type { Variant } from './types';
 import { PagePath } from '../../Router/types';
+import cartLogo from '../../../assets/imgs/car_logo_30.png';
 export default class ProductPage extends Page {
   router: Router;
 
@@ -380,7 +381,22 @@ export default class ProductPage extends Page {
     const addToCartButton: HTMLButtonElement = new Component('button', [
       style.add_to_cart_button,
     ]).getElement<HTMLButtonElement>();
-    addToCartButton.textContent = 'Add to Cart';
+    const cartButtonText: HTMLSpanElement = new Component('span', [
+      style.cart_button_text,
+    ]).getElement<HTMLSpanElement>();
+    const cartButtonImg: HTMLImageElement = new Component('img', ['cart_button_img']).getElement<HTMLImageElement>();
+    cartButtonImg.src = cartLogo;
+    addToCartButton.append(cartButtonText, cartButtonImg);
+    // проверка наличия товара в корзине
+    const stateProduct: boolean = false;
+    if (stateProduct) {
+      cartButtonText.textContent = 'Remove from Cart';
+      amountContainer.classList.add(style.disabled_amount);
+    } else {
+      cartButtonText.textContent = 'Add to Cart';
+      amountContainer.classList.remove(style.disabled_amount);
+    }
+    addToCartButton.addEventListener('click', (event: Event) => this.cartButtonHandler(event, amountContainer, amount));
     container.append(amountContainer, addToCartButton);
     return container;
   }
@@ -396,6 +412,27 @@ export default class ProductPage extends Page {
     if (numberAmount !== 0) {
       numberAmount--;
       amount.textContent = numberAmount.toString();
+    }
+  }
+
+  cartButtonHandler(event: Event, amountContainer: HTMLDivElement, amount: HTMLSpanElement) {
+    const button: HTMLButtonElement = <HTMLButtonElement>event.currentTarget;
+    const buttonText: HTMLSpanElement | null = button.querySelector<HTMLSpanElement>(`.${style.cart_button_text}`);
+    if (buttonText !== null) {
+      // проверка наличия в корзине
+      const stateProduct: boolean = false;
+      if (stateProduct) {
+        buttonText.textContent = 'Add to Cart';
+        amountContainer.classList.remove(style.disabled_amount);
+        amount.textContent = '1';
+        // удаление из корзины
+      } else {
+        if (amount.textContent !== '0') {
+          buttonText.textContent = 'Remove from Cart';
+          amountContainer.classList.add(style.disabled_amount);
+          // добавление в корзину
+        }
+      }
     }
   }
 }
