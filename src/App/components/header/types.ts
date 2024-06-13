@@ -5,6 +5,7 @@ export enum headerClassNames {
   NAVIGATE_LINK = 'navigate-link',
   LOGOUT_BUTTON = 'logout-button',
   USERPROFILE_LINK = 'profile-link',
+  ABOUTUS_LINK = 'about-us',
 }
 
 export enum headerLinkNames {
@@ -14,6 +15,7 @@ export enum headerLinkNames {
   LOGOUT = 'Logout',
   USERPROFILE = 'My Profile',
   PRODUCTS = 'Products',
+  ABOUTUS = 'About Us',
 }
 
 export const NAV_CONTAINER = 'nav-container';

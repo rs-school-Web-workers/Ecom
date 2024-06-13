@@ -14,6 +14,7 @@ import { UserProfilePage } from './Page/UserProfile/UserProfile';
 import { CatalogPage } from './Page/CatalogPage/Catalog';
 import ProductPage from './Page/Product/Product';
 import * as style from './app.module.scss';
+import { AboutUsPage } from './Page/AboutUsPage/AboutUs';
 
 export class App {
   router: Router;
@@ -78,6 +79,13 @@ export class App {
             this.router.navigate(PagePath.MAIN);
             this.router.renderPageView(PagePath.MAIN);
           }
+        },
+      },
+      {
+        pagePath: PagePath.ABOUTUS,
+        render: () => {
+          const aboutUsPage = new AboutUsPage();
+          this.setPage(aboutUsPage);
         },
       },
       {
