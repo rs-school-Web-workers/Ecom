@@ -8,7 +8,16 @@ $lightBlack: rgba(12, 12, 14, 0.6);
   margin-bottom: 50px;
   .aboutUsTitle {
     font-family: Integral CF;
-    padding: 0px 100px;
+    padding: 0px 0px 0px 100px;
+  }
+  @media (max-width: 900px) {
+    margin-left: 50px;
+  }
+  @media (max-width: 610px) {
+    margin-left: 10px;
+    .aboutUsTitle {
+      padding: 0px
+    }
   }
 }
 .aboutUsAbout {
@@ -38,14 +47,18 @@ $lightBlack: rgba(12, 12, 14, 0.6);
     font-family: Satoshi;
     color: white;
   }
+  @media (max-width: 610px) {
+    padding: 25px 50px;
+  }
 }
 .aboutUsTeam {
   display: flex;
   flex-wrap: wrap;
-  // justify-content: center;
+  align-items: center;
+  justify-content: center;
   // flex-direction: column;
   // padding: 0px 100px;
-  margin-left: 100px;
+  // margin-left: 7.5%;
   margin-right: 20px;
   gap: 40px;
   .aboutUsTeamCard {
@@ -98,5 +111,28 @@ $lightBlack: rgba(12, 12, 14, 0.6);
         color: black;
       }
     }
+  }
+  @media (max-width: 610px) {
+    margin-right: 10px;
+  }
+}
+.aboutUsFooter {
+  display: inline-flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px 10px;
+  border-radius: 8px;
+  background-color: rgba(0, 0, 0, 0.3);
+  margin-right: 20px;
+  .aboutUsFooterText {
+    font-family: Integral CF;
+    font-size: clamp(1rem, 2vw, 1.5rem);
+  }
+  .aboutUsFooterLink {
+    padding: 5px;
+    border-radius: 8px;
+  }
+  @media (max-width: 610px) {
+    margin-right: 10px;
   }
 }
