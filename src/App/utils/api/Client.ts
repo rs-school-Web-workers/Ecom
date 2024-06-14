@@ -249,7 +249,6 @@ export async function getCategorieById(id: string) {
  * @param offset смещение в общем массиве данных относительно начала
  * @returns
  */
-
 export async function getUserProfile() {
   if (inst === null) {
     throw new Error('client instance not found');
