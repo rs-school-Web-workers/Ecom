@@ -6,7 +6,7 @@ import { emailValidator, passwordValidator } from '../../utils/validations';
 import { loginClient } from '../../utils/api/Client';
 import { Router } from '../../Router/Router';
 import { PagePath } from '../../Router/types';
-import { showLogoutButton, showUserProfileLink } from '../../components/header/Header';
+import { showLoginButton, showLogoutButton, showUserProfileLink } from '../../components/header/Header';
 import type { ClientResponse, ErrorResponse } from '@commercetools/platform-sdk';
 
 export default class LoginPage extends Page {
@@ -83,6 +83,7 @@ export default class LoginPage extends Page {
           this.router.renderPageView(PagePath.MAIN);
           showLogoutButton();
           showUserProfileLink();
+          showLoginButton();
         } catch (resp) {
           const err = (resp as ClientResponse).body as ErrorResponse;
           if ((err as ErrorResponse).errors?.filter((el) => el.code === 'InvalidCredentials')[0]) {

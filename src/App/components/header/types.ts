@@ -6,6 +6,7 @@ export enum headerClassNames {
   LOGOUT_BUTTON = 'logout-button',
   USERPROFILE_LINK = 'profile-link',
   ABOUTUS_LINK = 'about-us',
+  LOGIN_LINK = 'login-link',
 }
 
 export enum headerLinkNames {

@@ -71,17 +71,25 @@ export default class Header {
     const productsLink: HTMLAnchorElement = this.createNavigateLink(headerLinkNames.PRODUCTS, PagePath.PRODUCTS);
     const menuLink: HTMLAnchorElement = this.createNavigateLink(headerLinkNames.MAIN, PagePath.MAIN);
     const loginLink: HTMLAnchorElement = this.createNavigateLink(headerLinkNames.LOGIN, PagePath.LOGIN);
-    const registrationLink: HTMLAnchorElement = this.createNavigateLink(
-      headerLinkNames.REGISTRATION,
-      PagePath.REGISTRATION
-    );
+    // const registrationLink: HTMLAnchorElement = this.createNavigateLink(
+    //   headerLinkNames.REGISTRATION,
+    //   PagePath.REGISTRATION
+    // );
     const logoutLink: HTMLAnchorElement = this.createNavigateLink(headerLinkNames.LOGOUT, PagePath.LOGIN);
     const profileLink: HTMLAnchorElement = this.createNavigateLink(headerLinkNames.USERPROFILE, PagePath.USERPROFILE);
     const aboutUsLink: HTMLAnchorElement = this.createNavigateLink(headerLinkNames.ABOUTUS, PagePath.ABOUTUS);
     logoutLink.classList.add(headerClassNames.LOGOUT_BUTTON);
+    loginLink.classList.add(headerClassNames.LOGIN_LINK);
     profileLink.innerHTML = `My profile${USERPROFILESVG}`;
     profileLink.classList.add(headerClassNames.USERPROFILE_LINK);
-    navElement.setChildren(productsLink, menuLink, aboutUsLink, loginLink, registrationLink, profileLink, logoutLink);
+    navElement.setChildren(
+      productsLink,
+      menuLink,
+      aboutUsLink,
+      loginLink,
+      /*registrationLink,*/ profileLink,
+      logoutLink
+    );
     navContainer.setChildren(navElement.getElement<HTMLElement>());
     return navContainer.getElement<HTMLDivElement>();
   }
@@ -94,6 +102,7 @@ export default class Header {
         destroyClient();
         showLogoutButton();
         showUserProfileLink();
+        showLoginButton();
       }
       const navigateLink: string | null = targetElem.getAttribute('href');
       if (navigateLink) {
@@ -157,5 +166,13 @@ export function showUserProfileLink() {
     profileLink?.classList.add('show-profile-link');
   } else {
     profileLink?.classList.remove('show-profile-link');
+  }
+}
+export function showLoginButton() {
+  const login: HTMLAnchorElement | null = document.querySelector<HTMLAnchorElement>(`.${headerClassNames.LOGIN_LINK}`);
+  if (isLogged()) {
+    login?.classList.remove('show-login');
+  } else {
+    login?.classList.add('show-login');
   }
 }
