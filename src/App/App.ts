@@ -15,6 +15,7 @@ import { CatalogPage } from './Page/CatalogPage/Catalog';
 import ProductPage from './Page/Product/Product';
 import * as style from './app.module.scss';
 import { AboutUsPage } from './Page/AboutUsPage/AboutUs';
+import { BasketPage } from './Page/BasketPage/Basket';
 
 export class App {
   router: Router;
@@ -80,6 +81,13 @@ export class App {
             this.router.navigate(PagePath.MAIN);
             this.router.renderPageView(PagePath.MAIN);
           }
+        },
+      },
+      {
+        pagePath: PagePath.BASKET,
+        render: () => {
+          const basketPage = new BasketPage();
+          this.setPage(basketPage);
         },
       },
       {
