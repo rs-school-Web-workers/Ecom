@@ -305,6 +305,7 @@ $max-width: 1240px;
   width: 170px;
   display: flex;
   justify-content: space-between;
+  align-items: center;
   padding: 16px 20px;
   background-color: $button-color;
   border-radius: 62px;
@@ -331,6 +332,10 @@ $max-width: 1240px;
   font-size: 16px;
   width: 400px;
   cursor: pointer;
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  align-items: center;
 
   @media (max-width: 767px) {
     width: 236px;
@@ -426,4 +431,9 @@ $max-width: 1240px;
   @media (max-width: 550px) {
     font-size: 14px;
   }
+}
+
+.disabled_amount {
+  pointer-events: none;
+  opacity: 0.5;
 }
