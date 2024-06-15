@@ -107,7 +107,7 @@ $borderRadius: 62px;
       flex: 1 1 70%;
       .basketOrderInput {
         box-sizing: border-box;
-        padding: 16px 10px 16px 52px;
+        padding: 16px 20px 16px 52px;
         border-radius: $borderRadius;
         background-color: #F0F0F0;
         border: none;
@@ -127,6 +127,7 @@ $borderRadius: 62px;
     .basketOrderInlineFlex {
       display: inline-flex;
       justify-content: space-between;
+      align-items: center;
       &_promo {
         gap: 12px;
       }
