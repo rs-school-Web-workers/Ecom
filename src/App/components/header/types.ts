@@ -7,6 +7,7 @@ export enum headerClassNames {
   USERPROFILE_LINK = 'profile-link',
   ABOUTUS_LINK = 'about-us',
   LOGIN_LINK = 'login-link',
+  BASKET_LINK = 'basket-link',
 }
 
 export enum headerLinkNames {
@@ -17,6 +18,7 @@ export enum headerLinkNames {
   USERPROFILE = 'My Profile',
   PRODUCTS = 'Products',
   ABOUTUS = 'About Us',
+  BASKET = 'Basket',
 }
 
 export const NAV_CONTAINER = 'nav-container';

@@ -1,0 +1,151 @@
+$borderRadius: 62px;
+
+.basket {
+  padding: 24px 100px;
+  .basketWrapper {
+    display: inline-flex;
+    align-items: flex-start;
+    gap: 20px;
+  }
+  .basketTitle {
+    font-family: Integral CF;
+    margin-bottom: 24px;
+  }
+  .basketContainer {
+    border: 2px solid rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    padding: 20px 24px;
+    // width: 715px;
+    flex: 1 1 40%;
+    font-family: Satoshi;
+    &_scroll {
+      flex: 1 1 58%;
+      max-height: 485px;
+      scroll-behavior: smooth;
+      scrollbar-width: thin;
+      overflow-y: scroll;
+    }
+  }
+  .basketText {
+    &_sub {
+      &_grey {
+        color: rgba(0, 0, 0, 0.5);
+      }
+    }
+    &_name {
+      font-size: 20px;
+    }
+  }
+  .basketCard {
+    display: inline-flex;
+    justify-content: space-between;
+    width: 100%;
+    .basketCardContainer {
+      display: flex;
+      font-family: Satoshi;
+      height: 124px;
+      &_attributes {
+        flex-direction: column;
+        gap: 6px;
+      }
+      &_count {
+        justify-content: space-between;
+        flex-direction: column;
+      }
+    }
+    .basketCardImg {
+      object-fit: fill;
+      height: 124px;
+      width: 125px;
+      margin-right: 14px;
+    }
+    .basketCardButton {
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: transparent;
+      cursor: pointer;
+      &_trash {
+        align-self: flex-end;
+      }
+    }
+    .basketCardButtonContainer {
+      display: inline-flex;
+      gap: 20px;
+      padding: 10px 20px;
+      background-color: rgba(240, 240, 240, 1);
+      border-radius: $borderRadius;
+    }
+    &:not(:last-child) {
+      border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+      padding-bottom: 24px;
+    }
+    &:not(:first-child) {
+      padding-top: 24px;
+    }
+  }
+  .basketOrder {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    .basketOrderTitle {
+      margin-bottom: 4px;
+    }
+    .basketOrderSubtitle {
+      font-size: 20px;
+      &_price {
+        font-weight: 700;
+      }
+      &_discount {
+        color: #ff3333;
+      }
+    }
+    .basketOrderInputWrapper {
+      position: relative;
+      border-radius: $borderRadius;
+      flex: 1 1 70%;
+      .basketOrderInput {
+        box-sizing: border-box;
+        padding: 16px 20px 16px 52px;
+        border-radius: $borderRadius;
+        background-color: #F0F0F0;
+        border: none;
+        width: 100%;
+      }
+      &::before {
+        position: absolute;
+        top: 50%;
+        left: 16px;
+        transform: translateY(-50%);
+        content: url(../../../assets/imgs/svg/promo.svg);
+        display: block;
+        width: 22px;
+        height: 22px;
+      }
+    }
+    .basketOrderInlineFlex {
+      display: inline-flex;
+      justify-content: space-between;
+      align-items: center;
+      &_promo {
+        gap: 12px;
+      }
+    }
+    .basketOrderButton {
+      padding: 16px 24px;
+      background-color: #000000;
+      color: #FFFFFF;
+      border: none;
+      cursor: pointer;
+      border-radius: $borderRadius;
+      transition: opacity 0.3s;
+      &:hover {
+        opacity: 0.8;
+      }
+      &_promoApply {
+        flex: 1 1 28%;
+      }
+    }
+  }
+}
