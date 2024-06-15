@@ -1,14 +1,15 @@
-export enum ContentClassesTest {
-  '/' = 'main-page',
-  '/login' = 'login',
-  // eslint-disable-next-line @typescript-eslint/no-duplicate-enum-values
-  '/main' = 'main-page',
-  '/registration' = 'registration',
-  '/not-found' = 'not-found-page',
-  '/products' = 'products-page',
-  // eslint-disable-next-line @typescript-eslint/no-duplicate-enum-values
-  '/not-found-example' = 'not-found-page',
-}
+import * as catalogStyle from '../App/Page/CatalogPage/catalog.module.scss';
+import * as userProfileStyle from '../App/Page/UserProfile/userprofile.module.scss';
+
+export const ContentClassesArrayTest = [
+  'main-page',
+  'login',
+  'main-page',
+  'registration',
+  'not-found-page',
+  `${catalogStyle.catalog}`,
+  'not-found-page',
+];
 
 export enum PagePathTest {
   INIT = '/',
@@ -20,7 +21,14 @@ export enum PagePathTest {
   OTHER_NOT_FOUND = '/not-found-example',
 }
 
-export const ContentClassesHeaderArrayTest = ['main-page', 'login', 'registration', 'login'];
+export const ContentClassesHeaderArrayTest = [
+  `${catalogStyle.catalog}`,
+  'main-page',
+  'login',
+  'registration',
+  `${userProfileStyle.userProfile}`,
+  'login',
+];
 
 export const SOME_ID = 'some-id';
 
