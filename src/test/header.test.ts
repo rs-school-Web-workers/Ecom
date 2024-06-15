@@ -7,6 +7,8 @@ describe('header buttons functionality', () => {
   buttons.forEach((button, index) => {
     test(`it render content container to ${button.textContent}-page`, () => {
       button.click();
+      console.log(ContentClassesHeaderArrayTest[index]);
+      console.log(app.contentContainer.querySelector(`.${ContentClassesHeaderArrayTest[index]}`));
       expect(app.contentContainer.querySelector(`.${ContentClassesHeaderArrayTest[index]}`)).not.toBeNull();
     });
   });
