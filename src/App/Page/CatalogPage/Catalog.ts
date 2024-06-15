@@ -26,6 +26,7 @@ import { getCategorieById, getClient } from '../../utils/api/Client';
 import { RangeFacetResult, TermFacetResult } from '@commercetools/platform-sdk';
 import { centsToDollar } from '../../utils/helpers';
 import { Router } from '../../Router/Router';
+import cartLogo from '../../../assets/imgs/car_logo_30.png';
 
 export class CatalogPage extends Page {
   catalogContainer = new Component('div', [catalogContainer]);
@@ -298,13 +299,44 @@ export class CatalogPage extends Page {
       descriptionCard.getElement(),
       containerForCardPrices.getElement()
     );
-    card.setChildren(imageCardContainer.getElement<HTMLImageElement>(), wrapperAboutCard.getElement());
+    card.setChildren(
+      imageCardContainer.getElement<HTMLImageElement>(),
+      wrapperAboutCard.getElement(),
+      this.createAddToCartButton().getElement<HTMLDivElement>()
+    );
     card.getElement<HTMLElement>().addEventListener('click', () => {
       const path = `/products/${data.category}/${data.id}`;
       this.router.navigate(path);
       this.router.renderPageView(path);
     });
     return card;
+  }
+
+  createAddToCartButton() {
+    const container: Component = new Component('div', [catalogStyle.add_to_cart_container]);
+    const button: Component = new Component('button', [catalogStyle.add_to_cart_button]);
+    const buttonText: Component = new Component('span', [catalogStyle.add_to_cart_text]);
+    const buttonLogo: Component = new Component('img', ['add_to_cart_logo']);
+    buttonText.setTextContent('Add to cart');
+    // проверяет наличие в корзине
+    const cartState: boolean = false;
+    if (cartState) {
+      button.getElement<HTMLButtonElement>().disabled = true;
+    }
+    buttonLogo.getElement<HTMLImageElement>().src = cartLogo;
+    button.setChildren(buttonText.getElement(), buttonLogo.getElement());
+    button
+      .getElement<HTMLButtonElement>()
+      .addEventListener('click', (event: Event) => this.clickAddToCartButtonHandler(event));
+    container.setChildren(button.getElement());
+    return container;
+  }
+
+  clickAddToCartButtonHandler(event: Event) {
+    // добавление элемента в корзину
+    event.stopPropagation();
+    const button: HTMLButtonElement = <HTMLButtonElement>event.currentTarget;
+    button.disabled = true;
   }
 
   createFilterContainer() {
