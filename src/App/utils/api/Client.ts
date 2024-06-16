@@ -449,10 +449,7 @@ export async function removeShippingAddress(version: number, addressId?: string,
 }
 
 export async function getCart() {
-  if (inst === null) {
-    throw new Error('client instance not found');
-  }
-  return await inst
+  return await (inst ?? getAnonClient())
     .me()
     .activeCart()
     .get()
