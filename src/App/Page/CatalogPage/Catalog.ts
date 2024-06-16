@@ -1,7 +1,15 @@
 import Component from '../../utils/base-component';
 import Page from '../Page';
 import * as catalogStyle from './catalog.module.scss';
-import { CardItem, sortValue, ICatalogFilter, defaultStateFilter, IFilterVariant, defaultVariantFilter } from './types';
+import {
+  CardItem,
+  sortValue,
+  ICatalogFilter,
+  defaultStateFilter,
+  IFilterVariant,
+  defaultVariantFilter,
+  limitsValue,
+} from './types';
 const {
   catalog,
   catalogContainer,
@@ -52,7 +60,10 @@ export class CatalogPage extends Page {
   category: string;
   currentPage: number = 0;
   limit: number = 6;
-  totalCount: number = 500;
+  totalCount: number = 5;
+  numberPage: HTMLDivElement = new Component('div', ['pagination_number_container']).getElement<HTMLDivElement>();
+  prevButton: HTMLButtonElement = new Component('button', [catalogStyle.button_prev]).getElement<HTMLButtonElement>();
+  nextButton: HTMLButtonElement = new Component('button', [catalogStyle.button_next]).getElement<HTMLButtonElement>();
 
   constructor(router: Router, category: string = '') {
     super([catalog]);
@@ -180,7 +191,43 @@ export class CatalogPage extends Page {
       selectSortContainer.append(sortElem);
     });
     currentSortingShow.addEventListener('click', () => this.clickShowHandler(currentSortingShow, selectSortContainer));
-    sortFilterContainer.append(filter_logoMinscreen, sortContainer, selectSortContainer);
+    const limitsContainer: HTMLDivElement = new Component('div', [
+      catalogStyle.limits_container,
+    ]).getElement<HTMLDivElement>();
+    const limitsText: HTMLSpanElement = new Component('span', [catalogStyle.limits_text]).getElement<HTMLSpanElement>();
+    limitsText.textContent = 'Products on page:';
+    const currentLimits: HTMLDivElement = new Component('div', [
+      catalogStyle.current_limit,
+    ]).getElement<HTMLDivElement>();
+    const currentLimitsText: HTMLSpanElement = new Component('span', [
+      'current_limit_text',
+    ]).getElement<HTMLSpanElement>();
+    currentLimitsText.textContent = limitsValue[2].toString();
+    const currentLimitsShow: HTMLImageElement = new Component('img', [
+      catalogStyle.current_limit_show,
+    ]).getElement<HTMLImageElement>();
+    currentLimitsShow.src = unshow;
+    currentLimits.append(currentLimitsText, currentLimitsShow);
+    limitsContainer.append(limitsText, currentLimits);
+    const selectLimitsContainer: HTMLDivElement = new Component('div', [
+      catalogStyle.select_limit_container,
+    ]).getElement<HTMLDivElement>();
+    limitsValue.forEach((value) => {
+      const limitElem: HTMLSpanElement = new Component('span', [catalogStyle.limit_elem]).getElement<HTMLSpanElement>();
+      limitElem.textContent = value.toString();
+      limitElem.addEventListener('click', (event) =>
+        this.clickLimitsElemHandler(event, currentLimitsText, currentLimitsShow, selectLimitsContainer)
+      );
+      selectLimitsContainer.append(limitElem);
+    });
+    currentLimitsShow.addEventListener('click', () => this.clickShowHandler(currentLimitsShow, selectLimitsContainer));
+    sortFilterContainer.append(
+      filter_logoMinscreen,
+      limitsContainer,
+      selectLimitsContainer,
+      sortContainer,
+      selectSortContainer
+    );
     return sortFilterContainer;
   }
 
@@ -291,6 +338,17 @@ export class CatalogPage extends Page {
       const card = this.createCard(dataObject);
       this.listProductsContainer.append(card.getElement());
     });
+    if (this.currentPage === Math.ceil(this.totalCount / this.limit) - 1) {
+      this.nextButton.disabled = true;
+    } else {
+      this.nextButton.disabled = false;
+    }
+    if (this.currentPage === 0) {
+      this.prevButton.disabled = true;
+    } else {
+      this.prevButton.disabled = false;
+    }
+    this.createPaginationNumbers();
   }
 
   createCard(data: CardItem) {
@@ -819,64 +877,168 @@ export class CatalogPage extends Page {
     const container: HTMLDivElement = new Component('div', [
       catalogStyle.pagination_container,
     ]).getElement<HTMLDivElement>();
-    const prevButton: HTMLButtonElement = new Component('button', [
-      catalogStyle.button_prev,
-    ]).getElement<HTMLButtonElement>();
     const prevButtonText: HTMLSpanElement = new Component('span', [
       catalogStyle.button_pagination_text,
     ]).getElement<HTMLSpanElement>();
     prevButtonText.textContent = 'Previous';
     const prevButtonImg: HTMLImageElement = new Component('img', [
-      'button_pagination_logo',
+      catalogStyle.button_pagination_logo,
     ]).getElement<HTMLImageElement>();
     prevButtonImg.src = prev_img;
-    prevButton.append(prevButtonImg, prevButtonText);
-    const nextButton: HTMLButtonElement = new Component('button', [
-      catalogStyle.button_next,
-    ]).getElement<HTMLButtonElement>();
+    this.prevButton.append(prevButtonImg, prevButtonText);
     const nextButtonText: HTMLSpanElement = new Component('span', [
       catalogStyle.button_pagination_text,
     ]).getElement<HTMLSpanElement>();
     nextButtonText.textContent = 'Next';
     const nextButtonImg: HTMLImageElement = new Component('img', [
-      'button_pagination_logo',
+      catalogStyle.button_pagination_logo,
     ]).getElement<HTMLImageElement>();
     nextButtonImg.src = next_img;
-    prevButton.addEventListener('click', (event: Event) => this.prevButtonHandler(event, nextButton));
-    nextButton.addEventListener('click', (event: Event) => this.nextButtonHandler(event, prevButton));
-    nextButton.append(nextButtonText, nextButtonImg);
-    // const pageNumbersContainer: HTMLDivElement = new Component('div', [
-    //   'page_numbers_container',
-    // ]).getElement<HTMLDivElement>();
-    container.append(prevButton, nextButton);
+    this.prevButton.addEventListener('click', () => this.prevButtonHandler());
+    this.nextButton.addEventListener('click', () => this.nextButtonHandler());
+    this.nextButton.append(nextButtonText, nextButtonImg);
+    this.numberPage.addEventListener('click', (event) => this.clickPaginationNumberHandler(event));
+    container.append(this.prevButton, this.numberPage, this.nextButton);
     return container;
   }
 
-  prevButtonHandler(event: Event, nextButton: HTMLButtonElement) {
-    const button: HTMLButtonElement = <HTMLButtonElement>event.currentTarget;
+  prevButtonHandler() {
     if (this.currentPage > 0) {
       this.currentPage--;
       if (this.currentPage < Math.ceil(this.totalCount / this.limit) - 1) {
-        nextButton.disabled = false;
+        this.nextButton.disabled = false;
       }
       this.render();
     }
     if (this.currentPage === 0) {
-      button.disabled = true;
+      this.prevButton.disabled = true;
     }
   }
 
-  nextButtonHandler(event: Event, prevButton: HTMLButtonElement) {
-    const button: HTMLButtonElement = <HTMLButtonElement>event.currentTarget;
+  nextButtonHandler() {
     if (this.currentPage < Math.ceil(this.totalCount / this.limit) - 1) {
       this.currentPage++;
       if (this.currentPage > 0) {
-        prevButton.disabled = false;
+        this.prevButton.disabled = false;
       }
       this.render();
     }
     if (this.currentPage === Math.ceil(this.totalCount / this.limit) - 1) {
-      button.disabled = true;
+      this.nextButton.disabled = true;
+    }
+  }
+
+  clickLimitsElemHandler(
+    event: Event,
+    currentLimit: HTMLSpanElement,
+    showElem: HTMLImageElement,
+    container: HTMLDivElement
+  ) {
+    const currentElem: HTMLSpanElement = <HTMLSpanElement>event.currentTarget;
+    currentLimit.textContent = currentElem.textContent;
+    this.clickShowHandler(showElem, container);
+    this.limit = Number(currentLimit.textContent);
+    this.render();
+  }
+
+  createPaginationNumbers() {
+    this.numberPage.replaceChildren();
+    const countPages: number = Math.ceil(this.totalCount / this.limit);
+    if (countPages < 8) {
+      for (let i = 0; i < countPages; i++) {
+        const numberPage: HTMLSpanElement = new Component('span', [
+          catalogStyle.number_page_container,
+        ]).getElement<HTMLSpanElement>();
+        numberPage.dataset.page = i.toString();
+        numberPage.textContent = (i + 1).toString();
+        if (i === this.currentPage) {
+          numberPage.classList.add(catalogStyle.active_page);
+        }
+        this.numberPage.append(numberPage);
+      }
+    } else if (this.currentPage < countPages - 4 && this.currentPage > 3) {
+      const dotStart: HTMLSpanElement = new Component('span', ['dot_container']).getElement<HTMLSpanElement>();
+      dotStart.textContent = '...';
+      const startPage: HTMLSpanElement = new Component('span', [
+        catalogStyle.number_page_container,
+      ]).getElement<HTMLSpanElement>();
+      startPage.dataset.page = '0';
+      startPage.textContent = '1';
+      this.numberPage.append(startPage, dotStart);
+      const prevPage: HTMLSpanElement = new Component('span', [
+        catalogStyle.number_page_container,
+      ]).getElement<HTMLSpanElement>();
+      prevPage.dataset.page = `${this.currentPage - 1}`;
+      prevPage.textContent = `${this.currentPage}`;
+      const current: HTMLSpanElement = new Component('span', [
+        catalogStyle.number_page_container,
+      ]).getElement<HTMLSpanElement>();
+      current.dataset.page = `${this.currentPage}`;
+      current.textContent = `${this.currentPage + 1}`;
+      current.classList.add(catalogStyle.active_page);
+      const nextPage: HTMLSpanElement = new Component('span', [
+        catalogStyle.number_page_container,
+      ]).getElement<HTMLSpanElement>();
+      nextPage.dataset.page = `${this.currentPage + 1}`;
+      nextPage.textContent = `${this.currentPage + 2}`;
+      this.numberPage.append(prevPage, current, nextPage);
+      const endPage: HTMLSpanElement = new Component('span', [
+        catalogStyle.number_page_container,
+      ]).getElement<HTMLSpanElement>();
+      endPage.dataset.page = `${countPages - 1}`;
+      endPage.textContent = `${countPages}`;
+      const dotEnd: HTMLSpanElement = new Component('span', ['dot_container']).getElement<HTMLSpanElement>();
+      dotEnd.textContent = '...';
+      this.numberPage.append(dotEnd, endPage);
+    } else if (this.currentPage < 4) {
+      for (let i = 0; i < 5; i++) {
+        const numberPage: HTMLSpanElement = new Component('span', [
+          catalogStyle.number_page_container,
+        ]).getElement<HTMLSpanElement>();
+        numberPage.dataset.page = i.toString();
+        numberPage.textContent = (i + 1).toString();
+        if (i === this.currentPage) {
+          numberPage.classList.add(catalogStyle.active_page);
+        }
+        this.numberPage.append(numberPage);
+      }
+      const dot: HTMLSpanElement = new Component('span', ['dot_container']).getElement<HTMLSpanElement>();
+      dot.textContent = '...';
+      const endPage: HTMLSpanElement = new Component('span', [
+        catalogStyle.number_page_container,
+      ]).getElement<HTMLSpanElement>();
+      endPage.dataset.page = `${countPages - 1}`;
+      endPage.textContent = `${countPages}`;
+      this.numberPage.append(dot, endPage);
+    } else if (this.currentPage > countPages - 6) {
+      const dot: HTMLSpanElement = new Component('span', ['dot_container']).getElement<HTMLSpanElement>();
+      dot.textContent = '...';
+      const startPage: HTMLSpanElement = new Component('span', [
+        catalogStyle.number_page_container,
+      ]).getElement<HTMLSpanElement>();
+      startPage.dataset.page = '0';
+      startPage.textContent = '1';
+      this.numberPage.append(startPage, dot);
+      for (let i = countPages - 5; i < countPages; i++) {
+        const numberPage: HTMLSpanElement = new Component('span', [
+          catalogStyle.number_page_container,
+        ]).getElement<HTMLSpanElement>();
+        numberPage.dataset.page = i.toString();
+        numberPage.textContent = (i + 1).toString();
+        if (i === this.currentPage) {
+          numberPage.classList.add(catalogStyle.active_page);
+        }
+        this.numberPage.append(numberPage);
+      }
+    }
+  }
+
+  clickPaginationNumberHandler(event: Event) {
+    const elem: HTMLSpanElement = <HTMLSpanElement>event.target;
+    if (elem.classList.contains(catalogStyle.number_page_container)) {
+      const page: string | undefined = elem.dataset.page;
+      this.currentPage = page !== undefined ? Number(page) : 0;
+      this.render();
     }
   }
 }
