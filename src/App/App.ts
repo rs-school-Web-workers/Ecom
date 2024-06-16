@@ -32,6 +32,17 @@ export class App {
     } else {
       getAnonClient();
     }
+    /* (async () => {
+      let cartId = 'error-cart';
+      if (localStorage.getItem('token')) {
+        await autoLoginCLient();
+        await getCart().then((el) => (cartId = el!));
+      } else {
+        await getAnonClient();
+        await getCart().then((el) => (cartId = el!));
+      }
+      console.log(cartId);
+    })(); */
     this.container = document.body;
     this.container = new Component('div', [style.app]).getElement<HTMLDivElement>();
     document.body.append(this.container);

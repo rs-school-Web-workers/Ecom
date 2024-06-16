@@ -447,3 +447,27 @@ export async function removeShippingAddress(version: number, addressId?: string,
     })
     .execute();
 }
+
+export async function getCart() {
+  if (inst === null) {
+    throw new Error('client instance not found');
+  }
+  return await inst
+    .me()
+    .activeCart()
+    .get()
+    .execute()
+    .catch((err) => {
+      if (err.statusCode == 404) {
+        return getClient()
+          ?.me()
+          .carts()
+          .post({
+            body: { currency: 'USD' },
+          })
+          .execute();
+      } else {
+        throw new Error('check network', err);
+      }
+    });
+}
