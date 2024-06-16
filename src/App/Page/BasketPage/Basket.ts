@@ -2,7 +2,7 @@ import Component from '../../utils/base-component';
 import Page from '../Page';
 import * as basketPageStyles from './basket.module.scss';
 import photo from '../../../assets/imgs/abs.png';
-import { getCart } from '../../utils/api/Client';
+import { getCart, getClient } from '../../utils/api/Client';
 import { centsToDollar } from '../../utils/helpers';
 
 const {
@@ -64,9 +64,9 @@ export class BasketPage extends Page {
           item.quantity.toString()
         );
       });
+      console.log(cart);
+      this.createOrderAmount();
     }
-
-    this.createOrderAmount();
     wrapper.setChildren(this.cardContainer.getElement(), this.orderContainer.getElement());
     this.container?.append(this.title.getElement(), wrapper.getElement());
   }
@@ -128,7 +128,17 @@ export class BasketPage extends Page {
     this.cardContainer.setChildren(card.getElement());
   }
 
-  private createOrderAmount(fullPrice: string = '$565', discount: string = '-$113') {
+  private async createOrderAmount() {
+    const cart = await getCart();
+    if (!cart) {
+      throw new Error('Cart not found');
+    }
+    const discountCents = cart.body.discountOnTotalPrice?.discountedAmount.centAmount ?? 0;
+    const TotalCents = cart.body.totalPrice.centAmount;
+    const subTotalCents = TotalCents + discountCents;
+    const fullPrice: string = centsToDollar(subTotalCents).concat('$');
+    const discount: string = `-${centsToDollar(discountCents)}$`;
+    const total = centsToDollar(TotalCents).concat('$');
     const wrapperFullPrice = new Component('div', [basketOrderInlineFlex]);
     const titleFullPrice = new Component('span', [basketOrderSubtitle, basketText_sub_grey]);
     titleFullPrice.setTextContent('Subtotal');
@@ -138,7 +148,7 @@ export class BasketPage extends Page {
 
     const wrapperDiscount = new Component('div', [basketOrderInlineFlex]);
     const titleDiscount = new Component('span', [basketOrderSubtitle, basketText_sub_grey]);
-    titleDiscount.setTextContent('Discount (-20%)');
+    titleDiscount.setTextContent('Discount');
     const textDiscount = new Component('span', [
       basketOrderSubtitle,
       basketOrderSubtitle_price,
@@ -147,18 +157,18 @@ export class BasketPage extends Page {
     textDiscount.setTextContent(discount);
     wrapperDiscount.setChildren(titleDiscount.getElement(), textDiscount.getElement());
 
-    const wrapperDeliveryFee = new Component('div', [basketOrderInlineFlex]);
+    /* const wrapperDeliveryFee = new Component('div', [basketOrderInlineFlex]);
     const titleDeliveryFee = new Component('span', [basketOrderSubtitle, basketText_sub_grey]);
     titleDeliveryFee.setTextContent('Delivery Fee');
     const textDeliveryFee = new Component('span', [basketOrderSubtitle, basketOrderSubtitle_price]);
     textDeliveryFee.setTextContent('$15');
-    wrapperDeliveryFee.setChildren(titleDeliveryFee.getElement(), textDeliveryFee.getElement());
+    wrapperDeliveryFee.setChildren(titleDeliveryFee.getElement(), textDeliveryFee.getElement()); */
 
     const wrapperTotalPrice = new Component('div', [basketOrderInlineFlex]);
     const titleTotalPrice = new Component('span', [basketOrderSubtitle]);
     titleTotalPrice.setTextContent('Total');
     const textTotalPrice = new Component('h2', []);
-    textTotalPrice.setTextContent('$467');
+    textTotalPrice.setTextContent(total);
     wrapperTotalPrice.setChildren(titleTotalPrice.getElement(), textTotalPrice.getElement());
 
     const wrapperPromo = new Component('div', [basketOrderInlineFlex, basketOrderInlineFlex_promo]);
@@ -170,6 +180,29 @@ export class BasketPage extends Page {
     const buttonApplyPromo = new Component('button', [basketOrderButton, basketOrderButton_promoApply]);
     buttonApplyPromo.getElement<HTMLButtonElement>().type = 'button';
     buttonApplyPromo.setTextContent('Apply');
+    buttonApplyPromo.getElement<HTMLButtonElement>().addEventListener('click', async () => {
+      const cart = await getCart();
+      await getClient()
+        ?.me()
+        .carts()
+        .withId({ ID: cart!.body.id })
+        .post({
+          body: {
+            version: cart!.body.version,
+            actions: [
+              {
+                action: 'addDiscountCode',
+                code: inputPromo.getElement<HTMLInputElement>().value,
+              },
+            ],
+          },
+        })
+        .execute()
+        .catch((err) => {
+          // show error message
+          console.log(err);
+        });
+    });
     wrapperPromo.setChildren(wrapperInput.getElement(), buttonApplyPromo.getElement<HTMLButtonElement>());
 
     const buttonConfirmOrder = new Component('button', [basketOrderButton]);
@@ -181,7 +214,7 @@ export class BasketPage extends Page {
       title.getElement(),
       wrapperFullPrice.getElement(),
       wrapperDiscount.getElement(),
-      wrapperDeliveryFee.getElement(),
+      /* wrapperDeliveryFee.getElement(), */
       wrapperTotalPrice.getElement(),
       wrapperPromo.getElement(),
       buttonConfirmOrder.getElement<HTMLButtonElement>()
