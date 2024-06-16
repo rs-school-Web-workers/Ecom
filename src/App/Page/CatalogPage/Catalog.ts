@@ -27,6 +27,8 @@ import { RangeFacetResult, TermFacetResult } from '@commercetools/platform-sdk';
 import { centsToDollar } from '../../utils/helpers';
 import { Router } from '../../Router/Router';
 import cartLogo from '../../../assets/imgs/car_logo_30.png';
+import prev_img from '../../../assets/imgs/prev_button.png';
+import next_img from '../../../assets/imgs/next_button.png';
 
 export class CatalogPage extends Page {
   catalogContainer = new Component('div', [catalogContainer]);
@@ -48,6 +50,9 @@ export class CatalogPage extends Page {
   styles: string[] = [];
   styleSubcategory: string[][] = [];
   category: string;
+  currentPage: number = 0;
+  limit: number = 6;
+  totalCount: number = 500;
 
   constructor(router: Router, category: string = '') {
     super([catalog]);
@@ -103,7 +108,12 @@ export class CatalogPage extends Page {
     this.containerProducts.append(this.listProductsContainer);
     this.modalBackground.addEventListener('click', (event) => this.clickCloseFilterLogoHandler(event));
     this.contentContainer.append(this.containerFilters, this.containerProducts);
-    this.container?.append(this.searchContainer, this.contentContainer, this.modalBackground);
+    this.container?.append(
+      this.searchContainer,
+      this.contentContainer,
+      this.createPaginationContainer(),
+      this.modalBackground
+    );
     this.render();
   }
 
@@ -211,8 +221,16 @@ export class CatalogPage extends Page {
   }
 
   async createCardList() {
-    const args: { limit?: number; fuzzy?: boolean; filter?: string[]; sort?: string; 'text.en-US'?: string } = {};
-    args.limit = 500;
+    const args: {
+      limit?: number;
+      offset?: number;
+      fuzzy?: boolean;
+      filter?: string[];
+      sort?: string;
+      'text.en-US'?: string;
+    } = {};
+    args.limit = this.limit;
+    args.offset = this.limit * this.currentPage;
     args.fuzzy = true;
     args.filter = [];
     if (this.stateFilter.cloth.length && !this.stateFilter.cloth.includes('All')) {
@@ -241,6 +259,7 @@ export class CatalogPage extends Page {
     }
     args['text.en-US'] = this.stateFilter.text ?? '';
     const products = await getClient()?.productProjections().search().get({ queryArgs: args }).execute();
+    this.totalCount = products?.body.total !== undefined ? products?.body.total : 0;
     const data = await Promise.all<{ [row: string]: string }>(
       products!.body.results.map(async (el) => {
         const priceWithDiscount =
@@ -424,6 +443,7 @@ export class CatalogPage extends Page {
       }
     });
     this.stateFilter.brand = brandSelect;
+    this.currentPage = 0;
     this.render();
   }
 
@@ -463,6 +483,8 @@ export class CatalogPage extends Page {
       brand.classList.remove(catalogStyle.active_brand);
     });
     this.stateFilter = Object.create(defaultStateFilter);
+    this.currentPage = 0;
+    this.render();
   }
 
   createFilterPrice() {
@@ -790,6 +812,71 @@ export class CatalogPage extends Page {
       showElem.src = show;
       showElem.classList.add('show-elem');
       container.classList.add(catalogStyle.active_elem);
+    }
+  }
+
+  createPaginationContainer() {
+    const container: HTMLDivElement = new Component('div', [
+      catalogStyle.pagination_container,
+    ]).getElement<HTMLDivElement>();
+    const prevButton: HTMLButtonElement = new Component('button', [
+      catalogStyle.button_prev,
+    ]).getElement<HTMLButtonElement>();
+    const prevButtonText: HTMLSpanElement = new Component('span', [
+      catalogStyle.button_pagination_text,
+    ]).getElement<HTMLSpanElement>();
+    prevButtonText.textContent = 'Previous';
+    const prevButtonImg: HTMLImageElement = new Component('img', [
+      'button_pagination_logo',
+    ]).getElement<HTMLImageElement>();
+    prevButtonImg.src = prev_img;
+    prevButton.append(prevButtonImg, prevButtonText);
+    const nextButton: HTMLButtonElement = new Component('button', [
+      catalogStyle.button_next,
+    ]).getElement<HTMLButtonElement>();
+    const nextButtonText: HTMLSpanElement = new Component('span', [
+      catalogStyle.button_pagination_text,
+    ]).getElement<HTMLSpanElement>();
+    nextButtonText.textContent = 'Next';
+    const nextButtonImg: HTMLImageElement = new Component('img', [
+      'button_pagination_logo',
+    ]).getElement<HTMLImageElement>();
+    nextButtonImg.src = next_img;
+    prevButton.addEventListener('click', (event: Event) => this.prevButtonHandler(event, nextButton));
+    nextButton.addEventListener('click', (event: Event) => this.nextButtonHandler(event, prevButton));
+    nextButton.append(nextButtonText, nextButtonImg);
+    // const pageNumbersContainer: HTMLDivElement = new Component('div', [
+    //   'page_numbers_container',
+    // ]).getElement<HTMLDivElement>();
+    container.append(prevButton, nextButton);
+    return container;
+  }
+
+  prevButtonHandler(event: Event, nextButton: HTMLButtonElement) {
+    const button: HTMLButtonElement = <HTMLButtonElement>event.currentTarget;
+    if (this.currentPage > 0) {
+      this.currentPage--;
+      if (this.currentPage < Math.ceil(this.totalCount / this.limit) - 1) {
+        nextButton.disabled = false;
+      }
+      this.render();
+    }
+    if (this.currentPage === 0) {
+      button.disabled = true;
+    }
+  }
+
+  nextButtonHandler(event: Event, prevButton: HTMLButtonElement) {
+    const button: HTMLButtonElement = <HTMLButtonElement>event.currentTarget;
+    if (this.currentPage < Math.ceil(this.totalCount / this.limit) - 1) {
+      this.currentPage++;
+      if (this.currentPage > 0) {
+        prevButton.disabled = false;
+      }
+      this.render();
+    }
+    if (this.currentPage === Math.ceil(this.totalCount / this.limit) - 1) {
+      button.disabled = true;
     }
   }
 }

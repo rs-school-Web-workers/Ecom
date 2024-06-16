@@ -566,3 +566,33 @@ input[type="range"]:active::-webkit-slider-thumb{
   font-size: 20px;
   color: white;
 }
+
+.pagination_container{
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+}
+
+.button_prev,
+.button_next {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  border: 1px solid $border-bottom-color;
+  border-radius: 8px;
+  padding: 8px 14px;
+  gap: 8px;
+}
+
+.button_prev:disabled,
+.button_next:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
+.button_pagination_text {
+  font-family: Satoshi;
+  font-weight: 500px;
+  font-size: 20px;
+  color: #000000;
+}
