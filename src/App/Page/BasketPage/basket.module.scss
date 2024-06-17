@@ -149,3 +149,20 @@ $borderRadius: 62px;
     }
   }
 }
+
+.clear_button_container{
+  width: 100%;
+}
+
+.clear_button {
+  padding: 16px 24px;
+  background-color: #000000;
+  color: #FFFFFF;
+  border: none;
+  cursor: pointer;
+  border-radius: $borderRadius;
+  transition: opacity 0.3s;
+  &:hover {
+    opacity: 0.8;
+  }
+}
