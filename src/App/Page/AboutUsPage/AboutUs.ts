@@ -51,9 +51,10 @@ export class AboutUsPage extends Page {
     const title = new Component('h2', [aboutUsAboutTitle]);
     title.setTextContent('Our story');
     const textAboutUs = new Component('p', [aboutUsAboutText]);
-    textAboutUs.setTextContent(
-      'Lorem ipsum dolor, sit amet consectetur adipisicing elit. Tempore iusto assumenda ratione natus nihil numquam repellat? Explicabo, quos? Corrupti modi deleniti nihil natus tenetur dolores accusantium fuga iusto debitis ipsam?'
-    );
+    textAboutUs.setTextContent(`The team was very productive during the project! In the second sprint, Daniil worked on creating a unique web component for input and select, as well as developing the login and registration page. Kirill took full responsibility for the backend and helped other team members if they encountered any difficulties. Tanya focused on setting up a great router, implementing a base component, and writing corresponding tests.
+      In the third sprint, Daniil developed the data, which Kirill integrated with the backend, creating requests to work with this data. Tanya implemented a single product page and, together with Kirill, fully created the page with all products. Daniil also created the profile page, and Kirill focused on writing tests to ensure code coverage.
+      In the fourth sprint, Kirill once again took on the responsibilities for backend development, while Daniil and Tanya worked on developing the user interface ready to work with requests.
+      The team really put a lot of effort into the project! 🚀`);
     containerAboutUs.setChildren(title.getElement(), textAboutUs.getElement());
     this.wrapperAbout.setChildren(containerAboutUs.getElement());
   }
@@ -69,7 +70,6 @@ export class AboutUsPage extends Page {
     cardName.setTextContent(name);
     const cardRole = new Component('h4', [aboutUsTeamCardRole]);
     cardRole.setTextContent(role);
-    console.log(shortBio, ghLink);
     const cardDescriptionContainer = new Component('div', [aboutUsTeamCardDescription]);
     const cardDescriptionName = new Component('h2', []);
     cardDescriptionName.setTextContent(name);
