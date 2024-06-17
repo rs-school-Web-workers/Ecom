@@ -81,7 +81,8 @@ export class BasketPage extends Page {
           ).concat('$'),
           item.quantity.toString(),
           item.productId,
-          item.variant.id
+          item.variant.id,
+          item.id
         );
       });
       console.log(cart);
@@ -97,6 +98,7 @@ export class BasketPage extends Page {
     quantity: string,
     productId: string,
     variantId: number,
+    lineItemId: string,
     size?: string
   ) {
     const SVGTRASH = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -172,6 +174,47 @@ export class BasketPage extends Page {
     buttonPlusItem.innerHTML = SVGPLUS;
     const amount = new Component('span', []);
     amount.setTextContent(quantity);
+    buttonMinusItem.addEventListener('click', async () => {
+      const cart = await getCart();
+      if (Number(amount.getElement<HTMLElement>().textContent) - 1 < 1) {
+        card.getElement<HTMLElement>().remove();
+        if (cart?.body.totalLineItemQuantity === 1) {
+          this.createEmptyMessage();
+        }
+      }
+      amount.getElement<HTMLElement>().textContent = (
+        Number(amount.getElement<HTMLElement>().textContent) - 1
+      ).toString();
+      await getClient()
+        ?.me()
+        .carts()
+        .withId({ ID: cart!.body.id })
+        .post({
+          body: { actions: [{ action: 'removeLineItem', quantity: 1, lineItemId }], version: cart!.body.version },
+        })
+        .execute();
+      this.orderContainer.getElement<HTMLDivElement>().replaceChildren();
+      this.createOrderAmount();
+    });
+    buttonPlusItem.addEventListener('click', async () => {
+      const cart = await getCart();
+      amount.getElement<HTMLElement>().textContent = (
+        Number(amount.getElement<HTMLElement>().textContent) + 1
+      ).toString();
+      await getClient()
+        ?.me()
+        .carts()
+        .withId({ ID: cart!.body.id })
+        .post({
+          body: {
+            actions: [{ action: 'addLineItem', quantity: 1, productId, variantId }],
+            version: cart!.body.version,
+          },
+        })
+        .execute();
+      this.orderContainer.getElement<HTMLDivElement>().replaceChildren();
+      this.createOrderAmount();
+    });
     amountContainer.setChildren(buttonMinusItem, amount.getElement(), buttonPlusItem);
     containerCardRight.setChildren(buttonDeleteCard, amountContainer.getElement());
     containerCardLeft.setChildren(itemImg, containerCardItemAttributes.getElement());
