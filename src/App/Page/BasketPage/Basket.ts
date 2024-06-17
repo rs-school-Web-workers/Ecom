@@ -43,14 +43,26 @@ export class BasketPage extends Page {
   private title = new Component('h1', [basketTitle]);
   private cardContainer = new Component('div', [basketContainer, basketContainer_scroll]);
   private orderContainer = new Component('div', [basketContainer, basketOrder]);
-  constructor(private router: Router) {
+  private router: Router;
+  constructor(router: Router) {
     super([basket]);
+    this.router = router;
     this.init();
   }
 
   private async init() {
     this.title.setTextContent('Your Cart');
     const wrapper = new Component('div', [basketWrapper]);
+    this.createCardProducts();
+    wrapper.setChildren(
+      this.cardContainer.getElement<HTMLDivElement>(),
+      this.orderContainer.getElement<HTMLDivElement>()
+    );
+    this.container?.append(this.title.getElement(), wrapper.getElement());
+  }
+
+  async createCardProducts() {
+    // запрос на товары в корзине
     const cart = await getCart();
     if (!cart || cart.body.lineItems.length === 0) {
       // no items in the cart message
@@ -73,8 +85,6 @@ export class BasketPage extends Page {
       console.log(cart);
     }
     this.createOrderAmount();
-    wrapper.setChildren(this.cardContainer.getElement(), this.orderContainer.getElement());
-    this.container?.append(this.title.getElement(), wrapper.getElement());
   }
 
   private createCard(img: string = photo, name: string, color: string, price: string, quantity: string, size?: string) {
@@ -131,7 +141,7 @@ export class BasketPage extends Page {
     containerCardRight.setChildren(buttonDeleteCard, amountContainer.getElement());
     containerCardLeft.setChildren(itemImg, containerCardItemAttributes.getElement());
     card.setChildren(containerCardLeft.getElement(), containerCardRight.getElement());
-    this.cardContainer.setChildren(card.getElement());
+    this.cardContainer.getElement<HTMLDivElement>().append(card.getElement());
   }
 
   private async createOrderAmount() {
@@ -140,27 +150,27 @@ export class BasketPage extends Page {
       throw new Error('Cart not found');
     }
     const discountCents = cart.body.discountOnTotalPrice?.discountedAmount.centAmount ?? 0;
-    const TotalCents = cart.body.totalPrice.centAmount;
-    const subTotalCents = TotalCents + discountCents;
+    const totalCents = cart.body.totalPrice.centAmount;
+    const subTotalCents = totalCents + discountCents;
     const fullPrice: string = centsToDollar(subTotalCents).concat('$');
     const discount: string = `-${centsToDollar(discountCents)}$`;
-    const total = centsToDollar(TotalCents).concat('$');
+    const total = centsToDollar(totalCents).concat('$');
     const wrapperFullPrice = new Component('div', [basketOrderInlineFlex]);
     const titleFullPrice = new Component('span', [basketOrderSubtitle, basketText_sub_grey]);
     titleFullPrice.setTextContent('Subtotal');
     const textFullPrice = new Component('span', [basketOrderSubtitle, basketOrderSubtitle_price]);
-    textFullPrice.setTextContent(fullPrice);
+    textFullPrice.setTextContent(`$${fullPrice}`);
     wrapperFullPrice.setChildren(titleFullPrice.getElement(), textFullPrice.getElement());
 
     const wrapperDiscount = new Component('div', [basketOrderInlineFlex]);
     const titleDiscount = new Component('span', [basketOrderSubtitle, basketText_sub_grey]);
-    titleDiscount.setTextContent('Discount');
+    titleDiscount.setTextContent(`Discount (${Math.ceil(totalCents !== 0 ? (discountCents / totalCents) * 100 : 0)}%)`);
     const textDiscount = new Component('span', [
       basketOrderSubtitle,
       basketOrderSubtitle_price,
       basketOrderSubtitle_discount,
     ]);
-    textDiscount.setTextContent(discount);
+    textDiscount.setTextContent(`$${discount}`);
     wrapperDiscount.setChildren(titleDiscount.getElement(), textDiscount.getElement());
 
     /* const wrapperDeliveryFee = new Component('div', [basketOrderInlineFlex]);
@@ -217,15 +227,37 @@ export class BasketPage extends Page {
     buttonConfirmOrder.setTextContent('Go to Checkout');
     const title = new Component('h2', [basketOrderTitle]);
     title.setTextContent('Order Summary');
-    this.orderContainer.setChildren(
+    const clearContainer: HTMLDivElement = this.createClearButton();
+    this.orderContainer.getElement<HTMLDivElement>().append(
       title.getElement(),
       wrapperFullPrice.getElement(),
       wrapperDiscount.getElement(),
       /* wrapperDeliveryFee.getElement(), */
       wrapperTotalPrice.getElement(),
       wrapperPromo.getElement(),
-      buttonConfirmOrder.getElement<HTMLButtonElement>()
+      buttonConfirmOrder.getElement<HTMLButtonElement>(),
+      clearContainer
     );
+  }
+
+  createClearButton() {
+    const container: HTMLDivElement = new Component('div', [
+      basketPageStyles.clear_button_container,
+    ]).getElement<HTMLDivElement>();
+    const clearButton: HTMLButtonElement = new Component('button', [
+      basketPageStyles.clear_button,
+    ]).getElement<HTMLButtonElement>();
+    clearButton.textContent = 'Clear Cart';
+    container.append(clearButton);
+    clearButton.addEventListener('click', () => this.clearButtonHandler());
+    return container;
+  }
+
+  clearButtonHandler() {
+    // удаление элементов из корзины
+    this.cardContainer.getElement<HTMLDivElement>().replaceChildren();
+    this.orderContainer.getElement<HTMLDivElement>().replaceChildren();
+    this.createOrderAmount();
   }
 
   async createEmptyMessage() {

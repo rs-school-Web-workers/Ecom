@@ -70,6 +70,8 @@ export const dresses = ['T-shirt', 'Trunks', 'Jackets', 'Pants', 'Shirts', 'Spor
 
 export const sortValue = ['asc', 'desc', 'alph'];
 
+export const limitsValue = [2, 4, 6];
+
 export const styles = ['Casual', 'Formal', 'Gym'];
 
 export const styleSubcategory = [
