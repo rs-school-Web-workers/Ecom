@@ -32,7 +32,7 @@ $borderRadius: 62px;
     &_scroll {
       flex: 1 1 58%;
       width: 100%;
-      max-height: 485px;
+      max-height: 540px;
       scroll-behavior: smooth;
       scrollbar-width: thin;
       overflow-y: scroll;
@@ -165,6 +165,21 @@ $borderRadius: 62px;
       &_promoApply {
         flex: 1 1 28%;
       }
+    }
+  }
+  .basketEmptyCardMessage {
+    text-align: center;
+    .basketEmptyTitle {
+      font-family: Integral CF;
+      margin-bottom: 15px;
+    }
+    .basketEmptyText {
+      margin-bottom: 10px;
+    }
+    .basketEmptyLink {
+      text-decoration: none;
+      color: #0f3dde;
+      font-family: Integral CF;
     }
   }
 }

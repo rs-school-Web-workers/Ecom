@@ -2,8 +2,9 @@ import Component from '../../utils/base-component';
 import Page from '../Page';
 import * as basketPageStyles from './basket.module.scss';
 import photo from '../../../assets/imgs/abs.png';
-import { getCart, getClient } from '../../utils/api/Client';
+import { getCart, getClient, getUserProfile, isLogged } from '../../utils/api/Client';
 import { centsToDollar } from '../../utils/helpers';
+import { Router } from '../../Router/Router';
 
 const {
   basket,
@@ -32,13 +33,17 @@ const {
   basketOrderInput,
   basketOrderButton,
   basketOrderButton_promoApply,
+  basketEmptyCardMessage,
+  basketEmptyTitle,
+  basketEmptyText,
+  basketEmptyLink,
 } = basketPageStyles;
 
 export class BasketPage extends Page {
   private title = new Component('h1', [basketTitle]);
   private cardContainer = new Component('div', [basketContainer, basketContainer_scroll]);
   private orderContainer = new Component('div', [basketContainer, basketOrder]);
-  constructor() {
+  constructor(private router: Router) {
     super([basket]);
     this.init();
   }
@@ -50,6 +55,7 @@ export class BasketPage extends Page {
     if (!cart || cart.body.lineItems.length === 0) {
       // no items in the cart message
       console.log('no items');
+      this.createEmptyMessage();
     } else {
       cart.body.lineItems.forEach((item) => {
         // item.productId и item.variant.id, чтобы найти конкретный продукт
@@ -221,5 +227,34 @@ export class BasketPage extends Page {
     );
   }
 
-  createEmptyMessage() {}
+  async createEmptyMessage() {
+    const wrapperMsg = new Component('div', [basketEmptyCardMessage]);
+    const msgTitle = new Component('h2', [basketEmptyTitle]);
+    const text = new Component('p', [basketEmptyText]);
+    const link = new Component('a', [basketEmptyLink]).getElement<HTMLAnchorElement>();
+    link.textContent = 'Go to products page';
+    link.href = '/products';
+    link.addEventListener('click', (event) => {
+      event.preventDefault();
+      const targetElem: HTMLAnchorElement | null = <HTMLAnchorElement>event.target;
+      if (targetElem) {
+        const navigateLink: string | null = targetElem.getAttribute('href');
+        if (navigateLink) {
+          this.router.navigate(navigateLink);
+          this.router.renderPageView(navigateLink);
+        }
+      }
+    });
+    if (isLogged()) {
+      const { firstName, lastName } = (await getUserProfile()).body;
+      msgTitle.setTextContent(`Hello, ${firstName} ${lastName}`);
+    } else {
+      msgTitle.setTextContent('Hello, Dear Friend');
+    }
+    text.setTextContent(
+      'Uh oh! Your cart is feeling a little lonely. Why not give it some company? Start adding products and make your cart happy again! 🛍️🙂'
+    );
+    wrapperMsg.setChildren(msgTitle.getElement(), text.getElement(), link);
+    this.cardContainer.setChildren(wrapperMsg.getElement());
+  }
 }
