@@ -5,7 +5,7 @@ import * as style from './product.module.scss';
 import { IProduct } from './types';
 import { isNull } from '../../utils/base-methods';
 import { ProductModal } from '../../Modal/ProductModal/ProductModal';
-import { getProductById } from '../../utils/api/Client';
+import { getCart, getClient, getProductById } from '../../utils/api/Client';
 import type { Variant } from './types';
 import { PagePath } from '../../Router/types';
 import cartLogo from '../../../assets/imgs/car_logo_30.png';
@@ -30,12 +30,15 @@ export default class ProductPage extends Page {
   sizeContainer: HTMLDivElement = new Component('div', [style.product_sizes]).getElement<HTMLDivElement>();
 
   priceContainer: HTMLDivElement = new Component('div', [style.price_container]).getElement<HTMLDivElement>();
+  amountContainer: HTMLDivElement | undefined;
+  cartButtonText: HTMLSpanElement | undefined;
+  amount: HTMLSpanElement | undefined;
 
   constructor(router: Router, id: string) {
     super([style.product]);
     this.router = router;
     this.modal = null;
-    this.initProductInfo(id).then(() => this.initPage());
+    this.initProductInfo(id).then(() => this.createProductDetail(id));
   }
 
   async initProductInfo(id: string) {
@@ -54,6 +57,7 @@ export default class ProductPage extends Page {
         .concat(response.body.masterData.current.variants)
         .map((el) => {
           const res: Variant = {
+            id: el.id,
             color: el.attributes?.filter((attr) => attr.name === 'color')[0].value[0],
             price: el.prices![0].value.centAmount,
             brand: el.attributes?.filter((attr) => attr.name === 'brand')[0].value,
@@ -67,6 +71,7 @@ export default class ProductPage extends Page {
         });
       this.products = this.variants.map((el) => {
         return {
+          id: el.id,
           name: this.info.name!,
           price: el.price.toString(),
           discount: el.discounted ? ((el.discounted * 100) / el.price).toString() : '',
@@ -83,10 +88,6 @@ export default class ProductPage extends Page {
     }
   }
 
-  initPage() {
-    this.createProductDetail();
-  }
-
   renderProductPage() {
     this.createSizeSelect();
     this.createImgContainer();
@@ -96,10 +97,10 @@ export default class ProductPage extends Page {
       this.container?.append(this.modal.background);
     }
   }
-  createProductDetail() {
+  createProductDetail(id: string) {
     const container: HTMLDivElement = new Component('div', [style.product_detail]).getElement<HTMLDivElement>();
     const infoContainer: HTMLDivElement = new Component('div', [style.product_info]).getElement<HTMLDivElement>();
-    infoContainer.append(this.imagesContainer, this.createProductDefinition());
+    infoContainer.append(this.imagesContainer, this.createProductDefinition(id));
     container.append(this.createPathChain(), infoContainer);
     this.container?.append(container);
   }
@@ -210,7 +211,7 @@ export default class ProductPage extends Page {
     }
   }
 
-  createProductDefinition() {
+  createProductDefinition(id: string) {
     const container: HTMLDivElement = new Component('div', [style.product_definition]).getElement<HTMLDivElement>();
     const name: HTMLHeadingElement = new Component('h3', [style.product_name]).getElement<HTMLHeadingElement>();
     if (this.variants[this.index] != null) {
@@ -226,9 +227,9 @@ export default class ProductPage extends Page {
         brand,
         this.priceContainer,
         textDefinition,
-        this.createColorsSelect(),
+        this.createColorsSelect(id),
         this.sizeContainer,
-        this.createCartButton()
+        this.createCartButton(id)
       );
       this.renderProductPage();
     }
@@ -298,7 +299,7 @@ export default class ProductPage extends Page {
     this.router.renderPageView(link);
   }
 
-  createColorsSelect() {
+  createColorsSelect(id: string) {
     const colorsContainer: HTMLDivElement = new Component('div', [style.product_colors]).getElement<HTMLDivElement>();
     const colorName: HTMLDivElement = new Component('div', [style.product_colors_name]).getElement<HTMLDivElement>();
     colorName.textContent = 'Select Colors';
@@ -315,7 +316,10 @@ export default class ProductPage extends Page {
       if (index === 0) {
         colorBox.classList.add(style.active_colorBox);
       }
-      colorBox.addEventListener('click', (event) => this.clickColorHandler(event, colorSelectContainer));
+      colorBox.addEventListener('click', (event) => {
+        this.clickColorHandler(event, colorSelectContainer);
+        this.updateButton(id);
+      });
       colorSelectContainer.append(colorBox);
     });
     colorsContainer.append(colorName, colorSelectContainer);
@@ -362,7 +366,7 @@ export default class ProductPage extends Page {
     elem.classList.add(style.active_sizebox);
   }
 
-  createCartButton() {
+  createCartButton(id: string) {
     const container: HTMLDivElement = new Component('div', [
       style.product_button_container,
     ]).getElement<HTMLDivElement>();
@@ -371,6 +375,7 @@ export default class ProductPage extends Page {
     ]).getElement<HTMLDivElement>();
     const amount: HTMLSpanElement = new Component('span', ['product_amount']).getElement<HTMLSpanElement>();
     amount.textContent = '1';
+    this.amount = amount;
     const minus: HTMLSpanElement = new Component('span', [style.minus_amount]).getElement<HTMLSpanElement>();
     minus.textContent = '-';
     minus.addEventListener('click', () => this.substractAmount(amount));
@@ -387,18 +392,73 @@ export default class ProductPage extends Page {
     const cartButtonImg: HTMLImageElement = new Component('img', ['cart_button_img']).getElement<HTMLImageElement>();
     cartButtonImg.src = cartLogo;
     addToCartButton.append(cartButtonText, cartButtonImg);
-    // проверка наличия товара в корзине
-    const stateProduct: boolean = false;
-    if (stateProduct) {
-      cartButtonText.textContent = 'Remove from Cart';
-      amountContainer.classList.add(style.disabled_amount);
-    } else {
-      cartButtonText.textContent = 'Add to Cart';
-      amountContainer.classList.remove(style.disabled_amount);
-    }
-    addToCartButton.addEventListener('click', (event: Event) => this.cartButtonHandler(event, amountContainer, amount));
+    this.amountContainer = amountContainer;
+    this.cartButtonText = cartButtonText;
+    this.updateButton(id);
+    addToCartButton.addEventListener('click', async () => {
+      const cart = await getCart();
+      if (this.amountContainer!.classList.contains(style.disabled_amount)) {
+        await getClient()
+          ?.me()
+          .carts()
+          .withId({ ID: cart!.body.id })
+          .post({
+            body: {
+              version: cart!.body.version,
+              actions: [
+                {
+                  action: 'removeLineItem',
+                  lineItemId: cart!.body.lineItems.filter(
+                    (el) => el.productId === id && el.variant.id === this.variants[this.index].id
+                  )[0].id,
+                },
+              ],
+            },
+          })
+          .execute();
+        this.cartButtonText!.textContent = 'Add to Cart';
+        this.amountContainer!.classList.remove(style.disabled_amount);
+        this.amount!.textContent = '1';
+      } else {
+        const variantId = this.variants[this.index].id;
+        await getClient()
+          ?.me()
+          .carts()
+          .withId({ ID: cart!.body.id })
+          .post({
+            body: {
+              version: cart!.body.version,
+              actions: [
+                {
+                  action: 'addLineItem',
+                  productId: id,
+                  variantId: variantId,
+                  quantity: Number(this.amount!.textContent),
+                },
+              ],
+            },
+          })
+          .execute();
+        this.cartButtonText!.textContent = 'Remove from Cart';
+        this.amountContainer!.classList.add(style.disabled_amount);
+      }
+    });
     container.append(amountContainer, addToCartButton);
     return container;
+  }
+
+  async updateButton(id: string) {
+    const cart = await getCart();
+    const stateProduct =
+      cart?.body.lineItems.filter((el) => el.productId === id && el.variant.id === this.variants[this.index].id)
+        .length ?? 1 > 0;
+    if (stateProduct) {
+      this.cartButtonText!.textContent = 'Remove from Cart';
+      this.amountContainer!.classList.add(style.disabled_amount);
+    } else {
+      this.cartButtonText!.textContent = 'Add to Cart';
+      this.amountContainer!.classList.remove(style.disabled_amount);
+    }
   }
 
   addAmount(amount: HTMLSpanElement) {
@@ -409,7 +469,7 @@ export default class ProductPage extends Page {
 
   substractAmount(amount: HTMLSpanElement) {
     let numberAmount: number = Number(amount.textContent);
-    if (numberAmount !== 0) {
+    if (numberAmount !== 1) {
       numberAmount--;
       amount.textContent = numberAmount.toString();
     }

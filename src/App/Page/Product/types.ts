@@ -10,6 +10,7 @@ export interface IProduct {
 }
 
 export type Variant = {
+  id: number;
   color: string;
   price: number;
   discounted?: number;

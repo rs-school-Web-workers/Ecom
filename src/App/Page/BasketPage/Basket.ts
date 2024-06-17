@@ -202,6 +202,7 @@ export class BasketPage extends Page {
           // show error message
           console.log(err);
         });
+      //refresh data
     });
     wrapperPromo.setChildren(wrapperInput.getElement(), buttonApplyPromo.getElement<HTMLButtonElement>());
 

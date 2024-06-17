@@ -22,7 +22,7 @@ import show from '../../../assets/imgs/svg/Vector.svg';
 import unshow from '../../../assets/imgs/svg/Vector2.svg';
 import filter_logo from '../../../assets/imgs/svg/filter.svg';
 import glass from '../../../assets/imgs/svg/glass.svg';
-import { getCart, getCategorieById, getClient } from '../../utils/api/Client';
+import { getCart, getCategorieById, getClient, getProductById } from '../../utils/api/Client';
 import { Cart, ClientResponse, RangeFacetResult, TermFacetResult } from '@commercetools/platform-sdk';
 import { centsToDollar } from '../../utils/helpers';
 import { Router } from '../../Router/Router';
@@ -344,6 +344,7 @@ export class CatalogPage extends Page {
     if (!(target instanceof HTMLButtonElement)) {
       return;
     }
+    const variantId = (await getProductById(target.dataset.id!)).body.masterData.current.masterVariant.id;
     await getClient()
       ?.me()
       .carts()
@@ -355,14 +356,13 @@ export class CatalogPage extends Page {
             {
               action: 'addLineItem',
               productId: target.dataset.id,
-              variantId: 1,
+              variantId: variantId,
               quantity: 1,
             },
           ],
         },
       })
       .execute();
-    await getCart();
     const button: HTMLButtonElement = <HTMLButtonElement>target;
     button.disabled = true;
   }
