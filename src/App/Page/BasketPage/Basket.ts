@@ -65,8 +65,8 @@ export class BasketPage extends Page {
         );
       });
       console.log(cart);
-      this.createOrderAmount();
     }
+    this.createOrderAmount();
     wrapper.setChildren(this.cardContainer.getElement(), this.orderContainer.getElement());
     this.container?.append(this.title.getElement(), wrapper.getElement());
   }
@@ -220,4 +220,6 @@ export class BasketPage extends Page {
       buttonConfirmOrder.getElement<HTMLButtonElement>()
     );
   }
+
+  createEmptyMessage() {}
 }

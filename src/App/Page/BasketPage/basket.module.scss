@@ -2,10 +2,20 @@ $borderRadius: 62px;
 
 .basket {
   padding: 24px 100px;
+  @media (max-width: 610px) {
+    padding: 24px 20px;
+  }
+  @media (max-width: 410px) {
+    padding: 24px 15px;
+  }
   .basketWrapper {
-    display: inline-flex;
+    display: flex;
     align-items: flex-start;
+    width: 100%;
     gap: 20px;
+    @media (max-width: 1080px) {
+      flex-direction: column;
+    }
   }
   .basketTitle {
     font-family: Integral CF;
@@ -14,16 +24,21 @@ $borderRadius: 62px;
   .basketContainer {
     border: 2px solid rgba(0, 0, 0, 0.1);
     border-radius: 8px;
-    padding: 20px 24px;
-    // width: 715px;
+    box-sizing: border-box;
+    padding: 24px 20px;
     flex: 1 1 40%;
+    width: 100%;
     font-family: Satoshi;
     &_scroll {
       flex: 1 1 58%;
+      width: 100%;
       max-height: 485px;
       scroll-behavior: smooth;
       scrollbar-width: thin;
       overflow-y: scroll;
+      @media (max-width: 470px) {
+        padding: 24px 10px;
+      }
     }
   }
   .basketText {
@@ -76,6 +91,10 @@ $borderRadius: 62px;
       padding: 10px 20px;
       background-color: rgba(240, 240, 240, 1);
       border-radius: $borderRadius;
+      @media (max-width: 470px) {
+        padding: 10px;
+        gap: 10px;
+      }
     }
     &:not(:last-child) {
       border-bottom: 2px solid rgba(0, 0, 0, 0.1);
