@@ -97,7 +97,7 @@ export class App {
       {
         pagePath: PagePath.BASKET,
         render: () => {
-          const basketPage = new BasketPage();
+          const basketPage = new BasketPage(this.router);
           this.setPage(basketPage);
         },
       },
