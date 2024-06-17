@@ -1,0 +1,36 @@
+.modal_promo {
+  width: 100%;
+  max-width: 450px;
+
+  @media (max-width: 767px) {
+    max-width: 400px;
+  }
+
+  @media (max-width: 600px) {
+    max-width: 360px;
+  }
+}
+
+.promo_buttons_container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.promo_ok_button {
+  font-family: Integral CF;
+  font-size: 24px;
+  background-color: black;
+  cursor: pointer;
+  color: white;
+  padding: 10px 15px;
+  width: 100px;
+  border-radius: 20px;
+}
+
+.promo_content_container {
+  font-family: Satoshi;
+  font-weight: 600;
+  font-size: 20px;
+  color: black;
+}

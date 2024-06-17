@@ -16,7 +16,7 @@ $lightBlack: rgba(12, 12, 14, 0.6);
   @media (max-width: 610px) {
     margin-left: 10px;
     .aboutUsTitle {
-      padding: 0px
+      padding: 0px;
     }
   }
 }
@@ -76,7 +76,7 @@ $lightBlack: rgba(12, 12, 14, 0.6);
     .aboutUsTeamCardImg {
       object-fit: cover;
       width: 350px;
-      height: 475px
+      height: 475px;
     }
     .aboutUsTeamCardName {
     }
@@ -92,7 +92,7 @@ $lightBlack: rgba(12, 12, 14, 0.6);
       height: 100%;
       background-color: rgba(0, 0, 0, 0.8);
       color: white;
-      transform:  translateY(100%);
+      transform: translateY(100%);
       transition: transform 0.3s;
       display: flex;
       flex-direction: column;
@@ -105,7 +105,7 @@ $lightBlack: rgba(12, 12, 14, 0.6);
     &:hover {
       background-color: black;
       .aboutUsTeamCardDescription {
-        transform: translateY(0)
+        transform: translateY(0);
       }
       .aboutUsTeamCardRole {
         color: black;

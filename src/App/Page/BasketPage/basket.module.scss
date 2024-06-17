@@ -128,7 +128,7 @@ $borderRadius: 62px;
         box-sizing: border-box;
         padding: 16px 20px 16px 52px;
         border-radius: $borderRadius;
-        background-color: #F0F0F0;
+        background-color: #f0f0f0;
         border: none;
         width: 100%;
       }
@@ -154,7 +154,7 @@ $borderRadius: 62px;
     .basketOrderButton {
       padding: 16px 24px;
       background-color: #000000;
-      color: #FFFFFF;
+      color: #ffffff;
       border: none;
       cursor: pointer;
       border-radius: $borderRadius;
@@ -184,14 +184,14 @@ $borderRadius: 62px;
   }
 }
 
-.clear_button_container{
+.clear_button_container {
   width: 100%;
 }
 
 .clear_button {
   padding: 16px 24px;
   background-color: #000000;
-  color: #FFFFFF;
+  color: #ffffff;
   border: none;
   cursor: pointer;
   border-radius: $borderRadius;

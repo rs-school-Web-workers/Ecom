@@ -8,7 +8,7 @@ $cardPriceFontSize: 24px;
 $cardDescriptionFontSize: 14px;
 $productTitleFontSize: 32px;
 $text-color: rgb(0, 0, 0, 0.6);
-$button-color: #F0F0F0;
+$button-color: #f0f0f0;
 $border-bottom-color: rgb(0, 0, 0, 0.1);
 .catalog {
   display: flex;
@@ -356,7 +356,7 @@ $border-bottom-color: rgb(0, 0, 0, 0.1);
   z-index: 2;
   height: 100%;
   width: 100%;
-  background: rgb(71,74,81, 0.8);
+  background: rgb(71, 74, 81, 0.8);
   opacity: 0;
   transition: 0.5s;
 }
@@ -475,7 +475,7 @@ $border-bottom-color: rgb(0, 0, 0, 0.1);
 .price_range_container {
   position: relative;
   pointer-events: none;
-  appearance: none
+  appearance: none;
 }
 
 .price_progress {
@@ -500,7 +500,7 @@ $border-bottom-color: rgb(0, 0, 0, 0.1);
   margin-top: -15px;
 }
 
-input[type="range"]::-webkit-slider-thumb{
+input[type='range']::-webkit-slider-thumb {
   -webkit-appearance: none;
   height: 15px;
   width: 15px;
@@ -510,7 +510,7 @@ input[type="range"]::-webkit-slider-thumb{
   border-radius: 50%;
 }
 
-input[type="range"]:active::-webkit-slider-thumb{
+input[type='range']:active::-webkit-slider-thumb {
   background-color: #ffffff;
   border: 2px solid black;
 }
@@ -586,7 +586,7 @@ input[type="range"]:active::-webkit-slider-thumb{
   color: white;
 }
 
-.pagination_container{
+.pagination_container {
   width: 100%;
   display: flex;
   justify-content: space-between;
