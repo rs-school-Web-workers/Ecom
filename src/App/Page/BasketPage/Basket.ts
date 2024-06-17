@@ -34,8 +34,14 @@ const {
 
 export class BasketPage extends Page {
   private title = new Component('h1', [basketTitle]);
-  private cardContainer = new Component('div', [basketContainer, basketContainer_scroll]);
-  private orderContainer = new Component('div', [basketContainer, basketOrder]);
+  private cardContainer: HTMLDivElement = new Component('div', [
+    basketContainer,
+    basketContainer_scroll,
+  ]).getElement<HTMLDivElement>();
+  private orderContainer: HTMLDivElement = new Component('div', [
+    basketContainer,
+    basketOrder,
+  ]).getElement<HTMLDivElement>();
   constructor() {
     super([basket]);
     this.init();
@@ -44,14 +50,19 @@ export class BasketPage extends Page {
   private init() {
     this.title.setTextContent('Your Cart');
     const wrapper = new Component('div', [basketWrapper]);
+    this.createCardProducts();
+    wrapper.setChildren(this.cardContainer, this.orderContainer);
+    this.container?.append(this.title.getElement(), wrapper.getElement());
+  }
+
+  createCardProducts() {
+    // запрос на товары в корзине
     this.createCard();
     this.createCard();
     this.createCard();
     this.createCard();
     this.createCard();
     this.createOrderAmount();
-    wrapper.setChildren(this.cardContainer.getElement(), this.orderContainer.getElement());
-    this.container?.append(this.title.getElement(), wrapper.getElement());
   }
 
   private createCard(
@@ -112,40 +123,42 @@ export class BasketPage extends Page {
     containerCardRight.setChildren(buttonDeleteCard, amountContainer.getElement());
     containerCardLeft.setChildren(itemImg, containerCardItemAttributes.getElement());
     card.setChildren(containerCardLeft.getElement(), containerCardRight.getElement());
-    this.cardContainer.setChildren(card.getElement());
+    this.cardContainer.append(card.getElement());
   }
 
-  private createOrderAmount(fullPrice: string = '$565', discount: string = '-$113') {
+  private createOrderAmount(fullPrice: string = '565', discount: string = '-113', deliveryFee: string = '15') {
     const wrapperFullPrice = new Component('div', [basketOrderInlineFlex]);
     const titleFullPrice = new Component('span', [basketOrderSubtitle, basketText_sub_grey]);
     titleFullPrice.setTextContent('Subtotal');
     const textFullPrice = new Component('span', [basketOrderSubtitle, basketOrderSubtitle_price]);
-    textFullPrice.setTextContent(fullPrice);
+    textFullPrice.setTextContent(`$${fullPrice}`);
     wrapperFullPrice.setChildren(titleFullPrice.getElement(), textFullPrice.getElement());
 
     const wrapperDiscount = new Component('div', [basketOrderInlineFlex]);
     const titleDiscount = new Component('span', [basketOrderSubtitle, basketText_sub_grey]);
-    titleDiscount.setTextContent('Discount (-20%)');
+    titleDiscount.setTextContent(
+      `Discount (${Number(fullPrice) !== 0 ? (Number(discount) / Number(fullPrice)) * 100 : 0}%)`
+    );
     const textDiscount = new Component('span', [
       basketOrderSubtitle,
       basketOrderSubtitle_price,
       basketOrderSubtitle_discount,
     ]);
-    textDiscount.setTextContent(discount);
+    textDiscount.setTextContent(`$${discount}`);
     wrapperDiscount.setChildren(titleDiscount.getElement(), textDiscount.getElement());
 
     const wrapperDeliveryFee = new Component('div', [basketOrderInlineFlex]);
     const titleDeliveryFee = new Component('span', [basketOrderSubtitle, basketText_sub_grey]);
     titleDeliveryFee.setTextContent('Delivery Fee');
     const textDeliveryFee = new Component('span', [basketOrderSubtitle, basketOrderSubtitle_price]);
-    textDeliveryFee.setTextContent('$15');
+    textDeliveryFee.setTextContent(`$${deliveryFee}`);
     wrapperDeliveryFee.setChildren(titleDeliveryFee.getElement(), textDeliveryFee.getElement());
 
     const wrapperTotalPrice = new Component('div', [basketOrderInlineFlex]);
     const titleTotalPrice = new Component('span', [basketOrderSubtitle]);
     titleTotalPrice.setTextContent('Total');
     const textTotalPrice = new Component('h2', []);
-    textTotalPrice.setTextContent('$467');
+    textTotalPrice.setTextContent(`$${Number(fullPrice) + Number(discount) + Number(deliveryFee)}`);
     wrapperTotalPrice.setChildren(titleTotalPrice.getElement(), textTotalPrice.getElement());
 
     const wrapperPromo = new Component('div', [basketOrderInlineFlex, basketOrderInlineFlex_promo]);
@@ -164,14 +177,36 @@ export class BasketPage extends Page {
     buttonConfirmOrder.setTextContent('Go to Checkout');
     const title = new Component('h2', [basketOrderTitle]);
     title.setTextContent('Order Summary');
-    this.orderContainer.setChildren(
+    const clearContainer: HTMLDivElement = this.createClearButton();
+    this.orderContainer.append(
       title.getElement(),
       wrapperFullPrice.getElement(),
       wrapperDiscount.getElement(),
       wrapperDeliveryFee.getElement(),
       wrapperTotalPrice.getElement(),
       wrapperPromo.getElement(),
-      buttonConfirmOrder.getElement<HTMLButtonElement>()
+      buttonConfirmOrder.getElement<HTMLButtonElement>(),
+      clearContainer
     );
+  }
+
+  createClearButton() {
+    const container: HTMLDivElement = new Component('div', [
+      basketPageStyles.clear_button_container,
+    ]).getElement<HTMLDivElement>();
+    const clearButton: HTMLButtonElement = new Component('button', [
+      basketPageStyles.clear_button,
+    ]).getElement<HTMLButtonElement>();
+    clearButton.textContent = 'Clear Cart';
+    container.append(clearButton);
+    clearButton.addEventListener('click', () => this.clearButtonHandler());
+    return container;
+  }
+
+  clearButtonHandler() {
+    // удаление элементов из корзины
+    this.cardContainer.replaceChildren();
+    this.orderContainer.replaceChildren();
+    this.createOrderAmount('0', '0', '0');
   }
 }
