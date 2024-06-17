@@ -144,33 +144,23 @@ export class BasketPage extends Page {
     this.cardContainer.getElement<HTMLDivElement>().append(card.getElement());
   }
 
-  private async createOrderAmount() {
-    const cart = await getCart();
-    if (!cart) {
-      throw new Error('Cart not found');
-    }
-    const discountCents = cart.body.discountOnTotalPrice?.discountedAmount.centAmount ?? 0;
-    const totalCents = cart.body.totalPrice.centAmount;
-    const subTotalCents = totalCents + discountCents;
-    const fullPrice: string = centsToDollar(subTotalCents).concat('$');
-    const discount: string = `-${centsToDollar(discountCents)}$`;
-    const total = centsToDollar(totalCents).concat('$');
+  private createOrderAmount() {
     const wrapperFullPrice = new Component('div', [basketOrderInlineFlex]);
     const titleFullPrice = new Component('span', [basketOrderSubtitle, basketText_sub_grey]);
     titleFullPrice.setTextContent('Subtotal');
     const textFullPrice = new Component('span', [basketOrderSubtitle, basketOrderSubtitle_price]);
-    textFullPrice.setTextContent(`$${fullPrice}`);
+    textFullPrice.setTextContent('0');
     wrapperFullPrice.setChildren(titleFullPrice.getElement(), textFullPrice.getElement());
 
     const wrapperDiscount = new Component('div', [basketOrderInlineFlex]);
     const titleDiscount = new Component('span', [basketOrderSubtitle, basketText_sub_grey]);
-    titleDiscount.setTextContent(`Discount (${Math.ceil(totalCents !== 0 ? (discountCents / totalCents) * 100 : 0)}%)`);
+    titleDiscount.setTextContent('0');
     const textDiscount = new Component('span', [
       basketOrderSubtitle,
       basketOrderSubtitle_price,
       basketOrderSubtitle_discount,
     ]);
-    textDiscount.setTextContent(`$${discount}`);
+    textDiscount.setTextContent('0');
     wrapperDiscount.setChildren(titleDiscount.getElement(), textDiscount.getElement());
 
     /* const wrapperDeliveryFee = new Component('div', [basketOrderInlineFlex]);
@@ -184,8 +174,23 @@ export class BasketPage extends Page {
     const titleTotalPrice = new Component('span', [basketOrderSubtitle]);
     titleTotalPrice.setTextContent('Total');
     const textTotalPrice = new Component('h2', []);
-    textTotalPrice.setTextContent(total);
+    textTotalPrice.setTextContent('0');
     wrapperTotalPrice.setChildren(titleTotalPrice.getElement(), textTotalPrice.getElement());
+
+    getCart().then((cart) => {
+      const discountCents = cart!.body.discountOnTotalPrice?.discountedAmount.centAmount ?? 0;
+      const totalCents = cart!.body.totalPrice.centAmount;
+      const subTotalCents = totalCents + discountCents;
+      const fullPrice: string = centsToDollar(subTotalCents).concat('$');
+      const discount: string = `-${centsToDollar(discountCents)}$`;
+      const total = centsToDollar(totalCents).concat('$');
+      textFullPrice.setTextContent(`$${fullPrice}`);
+      titleDiscount.setTextContent(
+        `Discount (${Math.ceil(totalCents !== 0 ? (discountCents / totalCents) * 100 : 0)}%)`
+      );
+      textTotalPrice.setTextContent(total);
+      textDiscount.setTextContent(`$${discount}`);
+    });
 
     const wrapperPromo = new Component('div', [basketOrderInlineFlex, basketOrderInlineFlex_promo]);
     const wrapperInput = new Component('div', [basketOrderInputWrapper]);
@@ -219,6 +224,8 @@ export class BasketPage extends Page {
           console.log(err);
         });
       //refresh data
+      this.orderContainer.getElement<HTMLDivElement>().replaceChildren();
+      this.createOrderAmount();
     });
     wrapperPromo.setChildren(wrapperInput.getElement(), buttonApplyPromo.getElement<HTMLButtonElement>());
 
@@ -249,7 +256,16 @@ export class BasketPage extends Page {
     ]).getElement<HTMLButtonElement>();
     clearButton.textContent = 'Clear Cart';
     container.append(clearButton);
-    clearButton.addEventListener('click', () => this.clearButtonHandler());
+    clearButton.addEventListener('click', async () => {
+      const cart = await getCart();
+      await getClient()
+        ?.me()
+        .carts()
+        .withId({ ID: cart!.body.id })
+        .delete({ queryArgs: { version: cart!.body.version } })
+        .execute();
+      this.clearButtonHandler();
+    });
     return container;
   }
 
@@ -258,6 +274,7 @@ export class BasketPage extends Page {
     this.cardContainer.getElement<HTMLDivElement>().replaceChildren();
     this.orderContainer.getElement<HTMLDivElement>().replaceChildren();
     this.createOrderAmount();
+    this.createEmptyMessage();
   }
 
   async createEmptyMessage() {
