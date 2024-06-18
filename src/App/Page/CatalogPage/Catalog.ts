@@ -938,6 +938,7 @@ export class CatalogPage extends Page {
     currentLimit.textContent = currentElem.textContent;
     this.clickShowHandler(showElem, container);
     this.limit = Number(currentLimit.textContent);
+    this.currentPage = 0;
     this.render();
   }
 
