@@ -275,7 +275,7 @@ export class BasketPage extends Page {
       const total = centsToDollar(totalCents).concat('$');
       textFullPrice.setTextContent(`${fullPrice}`);
       titleDiscount.setTextContent(
-        `Discount (${Math.ceil(totalCents !== 0 ? (discountCents / totalCents) * 100 : 0)}%)`
+        `Discount (${Math.ceil(subTotalCents !== 0 ? (discountCents / subTotalCents) * 100 : 0)}%)`
       );
       textTotalPrice.setTextContent(total);
       textDiscount.setTextContent(`${discount}`);
@@ -292,7 +292,7 @@ export class BasketPage extends Page {
     const inputPromo = new Component('input', [basketOrderInput]);
     wrapperInput.setChildren(inputPromo.getElement<HTMLInputElement>());
     inputPromo.getElement<HTMLInputElement>().type = 'text';
-    inputPromo.getElement<HTMLInputElement>().placeholder = /* 'Add promo code'; */ 'TEST = -12%';
+    inputPromo.getElement<HTMLInputElement>().placeholder = /* 'Add promo code'; */ 'TEST = -10%';
     const buttonApplyPromo = new Component('button', [basketOrderButton, basketOrderButton_promoApply]);
     buttonApplyPromo.getElement<HTMLButtonElement>().type = 'button';
     buttonApplyPromo.setTextContent('Apply');
@@ -328,7 +328,7 @@ export class BasketPage extends Page {
           if (this.currentDiscount !== discount) {
             this.currentDiscount = discount;
           } else if (this.promoMsg) {
-            this.modal?.setMessage('This promotional code has already been used by another user.');
+            this.modal?.setMessage('This promotional code has already been used');
             this.modal?.modalShow();
           }
         });
