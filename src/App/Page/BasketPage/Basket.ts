@@ -6,6 +6,7 @@ import { getCart, getClient, getUserProfile, isLogged } from '../../utils/api/Cl
 import { centsToDollar } from '../../utils/helpers';
 import { Router } from '../../Router/Router';
 import { PromoModal } from '../../Modal/PromoModal/PromoModal';
+import { RemoveModalAllCards } from '../../Modal/RemoveAllCardsModal/RemoveAllCardsModal';
 
 const {
   basket,
@@ -46,6 +47,7 @@ export class BasketPage extends Page {
   private orderContainer = new Component('div', [basketContainer, basketOrder]);
   private router: Router;
   private modal: PromoModal | null;
+  private modalRemoveAllCards: RemoveModalAllCards | null = null;
   private currentDiscount: string = '_';
   private promoMsg: boolean = false;
   constructor(router: Router) {
@@ -53,6 +55,16 @@ export class BasketPage extends Page {
     this.router = router;
     this.modal = null;
     this.init();
+    this.container?.addEventListener(
+      'removeAllCards',
+      (e) => {
+        const event = e as CustomEvent<{ state: boolean }>;
+        if (event.detail.state) {
+          this.clearCartPage();
+        }
+      },
+      { capture: true, passive: true }
+    );
   }
 
   private async init() {
@@ -65,7 +77,8 @@ export class BasketPage extends Page {
     );
     this.container?.append(this.title.getElement(), wrapper.getElement());
     this.modal = new PromoModal('Promo Code');
-    this.container?.append(this.modal.background);
+    this.modalRemoveAllCards = new RemoveModalAllCards('Remove All Cards');
+    this.container?.append(this.modal.background, this.modalRemoveAllCards.background);
   }
 
   async createCardProducts() {
@@ -170,7 +183,6 @@ export class BasketPage extends Page {
       this.cardContainer.getElement<HTMLDivElement>().replaceChildren();
       this.orderContainer.getElement<HTMLDivElement>().replaceChildren();
       this.createCardProducts();
-      buttonDeleteCard.disabled = false;
     });
     const amountContainer = new Component('div', [basketCardButtonContainer]);
     const buttonMinusItem = new Component('button', [basketCardButton]).getElement<HTMLButtonElement>();
@@ -252,19 +264,22 @@ export class BasketPage extends Page {
     textDiscount.setTextContent('0');
     wrapperDiscount.setChildren(titleDiscount.getElement(), textDiscount.getElement());
 
-    /* const wrapperDeliveryFee = new Component('div', [basketOrderInlineFlex]);
-    const titleDeliveryFee = new Component('span', [basketOrderSubtitle, basketText_sub_grey]);
-    titleDeliveryFee.setTextContent('Delivery Fee');
-    const textDeliveryFee = new Component('span', [basketOrderSubtitle, basketOrderSubtitle_price]);
-    textDeliveryFee.setTextContent('$15');
-    wrapperDeliveryFee.setChildren(titleDeliveryFee.getElement(), textDeliveryFee.getElement()); */
-
     const wrapperTotalPrice = new Component('div', [basketOrderInlineFlex]);
     const titleTotalPrice = new Component('span', [basketOrderSubtitle]);
     titleTotalPrice.setTextContent('Total');
     const textTotalPrice = new Component('h2', []);
     textTotalPrice.setTextContent('0');
     wrapperTotalPrice.setChildren(titleTotalPrice.getElement(), textTotalPrice.getElement());
+
+    const clearButton: HTMLButtonElement = new Component('button', [
+      basketPageStyles.clear_button,
+    ]).getElement<HTMLButtonElement>();
+    clearButton.textContent = 'Clear Cart';
+    clearButton.type = 'button';
+    clearButton.addEventListener('click', () => {
+      this.modalRemoveAllCards?.setMessage('Are you sure to remove all cards?');
+      this.modalRemoveAllCards?.modalShow();
+    });
 
     getCart().then((cart) => {
       const discountCents = cart!.body.discountOnTotalPrice?.discountedAmount.centAmount ?? 0;
@@ -279,6 +294,9 @@ export class BasketPage extends Page {
       );
       textTotalPrice.setTextContent(total);
       textDiscount.setTextContent(`${discount}`);
+      if (!cart?.body.lineItems.length) {
+        clearButton.disabled = true;
+      }
       // if (this.currentDiscount !== discount) {
       //   this.currentDiscount = discount;
       // } else {
@@ -344,51 +362,34 @@ export class BasketPage extends Page {
     buttonConfirmOrder.setTextContent('Go to Checkout');
     const title = new Component('h2', [basketOrderTitle]);
     title.setTextContent('Order Summary');
-    const clearContainer: HTMLDivElement = this.createClearButton();
-    this.orderContainer.getElement<HTMLDivElement>().append(
-      title.getElement(),
-      wrapperFullPrice.getElement(),
-      wrapperDiscount.getElement(),
-      /* wrapperDeliveryFee.getElement(), */
-      wrapperTotalPrice.getElement(),
-      wrapperPromo.getElement(),
-      buttonConfirmOrder.getElement<HTMLButtonElement>(),
-      clearContainer
-    );
+    this.orderContainer
+      .getElement<HTMLDivElement>()
+      .append(
+        title.getElement(),
+        wrapperFullPrice.getElement(),
+        wrapperDiscount.getElement(),
+        wrapperTotalPrice.getElement(),
+        wrapperPromo.getElement(),
+        buttonConfirmOrder.getElement<HTMLButtonElement>(),
+        clearButton
+      );
   }
 
-  createClearButton() {
-    const container: HTMLDivElement = new Component('div', [
-      basketPageStyles.clear_button_container,
-    ]).getElement<HTMLDivElement>();
-    const clearButton: HTMLButtonElement = new Component('button', [
-      basketPageStyles.clear_button,
-    ]).getElement<HTMLButtonElement>();
-    clearButton.textContent = 'Clear Cart';
-    container.append(clearButton);
-    clearButton.addEventListener('click', async () => {
-      clearButton.disabled = true;
-      const cart = await getCart();
-      if (cart?.body.lineItems.length) {
-        await getClient()
-          ?.me()
-          .carts()
-          .withId({ ID: cart!.body.id })
-          .delete({ queryArgs: { version: cart!.body.version } })
-          .execute();
-        this.clearButtonHandler();
-      }
-      clearButton.disabled = true;
-    });
-    return container;
-  }
-
-  clearButtonHandler() {
+  async clearCartPage() {
     // удаление элементов из корзины
-    this.cardContainer.getElement<HTMLDivElement>().replaceChildren();
-    this.orderContainer.getElement<HTMLDivElement>().replaceChildren();
-    this.createOrderAmount();
-    this.createEmptyMessage();
+    const cart = await getCart();
+    if (cart?.body.lineItems.length) {
+      await getClient()
+        ?.me()
+        .carts()
+        .withId({ ID: cart!.body.id })
+        .delete({ queryArgs: { version: cart!.body.version } })
+        .execute();
+      this.cardContainer.getElement<HTMLDivElement>().replaceChildren();
+      this.orderContainer.getElement<HTMLDivElement>().replaceChildren();
+      this.createOrderAmount();
+      this.createEmptyMessage();
+    }
   }
 
   async createEmptyMessage() {

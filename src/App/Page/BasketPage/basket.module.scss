@@ -2,6 +2,10 @@ $borderRadius: 62px;
 
 .basket {
   padding: 24px 100px;
+  button[disabled] {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
   @media (max-width: 610px) {
     padding: 24px 20px;
   }
@@ -183,12 +187,8 @@ $borderRadius: 62px;
     }
   }
 }
-
-.clear_button_container {
-  width: 100%;
-}
-
 .clear_button {
+  align-self: flex-start;
   padding: 16px 24px;
   background-color: #000000;
   color: #ffffff;
