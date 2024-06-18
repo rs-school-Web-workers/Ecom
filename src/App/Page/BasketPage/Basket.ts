@@ -5,6 +5,7 @@ import photo from '../../../assets/imgs/abs.png';
 import { getCart, getClient, getUserProfile, isLogged } from '../../utils/api/Client';
 import { centsToDollar } from '../../utils/helpers';
 import { Router } from '../../Router/Router';
+import { PromoModal } from '../../Modal/PromoModal/PromoModal';
 
 const {
   basket,
@@ -44,9 +45,13 @@ export class BasketPage extends Page {
   private cardContainer = new Component('div', [basketContainer, basketContainer_scroll]);
   private orderContainer = new Component('div', [basketContainer, basketOrder]);
   private router: Router;
+  private modal: PromoModal | null;
+  private currentDiscount: string = '_';
+  private promoMsg: boolean = false;
   constructor(router: Router) {
     super([basket]);
     this.router = router;
+    this.modal = null;
     this.init();
   }
 
@@ -59,6 +64,8 @@ export class BasketPage extends Page {
       this.orderContainer.getElement<HTMLDivElement>()
     );
     this.container?.append(this.title.getElement(), wrapper.getElement());
+    this.modal = new PromoModal('Promo Code');
+    this.container?.append(this.modal.background);
   }
 
   async createCardProducts() {
@@ -262,12 +269,18 @@ export class BasketPage extends Page {
       const fullPrice: string = centsToDollar(subTotalCents).concat('$');
       const discount: string = `-${centsToDollar(discountCents)}$`;
       const total = centsToDollar(totalCents).concat('$');
-      textFullPrice.setTextContent(`$${fullPrice}`);
+      textFullPrice.setTextContent(`${fullPrice}`);
       titleDiscount.setTextContent(
         `Discount (${Math.ceil(totalCents !== 0 ? (discountCents / totalCents) * 100 : 0)}%)`
       );
       textTotalPrice.setTextContent(total);
-      textDiscount.setTextContent(`$${discount}`);
+      textDiscount.setTextContent(`${discount}`);
+      // if (this.currentDiscount !== discount) {
+      //   this.currentDiscount = discount;
+      // } else {
+      //   this.modal?.setMessage('This promotional code has already been used by another user.');
+      //   this.modal?.modalShow();
+      // }
     });
 
     const wrapperPromo = new Component('div', [basketOrderInlineFlex, basketOrderInlineFlex_promo]);
@@ -280,6 +293,7 @@ export class BasketPage extends Page {
     buttonApplyPromo.getElement<HTMLButtonElement>().type = 'button';
     buttonApplyPromo.setTextContent('Apply');
     buttonApplyPromo.getElement<HTMLButtonElement>().addEventListener('click', async () => {
+      this.promoMsg = true;
       const cart = await getCart();
       await getClient()
         ?.me()
@@ -299,7 +313,19 @@ export class BasketPage extends Page {
         .execute()
         .catch((err) => {
           // show error message
-          console.log(err);
+          this.modal?.setMessage(err.message);
+          this.modal?.modalShow();
+          this.promoMsg = false;
+        })
+        .then(() => {
+          const discountCents = cart!.body.discountOnTotalPrice?.discountedAmount.centAmount ?? 0;
+          const discount: string = `-${centsToDollar(discountCents)}$`;
+          if (this.currentDiscount !== discount) {
+            this.currentDiscount = discount;
+          } else if (this.promoMsg) {
+            this.modal?.setMessage('This promotional code has already been used by another user.');
+            this.modal?.modalShow();
+          }
         });
       //refresh data
       this.orderContainer.getElement<HTMLDivElement>().replaceChildren();
