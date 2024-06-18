@@ -446,6 +446,7 @@ export class CatalogPage extends Page {
         console.error(error);
         button.disabled = false;
       });
+    window.dispatchEvent(new Event('cart-update'));
   }
 
   createFilterContainer() {

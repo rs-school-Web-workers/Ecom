@@ -420,6 +420,7 @@ export default class ProductPage extends Page {
         this.cartButtonText!.textContent = 'Add to Cart';
         this.amountContainer!.classList.remove(style.disabled_amount);
         this.amount!.textContent = '1';
+        window.dispatchEvent(new Event('cart-update'));
       } else {
         const variantId = this.variants[this.index].id;
         await getClient()
@@ -442,6 +443,7 @@ export default class ProductPage extends Page {
           .execute();
         this.cartButtonText!.textContent = 'Remove from Cart';
         this.amountContainer!.classList.add(style.disabled_amount);
+        window.dispatchEvent(new Event('cart-update'));
       }
       addToCartButton.disabled = false;
     });

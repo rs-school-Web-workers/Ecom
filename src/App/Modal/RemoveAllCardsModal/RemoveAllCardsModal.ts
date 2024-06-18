@@ -1,6 +1,7 @@
 import Component from '../../utils/base-component';
 import { Modal } from '../Modal';
 import * as style from './removeAllCards.module.scss';
+import * as styleBase from '../modal.module.scss';
 
 const { removeModal, removeModal_buttons_container, removeModal_content_container, removeModal_ok_button } = style;
 
@@ -37,14 +38,14 @@ export class RemoveModalAllCards extends Modal {
   }
 
   clickOkHandler(event: Event) {
+    this.modalUnshow();
     const setTrueEvent = new CustomEvent('removeAllCards', {
       detail: {
-        state: true,
+        state: this.background?.classList.contains(styleBase.modal_active),
       },
       cancelable: true,
     });
     event.target?.dispatchEvent(setTrueEvent);
-    this.modalUnshow();
   }
 
   setMessage(message: string) {

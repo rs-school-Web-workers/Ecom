@@ -59,7 +59,7 @@ export class BasketPage extends Page {
       'removeAllCards',
       (e) => {
         const event = e as CustomEvent<{ state: boolean }>;
-        if (event.detail.state) {
+        if (!event.detail.state) {
           this.clearCartPage();
         }
       },
@@ -180,6 +180,7 @@ export class BasketPage extends Page {
           },
         })
         .execute();
+      window.dispatchEvent(new Event('cart-update'));
       this.cardContainer.getElement<HTMLDivElement>().replaceChildren();
       this.orderContainer.getElement<HTMLDivElement>().replaceChildren();
       this.createCardProducts();
@@ -215,6 +216,7 @@ export class BasketPage extends Page {
         .execute();
       this.orderContainer.getElement<HTMLDivElement>().replaceChildren();
       this.createOrderAmount();
+      window.dispatchEvent(new Event('cart-update'));
       buttonMinusItem.disabled = false;
     });
     buttonPlusItem.addEventListener('click', async () => {
@@ -236,6 +238,7 @@ export class BasketPage extends Page {
         .execute();
       this.orderContainer.getElement<HTMLDivElement>().replaceChildren();
       this.createOrderAmount();
+      window.dispatchEvent(new Event('cart-update'));
       buttonPlusItem.disabled = false;
     });
     amountContainer.setChildren(buttonMinusItem, amount.getElement(), buttonPlusItem);
@@ -389,6 +392,7 @@ export class BasketPage extends Page {
       this.orderContainer.getElement<HTMLDivElement>().replaceChildren();
       this.createOrderAmount();
       this.createEmptyMessage();
+      window.dispatchEvent(new Event('cart-update'));
     }
   }
 
