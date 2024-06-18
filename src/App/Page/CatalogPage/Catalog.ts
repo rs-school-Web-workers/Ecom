@@ -417,6 +417,8 @@ export class CatalogPage extends Page {
 
   async clickAddToCartButtonHandler(target: EventTarget | null) {
     // добавление элемента в корзину
+    const button: HTMLButtonElement = <HTMLButtonElement>target;
+    button.disabled = true;
     const cart = await getCart();
     if (!(target instanceof HTMLButtonElement)) {
       return;
@@ -439,9 +441,11 @@ export class CatalogPage extends Page {
           ],
         },
       })
-      .execute();
-    const button: HTMLButtonElement = <HTMLButtonElement>target;
-    button.disabled = true;
+      .execute()
+      .catch((error) => {
+        console.error(error);
+        button.disabled = false;
+      });
   }
 
   createFilterContainer() {

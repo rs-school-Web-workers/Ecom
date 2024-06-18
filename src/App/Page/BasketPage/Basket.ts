@@ -66,7 +66,6 @@ export class BasketPage extends Page {
     const cart = await getCart();
     if (!cart || cart.body.lineItems.length === 0) {
       // no items in the cart message
-      console.log('no items');
       this.createEmptyMessage();
     } else {
       cart.body.lineItems.forEach((item) => {
@@ -85,7 +84,6 @@ export class BasketPage extends Page {
           item.id
         );
       });
-      console.log(cart);
     }
     this.createOrderAmount();
   }
@@ -142,6 +140,7 @@ export class BasketPage extends Page {
     buttonDeleteCard.type = 'button';
     buttonDeleteCard.innerHTML = SVGTRASH;
     buttonDeleteCard.addEventListener('click', async () => {
+      buttonDeleteCard.disabled = true;
       const cart = await getCart();
       await getClient()
         ?.me()
@@ -164,6 +163,7 @@ export class BasketPage extends Page {
       this.cardContainer.getElement<HTMLDivElement>().replaceChildren();
       this.orderContainer.getElement<HTMLDivElement>().replaceChildren();
       this.createCardProducts();
+      buttonDeleteCard.disabled = false;
     });
     const amountContainer = new Component('div', [basketCardButtonContainer]);
     const buttonMinusItem = new Component('button', [basketCardButton]).getElement<HTMLButtonElement>();
@@ -175,6 +175,7 @@ export class BasketPage extends Page {
     const amount = new Component('span', []);
     amount.setTextContent(quantity);
     buttonMinusItem.addEventListener('click', async () => {
+      buttonMinusItem.disabled = true;
       const cart = await getCart();
       if (Number(amount.getElement<HTMLElement>().textContent) - 1 < 1) {
         card.getElement<HTMLElement>().remove();
@@ -195,8 +196,10 @@ export class BasketPage extends Page {
         .execute();
       this.orderContainer.getElement<HTMLDivElement>().replaceChildren();
       this.createOrderAmount();
+      buttonMinusItem.disabled = false;
     });
     buttonPlusItem.addEventListener('click', async () => {
+      buttonPlusItem.disabled = true;
       const cart = await getCart();
       amount.getElement<HTMLElement>().textContent = (
         Number(amount.getElement<HTMLElement>().textContent) + 1
@@ -214,6 +217,7 @@ export class BasketPage extends Page {
         .execute();
       this.orderContainer.getElement<HTMLDivElement>().replaceChildren();
       this.createOrderAmount();
+      buttonPlusItem.disabled = false;
     });
     amountContainer.setChildren(buttonMinusItem, amount.getElement(), buttonPlusItem);
     containerCardRight.setChildren(buttonDeleteCard, amountContainer.getElement());
@@ -275,11 +279,12 @@ export class BasketPage extends Page {
     const inputPromo = new Component('input', [basketOrderInput]);
     wrapperInput.setChildren(inputPromo.getElement<HTMLInputElement>());
     inputPromo.getElement<HTMLInputElement>().type = 'text';
-    inputPromo.getElement<HTMLInputElement>().placeholder = 'Add promo code';
+    inputPromo.getElement<HTMLInputElement>().placeholder = /* 'Add promo code'; */ 'TEST = -12%';
     const buttonApplyPromo = new Component('button', [basketOrderButton, basketOrderButton_promoApply]);
     buttonApplyPromo.getElement<HTMLButtonElement>().type = 'button';
     buttonApplyPromo.setTextContent('Apply');
     buttonApplyPromo.getElement<HTMLButtonElement>().addEventListener('click', async () => {
+      buttonApplyPromo.getElement<HTMLButtonElement>().disabled = true;
       const cart = await getCart();
       await getClient()
         ?.me()
@@ -304,6 +309,7 @@ export class BasketPage extends Page {
       //refresh data
       this.orderContainer.getElement<HTMLDivElement>().replaceChildren();
       this.createOrderAmount();
+      buttonApplyPromo.getElement<HTMLButtonElement>().disabled = false;
     });
     wrapperPromo.setChildren(wrapperInput.getElement(), buttonApplyPromo.getElement<HTMLButtonElement>());
 
@@ -335,14 +341,18 @@ export class BasketPage extends Page {
     clearButton.textContent = 'Clear Cart';
     container.append(clearButton);
     clearButton.addEventListener('click', async () => {
+      clearButton.disabled = true;
       const cart = await getCart();
-      await getClient()
-        ?.me()
-        .carts()
-        .withId({ ID: cart!.body.id })
-        .delete({ queryArgs: { version: cart!.body.version } })
-        .execute();
-      this.clearButtonHandler();
+      if (cart?.body.lineItems.length) {
+        await getClient()
+          ?.me()
+          .carts()
+          .withId({ ID: cart!.body.id })
+          .delete({ queryArgs: { version: cart!.body.version } })
+          .execute();
+        this.clearButtonHandler();
+      }
+      clearButton.disabled = true;
     });
     return container;
   }

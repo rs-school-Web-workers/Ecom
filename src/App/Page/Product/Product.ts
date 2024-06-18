@@ -396,6 +396,7 @@ export default class ProductPage extends Page {
     this.cartButtonText = cartButtonText;
     this.updateButton(id);
     addToCartButton.addEventListener('click', async () => {
+      addToCartButton.disabled = true;
       const cart = await getCart();
       if (this.amountContainer!.classList.contains(style.disabled_amount)) {
         await getClient()
@@ -442,6 +443,7 @@ export default class ProductPage extends Page {
         this.cartButtonText!.textContent = 'Remove from Cart';
         this.amountContainer!.classList.add(style.disabled_amount);
       }
+      addToCartButton.disabled = false;
     });
     container.append(amountContainer, addToCartButton);
     return container;
