@@ -7,3 +7,7 @@ declare module '*.module.scss' {
   const classNames: IClassNames;
   export = classNames;
 }
+
+declare module global {
+  const fetch: object;
+}
