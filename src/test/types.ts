@@ -1,5 +1,4 @@
 import * as catalogStyle from '../App/Page/CatalogPage/catalog.module.scss';
-import * as userProfileStyle from '../App/Page/UserProfile/userprofile.module.scss';
 
 export const ContentClassesArrayTest = [
   'main-page',
@@ -26,7 +25,7 @@ export const ContentClassesHeaderArrayTest = [
   'main-page',
   'login',
   'registration',
-  `${userProfileStyle.userProfile}`,
+  'main-page',
   'login',
 ];
 
