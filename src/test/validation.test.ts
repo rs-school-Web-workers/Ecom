@@ -10,102 +10,132 @@ import {
   streetValidator,
   surnameValidator,
 } from '../App/utils/validationsInputText';
+import {
+  BelarusPostalCodeValidateTrueValue,
+  PolandPostalCodeValidateValue,
+  RussiaPostalCodeValidateTrueValue,
+  dateValidateValues,
+  emailValidateValues,
+  emptySpaceValidateValue,
+  emptyValidateValue,
+  nameValidateFalseValues,
+  nameValidateTrueValue,
+  passwordTrueValues,
+  passwordValidateFalseValues,
+  postalCodeValidateFalseValue,
+} from './types';
 
 describe('email validation functionality', () => {
   test(`validation`, async () => {
-    expect(emailValidator[0].validate(' ')).not.toBeTruthy();
+    expect(emailValidator[0].validate(emptySpaceValidateValue)).not.toBeTruthy();
   });
   test(`validation`, async () => {
-    expect(emailValidator[1].validate(' ')).not.toBeTruthy();
+    expect(emailValidator[1].validate(emptySpaceValidateValue)).not.toBeTruthy();
   });
-  test(`validation`, async () => {
-    expect(emailValidator[2].validate('asd@qwe')).not.toBeTruthy();
-  });
-  test(`validation`, async () => {
-    expect(emailValidator[3].validate('asd@qwe')).not.toBeTruthy();
+  emailValidateValues.forEach((value) => {
+    test(`validation`, async () => {
+      expect(emailValidator[2].validate(value.value)).toBe(value.expected);
+    });
+    test(`validation`, async () => {
+      expect(emailValidator[3].validate(value.value)).toBe(value.expected);
+    });
   });
 });
 
 describe('password validation functionality', () => {
-  test(`validation`, async () => {
-    expect(passwordValidator[0].validate('asd')).not.toBeTruthy();
+  passwordValidateFalseValues.forEach((password, index) => {
+    test(`validation`, async () => {
+      expect(passwordValidator[index].validate(password)).not.toBeTruthy();
+    });
   });
-  test(`validation`, async () => {
-    expect(passwordValidator[1].validate('ASD')).not.toBeTruthy();
-  });
-  test(`validation`, async () => {
-    expect(passwordValidator[2].validate('asd')).not.toBeTruthy();
-  });
-  test(`validation`, async () => {
-    expect(passwordValidator[3].validate('asd asd')).not.toBeTruthy();
-  });
-  test(`validation`, async () => {
-    expect(passwordValidator[4].validate('asdasd')).not.toBeTruthy();
+  passwordTrueValues.forEach((password) => {
+    for (let i = 0; i < 4; i++) {
+      test(`validation`, async () => {
+        expect(passwordValidator[i].validate(password)).toBeTruthy();
+      });
+    }
   });
 });
 
 describe('name validation functionality', () => {
-  test(`validation`, async () => {
-    expect(nameValidator[0].validate('as!@d')).not.toBeTruthy();
-  });
-  test(`validation`, async () => {
-    expect(nameValidator[1].validate('AS123D')).not.toBeTruthy();
-  });
-  test(`validation`, async () => {
-    expect(nameValidator[2].validate('')).not.toBeTruthy();
+  nameValidateFalseValues.forEach((name, index) => {
+    test(`validation`, async () => {
+      expect(nameValidator[index].validate(name)).not.toBeTruthy();
+    });
+    test(`validation`, async () => {
+      expect(cityValidator[index].validate(nameValidateTrueValue)).toBeTruthy();
+    });
   });
 });
 
 describe('surname validation functionality', () => {
-  test(`validation`, async () => {
-    expect(surnameValidator[0].validate('as!@d')).not.toBeTruthy();
-  });
-  test(`validation`, async () => {
-    expect(surnameValidator[1].validate('AS123D')).not.toBeTruthy();
-  });
-  test(`validation`, async () => {
-    expect(surnameValidator[2].validate('')).not.toBeTruthy();
+  nameValidateFalseValues.forEach((surname, index) => {
+    test(`validation`, async () => {
+      expect(surnameValidator[index].validate(surname)).not.toBeTruthy();
+    });
+    test(`validation`, async () => {
+      expect(cityValidator[index].validate(nameValidateTrueValue)).toBeTruthy();
+    });
   });
 });
 
 describe('city validation functionality', () => {
-  test(`validation`, async () => {
-    expect(cityValidator[0].validate('as!@d')).not.toBeTruthy();
-  });
-  test(`validation`, async () => {
-    expect(cityValidator[1].validate('AS123D')).not.toBeTruthy();
-  });
-  test(`validation`, async () => {
-    expect(cityValidator[2].validate('')).not.toBeTruthy();
+  nameValidateFalseValues.forEach((city, index) => {
+    test(`validation`, async () => {
+      expect(cityValidator[index].validate(city)).not.toBeTruthy();
+    });
+    test(`validation`, async () => {
+      expect(cityValidator[index].validate(nameValidateTrueValue)).toBeTruthy();
+    });
   });
 });
 
 describe('street validation functionality', () => {
   test(`validation`, async () => {
-    expect(streetValidator[0].validate('')).not.toBeTruthy();
+    expect(streetValidator[0].validate(emptyValidateValue)).not.toBeTruthy();
   });
 });
 
 describe('date validation functionality', () => {
-  test(`validation`, async () => {
-    expect(dateOfBirthdayValidator[0].validate('01-01-2013')).not.toBeTruthy();
+  dateValidateValues.forEach((date) => {
+    test(`validation`, async () => {
+      expect(dateOfBirthdayValidator[0].validate(date.value)).toBe(date.expected);
+    });
   });
 });
 
 describe('postal PL validation functionality', () => {
   test(`validation`, async () => {
-    expect(postalCodePolandValidator[0].validate('123123123')).not.toBeTruthy();
+    expect(postalCodePolandValidator[0].validate(postalCodeValidateFalseValue)).not.toBeTruthy();
+  });
+});
+
+describe('postal PL validation functionality', () => {
+  test(`validation`, async () => {
+    expect(postalCodePolandValidator[0].validate(PolandPostalCodeValidateValue)).toBeTruthy();
   });
 });
 
 describe('postal RU validation functionality', () => {
   test(`validation`, async () => {
-    expect(postalCodeRussiaValidator[0].validate('123123123')).not.toBeTruthy();
+    expect(postalCodeRussiaValidator[0].validate(postalCodeValidateFalseValue)).not.toBeTruthy();
+  });
+});
+
+describe('postal RU validation functionality', () => {
+  test(`validation`, async () => {
+    expect(postalCodeRussiaValidator[0].validate(RussiaPostalCodeValidateTrueValue)).toBeTruthy();
   });
 });
 
 describe('postal BY validation functionality', () => {
   test(`validation`, async () => {
-    expect(postalCodeBelarusValidator[0].validate('123123123')).not.toBeTruthy();
+    expect(postalCodeBelarusValidator[0].validate(postalCodeValidateFalseValue)).not.toBeTruthy();
+  });
+});
+
+describe('postal BY validation functionality', () => {
+  test(`validation`, async () => {
+    expect(postalCodeBelarusValidator[0].validate(BelarusPostalCodeValidateTrueValue)).toBeTruthy();
   });
 });
