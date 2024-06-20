@@ -4,6 +4,7 @@ export enum PagePath {
   REGISTRATION = '/registration',
   NOT_FOUND = '/not-found',
   PRODUCTS = '/products',
+  USERPROFILE = '/user-profile',
 }
 
 export const SECTION_NAME = '{section_name}';

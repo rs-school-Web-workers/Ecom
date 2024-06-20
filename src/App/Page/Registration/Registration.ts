@@ -1,6 +1,6 @@
 import { Router } from '../../Router/Router';
 import { PagePath } from '../../Router/types';
-import { showLogoutButton } from '../../components/header/Header';
+import { showLogoutButton, showUserProfileLink } from '../../components/header/Header';
 import { createInputView } from '../../components/input/inputComponent';
 import { createSelectView } from '../../components/select/selectComponent';
 import { signinClient } from '../../utils/api/Client';
@@ -213,9 +213,7 @@ export default class RegistrationPage extends Page {
 
             if (sSelectCountryValue?.classList.contains('success')) {
               const sPostalCode = this.sPostalCode?.shadowRoot?.children[1].lastChild as HTMLInputElement;
-              if (sPostalCode.classList.contains('success')) {
-                console.log('success');
-              } else {
+              if (!sPostalCode.classList.contains('success')) {
                 sPostalCode.classList.add('unsuccess');
               }
             } else {
@@ -250,7 +248,6 @@ export default class RegistrationPage extends Page {
               sPostalCode.classList.contains('success') &&
               (this.сheckboxForBothAddresses.checked || bPostalCode.classList.contains('success'))
             ) {
-              console.log('success Full Validations');
               const defaultBilling = this.bCheckbox.checked ? 1 : undefined;
               const defaultShipping = this.sCheckbox.checked ? 0 : undefined;
               const address = [
@@ -330,24 +327,6 @@ export default class RegistrationPage extends Page {
         );
       }
     }
-    /** ЕСЛИ НАДО ПРОВЕРКА ЧТО
-     * emailInputValue instanceof HTMLInputElement &&
-      passwordInputValue instanceof HTMLInputElement &&
-      nameInputValue instanceof HTMLInputElement &&
-      dateOfBirthdayValue instanceof HTMLInputElement &&
-      surnameInputValue instanceof HTMLInputElement &&
-      sStreet instanceof HTMLInputElement &&
-      sStreetNumber instanceof HTMLInputElement &&
-      sCity instanceof HTMLInputElement &&
-      bStreet instanceof HTMLInputElement &&
-      bStreetNumber instanceof HTMLInputElement &&
-      bCity instanceof HTMLInputElement
-
-      то добавь else {
-        ''
-      }
-      выше этой записи
-    */
   }
 
   successRegister(msg: string) {
@@ -382,6 +361,7 @@ export default class RegistrationPage extends Page {
     this.router.navigate(PagePath.MAIN);
     this.router.renderPageView(PagePath.MAIN);
     showLogoutButton();
+    showUserProfileLink();
   }
 
   toogleList(el: Event) {

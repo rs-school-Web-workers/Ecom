@@ -1,7 +1,7 @@
 import { App } from '../App/App';
 import { Router } from '../App/Router/Router';
 import { PagePath } from '../App/Router/types';
-import { ContentClassesTest, PagePathTest } from './types';
+import { ContentClassesArrayTest, PagePathTest } from './types';
 
 describe('navigate functionality', () => {
   const values = Object.values(PagePath);
@@ -16,10 +16,10 @@ describe('navigate functionality', () => {
 describe('render functionality', () => {
   const app = new App();
   const values = Object.values(PagePathTest);
-  values.forEach((value) => {
+  values.forEach((value, index) => {
     test(`it render content container to ${value}-page`, () => {
       app.router.renderPageView(value);
-      expect(app.contentContainer.querySelector(`.${ContentClassesTest[value]}`)).not.toBeNull();
+      expect(app.contentContainer.querySelector(`.${ContentClassesArrayTest[index]}`)).not.toBeNull();
     });
   });
 });

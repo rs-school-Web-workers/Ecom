@@ -1,0 +1,157 @@
+$buttonBackground: #3a5b22;
+$gapForm: 6px;
+$buttonColorFont: #ffffff;
+$linkColor: #0f3dde;
+.userProfile {
+  display: flex;
+  justify-content: center;
+  padding-left: 70px;
+  height: 100%;
+  @media (max-width: 820px) {
+    flex-direction: column;
+    padding-left: 0px;
+  }
+  .userProfile__formContainer {
+    flex-direction: column;
+    display: flex;
+    flex: 1 1 auto;
+    padding: 0px 20px;
+  }
+  .userProfile__formContainer_addresses {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    overflow-y: scroll;
+    height: 420px;
+    scrollbar-width: thin;
+    scroll-behavior: smooth;
+  }
+  .userProfile__wrapperCheckBox {
+    display: flex;
+  }
+  .userProfile__btnDelete {
+    display: flex;
+    padding: 0px;
+    border: none;
+    cursor: pointer;
+    background-color: white;
+    margin-left: 10px;
+  }
+  .userProfile__wrapperCheckBox_default {
+    display: flex;
+    grid-column: 1 / span 2;
+    justify-content: space-between;
+    padding-bottom: 5px;
+    margin-bottom: 5px;
+    border-bottom: 2px solid #d9d9d9;
+  }
+  .userProfile__addressesContainer {
+    display: flex;
+    flex-direction: column;
+    flex: 0 1 42%;
+    padding: 0px 20px;
+    @media (max-width: 400px) {
+     padding: 0 10px;
+    }
+  }
+  .userProfile__form {
+    display: flex;
+    flex-direction: column;
+    padding: 0 10px;
+    border-radius: 8px;
+    border: 2px solid white;
+    gap: $gapForm;
+    &.success {
+      border-color:  #6fcf97;
+    }
+    &.unsuccess {
+      border-color: #ee5757;
+    }
+  }
+  .userProfile__title {
+    margin-bottom: 10px;
+    font-family: Integral CF;
+  }
+  .userProfile__aboutText {
+    margin-bottom: 20px;
+    font-family: Integral CF;
+  }
+  .userProfile__FormList {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 15px;
+    border: 2px solid #d9d9d9;
+    border-radius: 8px;
+    padding: 20px;
+    &.success {
+      border: 2px solid #6fcf97;
+    }
+    @media (max-width: 430px) {
+      column-gap: 7px;
+      padding: 10px
+    }
+  }
+  select-component {
+    margin-top: 20.7px;
+    @media (max-width: 780px) {
+      margin-top: 15.7px;
+    }
+  }
+  .userProfile__listBtn {
+    margin-top: 6px;
+    grid-column: 1 / span 2;
+  }
+  .userProfile__label {
+    display: inline-flex;
+    gap: 10px;
+    align-self: center;
+    font-family: Satoshi;
+    font-size: clamp(0.8rem, 2vw, 1.1rem);
+    color: rgb(255, 0, 0);
+    margin-left: 10px;
+    align-items: center;
+    .userProfile__inputCheck {
+      width: 20px;
+      height: 20px;
+      @media (max-width: 400px) {
+        width: 10px;
+        height: 10px;
+      }
+    }
+    @media (max-width: 400px) {
+      gap: 5px;
+      margin-left: 5px;
+    }
+  }
+  .userProfile__formBtn {
+    padding: 6px 10px;
+    font-size: clamp(0.8rem, 2vw, 1.1rem);
+    font-weight: bold;
+    background-color: $buttonBackground;
+    font-family: Satoshi;
+    border: none;
+    color: $buttonColorFont;
+    border-radius: 100px;
+    cursor: pointer;
+    margin-bottom: 10px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.4);
+    transition: opacity 0.3s;
+    &[disabled] {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    @media (hover: hover) {
+      &:not([disabled]):hover {
+        opacity: 0.8;
+      }
+    }
+  }
+  .userProfileImgWrapper {
+    background-image: url(../../../assets/imgs/form-image.webp);
+    background-repeat: no-repeat;
+    background-position: left center;
+    background-size: cover;
+    flex: 1 1 50%;
+    height: 1042px;
+  }
+}
