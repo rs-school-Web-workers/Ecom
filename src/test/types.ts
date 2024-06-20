@@ -1,14 +1,16 @@
-export enum ContentClassesTest {
-  '/' = 'main-page',
-  '/login' = 'login',
-  // eslint-disable-next-line @typescript-eslint/no-duplicate-enum-values
-  '/main' = 'main-page',
-  '/registration' = 'registration',
-  '/not-found' = 'not-found-page',
-  '/products' = 'products-page',
-  // eslint-disable-next-line @typescript-eslint/no-duplicate-enum-values
-  '/not-found-example' = 'not-found-page',
-}
+import * as catalogStyle from '../App/Page/CatalogPage/catalog.module.scss';
+import * as aboutUsStyles from '../App/Page/AboutUsPage/aboutus.module.scss';
+import * as basketPageStyles from '../App/Page/BasketPage/basket.module.scss';
+
+export const ContentClassesArrayTest = [
+  'main-page',
+  'login',
+  'main-page',
+  'registration',
+  'not-found-page',
+  `${catalogStyle.catalog}`,
+  'not-found-page',
+];
 
 export enum PagePathTest {
   INIT = '/',
@@ -20,8 +22,46 @@ export enum PagePathTest {
   OTHER_NOT_FOUND = '/not-found-example',
 }
 
-export const ContentClassesHeaderArrayTest = ['main-page', 'login', 'registration', 'login'];
+export const ContentClassesHeaderArrayTest = [
+  `${catalogStyle.catalog}`,
+  'main-page',
+  `${aboutUsStyles.aboutUs}`,
+  'login',
+  'main-page',
+  `${basketPageStyles.basket}`,
+  'login',
+];
 
 export const SOME_ID = 'some-id';
 
 export const SOME_TEXT = 'some-text';
+
+export const emptySpaceValidateValue = ' ';
+
+export const emptyValidateValue = '';
+
+export const emailValidateValues = [
+  { value: 'asd@qwe', expected: false },
+  { value: 'asd@asd.asd', expected: true },
+];
+
+export const passwordValidateFalseValues = ['asd', 'ASD', 'asd', 'asd asd', 'asdasd'];
+
+export const passwordTrueValues = ['Aaaaaaaa1', 'Aaaaaaaa1!'];
+
+export const nameValidateFalseValues = ['as!@d', 'AS123D', ''];
+
+export const nameValidateTrueValue = 'qwerty';
+
+export const dateValidateValues = [
+  { value: '01-01-2013', expected: false },
+  { value: '01-01-1999', expected: true },
+];
+
+export const postalCodeValidateFalseValue = '123123123';
+
+export const BelarusPostalCodeValidateTrueValue = '111111';
+
+export const RussiaPostalCodeValidateTrueValue = '111111';
+
+export const PolandPostalCodeValidateValue = '11-111';

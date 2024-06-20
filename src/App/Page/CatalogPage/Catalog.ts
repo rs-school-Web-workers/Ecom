@@ -30,8 +30,8 @@ import show from '../../../assets/imgs/svg/Vector.svg';
 import unshow from '../../../assets/imgs/svg/Vector2.svg';
 import filter_logo from '../../../assets/imgs/svg/filter.svg';
 import glass from '../../../assets/imgs/svg/glass.svg';
-import { getCategorieById, getClient } from '../../utils/api/Client';
-import { RangeFacetResult, TermFacetResult } from '@commercetools/platform-sdk';
+import { getCart, getCategorieById, getClient, getProductById } from '../../utils/api/Client';
+import { Cart, ClientResponse, RangeFacetResult, TermFacetResult } from '@commercetools/platform-sdk';
 import { centsToDollar } from '../../utils/helpers';
 import { Router } from '../../Router/Router';
 import cartLogo from '../../../assets/imgs/car_logo_30.png';
@@ -268,6 +268,10 @@ export class CatalogPage extends Page {
   }
 
   async createCardList() {
+    const cart = await getCart();
+    if (!cart) {
+      throw new Error('Cannot access cart');
+    }
     const args: {
       limit?: number;
       offset?: number;
@@ -335,7 +339,7 @@ export class CatalogPage extends Page {
         priceWithoutDiscount,
         imageLink,
       };
-      const card = this.createCard(dataObject);
+      const card = this.createCard(dataObject, cart);
       this.listProductsContainer.append(card.getElement());
     });
     if (this.currentPage === Math.ceil(this.totalCount / this.limit) - 1) {
@@ -351,7 +355,7 @@ export class CatalogPage extends Page {
     this.createPaginationNumbers();
   }
 
-  createCard(data: CardItem) {
+  createCard(data: CardItem, cart: ClientResponse<Cart>) {
     const card = new Component('div', [catalog__card]);
     const imageCardContainer = new Component('div', [catalogStyle.catalog__cardImgContainer]);
     const imageCard = new Component('img', [catalog__cardImg]);
@@ -379,7 +383,7 @@ export class CatalogPage extends Page {
     card.setChildren(
       imageCardContainer.getElement<HTMLImageElement>(),
       wrapperAboutCard.getElement(),
-      this.createAddToCartButton().getElement<HTMLDivElement>()
+      this.createAddToCartButton(data.id, cart).getElement<HTMLDivElement>()
     );
     card.getElement<HTMLElement>().addEventListener('click', () => {
       const path = `/products/${data.category}/${data.id}`;
@@ -389,31 +393,60 @@ export class CatalogPage extends Page {
     return card;
   }
 
-  createAddToCartButton() {
+  createAddToCartButton(id: string, cart: ClientResponse<Cart>) {
     const container: Component = new Component('div', [catalogStyle.add_to_cart_container]);
     const button: Component = new Component('button', [catalogStyle.add_to_cart_button]);
     const buttonText: Component = new Component('span', [catalogStyle.add_to_cart_text]);
     const buttonLogo: Component = new Component('img', ['add_to_cart_logo']);
     buttonText.setTextContent('Add to cart');
     // проверяет наличие в корзине
-    const cartState: boolean = false;
+    const cartState = cart?.body.lineItems.filter((el) => el.productId === id).length ?? 1 > 0;
     if (cartState) {
       button.getElement<HTMLButtonElement>().disabled = true;
     }
     buttonLogo.getElement<HTMLImageElement>().src = cartLogo;
     button.setChildren(buttonText.getElement(), buttonLogo.getElement());
-    button
-      .getElement<HTMLButtonElement>()
-      .addEventListener('click', (event: Event) => this.clickAddToCartButtonHandler(event));
+    button.getElement<HTMLButtonElement>().dataset.id = id;
+    button.getElement<HTMLButtonElement>().addEventListener('click', (event: Event) => {
+      event.stopPropagation();
+      this.clickAddToCartButtonHandler(event.currentTarget);
+    });
     container.setChildren(button.getElement());
     return container;
   }
 
-  clickAddToCartButtonHandler(event: Event) {
+  async clickAddToCartButtonHandler(target: EventTarget | null) {
     // добавление элемента в корзину
-    event.stopPropagation();
-    const button: HTMLButtonElement = <HTMLButtonElement>event.currentTarget;
+    const button: HTMLButtonElement = <HTMLButtonElement>target;
     button.disabled = true;
+    const cart = await getCart();
+    if (!(target instanceof HTMLButtonElement)) {
+      return;
+    }
+    const variantId = (await getProductById(target.dataset.id!)).body.masterData.current.masterVariant.id;
+    await getClient()
+      ?.me()
+      .carts()
+      .withId({ ID: cart!.body.id })
+      .post({
+        body: {
+          version: cart!.body.version,
+          actions: [
+            {
+              action: 'addLineItem',
+              productId: target.dataset.id,
+              variantId: variantId,
+              quantity: 1,
+            },
+          ],
+        },
+      })
+      .execute()
+      .catch((error) => {
+        console.error(error);
+        button.disabled = false;
+      });
+    window.dispatchEvent(new Event('cart-update'));
   }
 
   createFilterContainer() {
@@ -938,6 +971,7 @@ export class CatalogPage extends Page {
     currentLimit.textContent = currentElem.textContent;
     this.clickShowHandler(showElem, container);
     this.limit = Number(currentLimit.textContent);
+    this.currentPage = 0;
     this.render();
   }
 

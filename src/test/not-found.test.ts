@@ -2,7 +2,7 @@ import { App } from '../App/App';
 import { notFoundClassNames } from '../App/Page/NotFoundPage/types';
 import { PagePath } from '../App/Router/types';
 import { isNull } from '../App/utils/base-methods';
-import { ContentClassesTest } from './types';
+import { ContentClassesArrayTest } from './types';
 
 describe('render functionality', () => {
   const app = new App();
@@ -18,6 +18,6 @@ describe('render functionality', () => {
   });
 
   test(`should render content container to main page`, () => {
-    expect(app.contentContainer.querySelector(`.${ContentClassesTest[PagePath.MAIN]}`)).not.toBeNull();
+    expect(app.contentContainer.querySelector(`.${ContentClassesArrayTest[2]}`)).not.toBeNull();
   });
 });
