@@ -20,6 +20,9 @@ Welcome to our eCommerce application! This platform replicates real-world shoppi
 ### Project Structure:
 - src: Source code of the application
 
+### Deploy:
+- [DEPLOY LINK](https://web-workers-team.netlify.app/)
+
 ### Commands:
 - `npm test`: Run Jest tests
 - `npm run test:dev`: Run Jest tests in watch mode

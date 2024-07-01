@@ -51,7 +51,7 @@ $linkColor: #0f3dde;
     flex: 0 1 42%;
     padding: 0px 20px;
     @media (max-width: 400px) {
-     padding: 0 10px;
+      padding: 0 10px;
     }
   }
   .userProfile__form {
@@ -62,7 +62,7 @@ $linkColor: #0f3dde;
     border: 2px solid white;
     gap: $gapForm;
     &.success {
-      border-color:  #6fcf97;
+      border-color: #6fcf97;
     }
     &.unsuccess {
       border-color: #ee5757;
@@ -88,7 +88,7 @@ $linkColor: #0f3dde;
     }
     @media (max-width: 430px) {
       column-gap: 7px;
-      padding: 10px
+      padding: 10px;
     }
   }
   select-component {

@@ -177,7 +177,7 @@ const config: Config = {
   // A map from regular expressions to paths to transformers
   transform: {
     '^.+\\.(ts|tsx|js|jsx)$': 'ts-jest',
-    '^.+\\.svg$': 'jest-transform-stub',
+    '^.+\\.(svg|png|jpg)$': 'jest-transform-stub',
   },
 
   // An array of regexp pattern strings that are matched against all source file paths, matched files will skip transformation

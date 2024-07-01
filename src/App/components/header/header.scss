@@ -66,7 +66,8 @@ $gap-link-burger: 60px;
   color: $headerTextColor;
 }
 
-.logout-button {
+.logout-button,
+.login-link {
   display: none;
 }
 
@@ -76,11 +77,18 @@ $gap-link-burger: 60px;
   gap: 5px;
 }
 
+.basket-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
 .show-profile-link {
   display: inline-flex;
 }
 
-.show-logout {
+.show-logout,
+.show-login {
   display: block;
 }
 

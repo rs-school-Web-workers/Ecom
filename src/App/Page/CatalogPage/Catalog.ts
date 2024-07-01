@@ -1,7 +1,15 @@
 import Component from '../../utils/base-component';
 import Page from '../Page';
 import * as catalogStyle from './catalog.module.scss';
-import { CardItem, sortValue, ICatalogFilter, defaultStateFilter, IFilterVariant, defaultVariantFilter } from './types';
+import {
+  CardItem,
+  sortValue,
+  ICatalogFilter,
+  defaultStateFilter,
+  IFilterVariant,
+  defaultVariantFilter,
+  limitsValue,
+} from './types';
 const {
   catalog,
   catalogContainer,
@@ -22,10 +30,13 @@ import show from '../../../assets/imgs/svg/Vector.svg';
 import unshow from '../../../assets/imgs/svg/Vector2.svg';
 import filter_logo from '../../../assets/imgs/svg/filter.svg';
 import glass from '../../../assets/imgs/svg/glass.svg';
-import { getCategorieById, getClient } from '../../utils/api/Client';
-import { RangeFacetResult, TermFacetResult } from '@commercetools/platform-sdk';
+import { getCart, getCategorieById, getClient, getProductById } from '../../utils/api/Client';
+import { Cart, ClientResponse, RangeFacetResult, TermFacetResult } from '@commercetools/platform-sdk';
 import { centsToDollar } from '../../utils/helpers';
 import { Router } from '../../Router/Router';
+import cartLogo from '../../../assets/imgs/car_logo_30.png';
+import prev_img from '../../../assets/imgs/prev_button.png';
+import next_img from '../../../assets/imgs/next_button.png';
 
 export class CatalogPage extends Page {
   catalogContainer = new Component('div', [catalogContainer]);
@@ -47,6 +58,12 @@ export class CatalogPage extends Page {
   styles: string[] = [];
   styleSubcategory: string[][] = [];
   category: string;
+  currentPage: number = 0;
+  limit: number = 6;
+  totalCount: number = 5;
+  numberPage: HTMLDivElement = new Component('div', ['pagination_number_container']).getElement<HTMLDivElement>();
+  prevButton: HTMLButtonElement = new Component('button', [catalogStyle.button_prev]).getElement<HTMLButtonElement>();
+  nextButton: HTMLButtonElement = new Component('button', [catalogStyle.button_next]).getElement<HTMLButtonElement>();
 
   constructor(router: Router, category: string = '') {
     super([catalog]);
@@ -102,7 +119,12 @@ export class CatalogPage extends Page {
     this.containerProducts.append(this.listProductsContainer);
     this.modalBackground.addEventListener('click', (event) => this.clickCloseFilterLogoHandler(event));
     this.contentContainer.append(this.containerFilters, this.containerProducts);
-    this.container?.append(this.searchContainer, this.contentContainer, this.modalBackground);
+    this.container?.append(
+      this.searchContainer,
+      this.contentContainer,
+      this.createPaginationContainer(),
+      this.modalBackground
+    );
     this.render();
   }
 
@@ -169,7 +191,43 @@ export class CatalogPage extends Page {
       selectSortContainer.append(sortElem);
     });
     currentSortingShow.addEventListener('click', () => this.clickShowHandler(currentSortingShow, selectSortContainer));
-    sortFilterContainer.append(filter_logoMinscreen, sortContainer, selectSortContainer);
+    const limitsContainer: HTMLDivElement = new Component('div', [
+      catalogStyle.limits_container,
+    ]).getElement<HTMLDivElement>();
+    const limitsText: HTMLSpanElement = new Component('span', [catalogStyle.limits_text]).getElement<HTMLSpanElement>();
+    limitsText.textContent = 'Products on page:';
+    const currentLimits: HTMLDivElement = new Component('div', [
+      catalogStyle.current_limit,
+    ]).getElement<HTMLDivElement>();
+    const currentLimitsText: HTMLSpanElement = new Component('span', [
+      'current_limit_text',
+    ]).getElement<HTMLSpanElement>();
+    currentLimitsText.textContent = limitsValue[2].toString();
+    const currentLimitsShow: HTMLImageElement = new Component('img', [
+      catalogStyle.current_limit_show,
+    ]).getElement<HTMLImageElement>();
+    currentLimitsShow.src = unshow;
+    currentLimits.append(currentLimitsText, currentLimitsShow);
+    limitsContainer.append(limitsText, currentLimits);
+    const selectLimitsContainer: HTMLDivElement = new Component('div', [
+      catalogStyle.select_limit_container,
+    ]).getElement<HTMLDivElement>();
+    limitsValue.forEach((value) => {
+      const limitElem: HTMLSpanElement = new Component('span', [catalogStyle.limit_elem]).getElement<HTMLSpanElement>();
+      limitElem.textContent = value.toString();
+      limitElem.addEventListener('click', (event) =>
+        this.clickLimitsElemHandler(event, currentLimitsText, currentLimitsShow, selectLimitsContainer)
+      );
+      selectLimitsContainer.append(limitElem);
+    });
+    currentLimitsShow.addEventListener('click', () => this.clickShowHandler(currentLimitsShow, selectLimitsContainer));
+    sortFilterContainer.append(
+      filter_logoMinscreen,
+      limitsContainer,
+      selectLimitsContainer,
+      sortContainer,
+      selectSortContainer
+    );
     return sortFilterContainer;
   }
 
@@ -210,8 +268,20 @@ export class CatalogPage extends Page {
   }
 
   async createCardList() {
-    const args: { limit?: number; fuzzy?: boolean; filter?: string[]; sort?: string; 'text.en-US'?: string } = {};
-    args.limit = 500;
+    const cart = await getCart();
+    if (!cart) {
+      throw new Error('Cannot access cart');
+    }
+    const args: {
+      limit?: number;
+      offset?: number;
+      fuzzy?: boolean;
+      filter?: string[];
+      sort?: string;
+      'text.en-US'?: string;
+    } = {};
+    args.limit = this.limit;
+    args.offset = this.limit * this.currentPage;
     args.fuzzy = true;
     args.filter = [];
     if (this.stateFilter.cloth.length && !this.stateFilter.cloth.includes('All')) {
@@ -240,6 +310,7 @@ export class CatalogPage extends Page {
     }
     args['text.en-US'] = this.stateFilter.text ?? '';
     const products = await getClient()?.productProjections().search().get({ queryArgs: args }).execute();
+    this.totalCount = products?.body.total !== undefined ? products?.body.total : 0;
     const data = await Promise.all<{ [row: string]: string }>(
       products!.body.results.map(async (el) => {
         const priceWithDiscount =
@@ -268,12 +339,23 @@ export class CatalogPage extends Page {
         priceWithoutDiscount,
         imageLink,
       };
-      const card = this.createCard(dataObject);
+      const card = this.createCard(dataObject, cart);
       this.listProductsContainer.append(card.getElement());
     });
+    if (this.currentPage === Math.ceil(this.totalCount / this.limit) - 1) {
+      this.nextButton.disabled = true;
+    } else {
+      this.nextButton.disabled = false;
+    }
+    if (this.currentPage === 0) {
+      this.prevButton.disabled = true;
+    } else {
+      this.prevButton.disabled = false;
+    }
+    this.createPaginationNumbers();
   }
 
-  createCard(data: CardItem) {
+  createCard(data: CardItem, cart: ClientResponse<Cart>) {
     const card = new Component('div', [catalog__card]);
     const imageCardContainer = new Component('div', [catalogStyle.catalog__cardImgContainer]);
     const imageCard = new Component('img', [catalog__cardImg]);
@@ -298,13 +380,73 @@ export class CatalogPage extends Page {
       descriptionCard.getElement(),
       containerForCardPrices.getElement()
     );
-    card.setChildren(imageCardContainer.getElement<HTMLImageElement>(), wrapperAboutCard.getElement());
+    card.setChildren(
+      imageCardContainer.getElement<HTMLImageElement>(),
+      wrapperAboutCard.getElement(),
+      this.createAddToCartButton(data.id, cart).getElement<HTMLDivElement>()
+    );
     card.getElement<HTMLElement>().addEventListener('click', () => {
       const path = `/products/${data.category}/${data.id}`;
       this.router.navigate(path);
       this.router.renderPageView(path);
     });
     return card;
+  }
+
+  createAddToCartButton(id: string, cart: ClientResponse<Cart>) {
+    const container: Component = new Component('div', [catalogStyle.add_to_cart_container]);
+    const button: Component = new Component('button', [catalogStyle.add_to_cart_button]);
+    const buttonText: Component = new Component('span', [catalogStyle.add_to_cart_text]);
+    const buttonLogo: Component = new Component('img', ['add_to_cart_logo']);
+    buttonText.setTextContent('Add to cart');
+    // проверяет наличие в корзине
+    const cartState = cart?.body.lineItems.filter((el) => el.productId === id).length ?? 1 > 0;
+    if (cartState) {
+      button.getElement<HTMLButtonElement>().disabled = true;
+    }
+    buttonLogo.getElement<HTMLImageElement>().src = cartLogo;
+    button.setChildren(buttonText.getElement(), buttonLogo.getElement());
+    button.getElement<HTMLButtonElement>().dataset.id = id;
+    button.getElement<HTMLButtonElement>().addEventListener('click', (event: Event) => {
+      event.stopPropagation();
+      this.clickAddToCartButtonHandler(event.currentTarget);
+    });
+    container.setChildren(button.getElement());
+    return container;
+  }
+
+  async clickAddToCartButtonHandler(target: EventTarget | null) {
+    // добавление элемента в корзину
+    const button: HTMLButtonElement = <HTMLButtonElement>target;
+    button.disabled = true;
+    const cart = await getCart();
+    if (!(target instanceof HTMLButtonElement)) {
+      return;
+    }
+    const variantId = (await getProductById(target.dataset.id!)).body.masterData.current.masterVariant.id;
+    await getClient()
+      ?.me()
+      .carts()
+      .withId({ ID: cart!.body.id })
+      .post({
+        body: {
+          version: cart!.body.version,
+          actions: [
+            {
+              action: 'addLineItem',
+              productId: target.dataset.id,
+              variantId: variantId,
+              quantity: 1,
+            },
+          ],
+        },
+      })
+      .execute()
+      .catch((error) => {
+        console.error(error);
+        button.disabled = false;
+      });
+    window.dispatchEvent(new Event('cart-update'));
   }
 
   createFilterContainer() {
@@ -392,6 +534,7 @@ export class CatalogPage extends Page {
       }
     });
     this.stateFilter.brand = brandSelect;
+    this.currentPage = 0;
     this.render();
   }
 
@@ -431,6 +574,8 @@ export class CatalogPage extends Page {
       brand.classList.remove(catalogStyle.active_brand);
     });
     this.stateFilter = Object.create(defaultStateFilter);
+    this.currentPage = 0;
+    this.render();
   }
 
   createFilterPrice() {
@@ -758,6 +903,176 @@ export class CatalogPage extends Page {
       showElem.src = show;
       showElem.classList.add('show-elem');
       container.classList.add(catalogStyle.active_elem);
+    }
+  }
+
+  createPaginationContainer() {
+    const container: HTMLDivElement = new Component('div', [
+      catalogStyle.pagination_container,
+    ]).getElement<HTMLDivElement>();
+    const prevButtonText: HTMLSpanElement = new Component('span', [
+      catalogStyle.button_pagination_text,
+    ]).getElement<HTMLSpanElement>();
+    prevButtonText.textContent = 'Previous';
+    const prevButtonImg: HTMLImageElement = new Component('img', [
+      catalogStyle.button_pagination_logo,
+    ]).getElement<HTMLImageElement>();
+    prevButtonImg.src = prev_img;
+    this.prevButton.append(prevButtonImg, prevButtonText);
+    const nextButtonText: HTMLSpanElement = new Component('span', [
+      catalogStyle.button_pagination_text,
+    ]).getElement<HTMLSpanElement>();
+    nextButtonText.textContent = 'Next';
+    const nextButtonImg: HTMLImageElement = new Component('img', [
+      catalogStyle.button_pagination_logo,
+    ]).getElement<HTMLImageElement>();
+    nextButtonImg.src = next_img;
+    this.prevButton.addEventListener('click', () => this.prevButtonHandler());
+    this.nextButton.addEventListener('click', () => this.nextButtonHandler());
+    this.nextButton.append(nextButtonText, nextButtonImg);
+    this.numberPage.addEventListener('click', (event) => this.clickPaginationNumberHandler(event));
+    container.append(this.prevButton, this.numberPage, this.nextButton);
+    return container;
+  }
+
+  prevButtonHandler() {
+    if (this.currentPage > 0) {
+      this.currentPage--;
+      if (this.currentPage < Math.ceil(this.totalCount / this.limit) - 1) {
+        this.nextButton.disabled = false;
+      }
+      this.render();
+    }
+    if (this.currentPage === 0) {
+      this.prevButton.disabled = true;
+    }
+  }
+
+  nextButtonHandler() {
+    if (this.currentPage < Math.ceil(this.totalCount / this.limit) - 1) {
+      this.currentPage++;
+      if (this.currentPage > 0) {
+        this.prevButton.disabled = false;
+      }
+      this.render();
+    }
+    if (this.currentPage === Math.ceil(this.totalCount / this.limit) - 1) {
+      this.nextButton.disabled = true;
+    }
+  }
+
+  clickLimitsElemHandler(
+    event: Event,
+    currentLimit: HTMLSpanElement,
+    showElem: HTMLImageElement,
+    container: HTMLDivElement
+  ) {
+    const currentElem: HTMLSpanElement = <HTMLSpanElement>event.currentTarget;
+    currentLimit.textContent = currentElem.textContent;
+    this.clickShowHandler(showElem, container);
+    this.limit = Number(currentLimit.textContent);
+    this.currentPage = 0;
+    this.render();
+  }
+
+  createPaginationNumbers() {
+    this.numberPage.replaceChildren();
+    const countPages: number = Math.ceil(this.totalCount / this.limit);
+    if (countPages < 8) {
+      for (let i = 0; i < countPages; i++) {
+        const numberPage: HTMLSpanElement = new Component('span', [
+          catalogStyle.number_page_container,
+        ]).getElement<HTMLSpanElement>();
+        numberPage.dataset.page = i.toString();
+        numberPage.textContent = (i + 1).toString();
+        if (i === this.currentPage) {
+          numberPage.classList.add(catalogStyle.active_page);
+        }
+        this.numberPage.append(numberPage);
+      }
+    } else if (this.currentPage < countPages - 4 && this.currentPage > 3) {
+      const dotStart: HTMLSpanElement = new Component('span', ['dot_container']).getElement<HTMLSpanElement>();
+      dotStart.textContent = '...';
+      const startPage: HTMLSpanElement = new Component('span', [
+        catalogStyle.number_page_container,
+      ]).getElement<HTMLSpanElement>();
+      startPage.dataset.page = '0';
+      startPage.textContent = '1';
+      this.numberPage.append(startPage, dotStart);
+      const prevPage: HTMLSpanElement = new Component('span', [
+        catalogStyle.number_page_container,
+      ]).getElement<HTMLSpanElement>();
+      prevPage.dataset.page = `${this.currentPage - 1}`;
+      prevPage.textContent = `${this.currentPage}`;
+      const current: HTMLSpanElement = new Component('span', [
+        catalogStyle.number_page_container,
+      ]).getElement<HTMLSpanElement>();
+      current.dataset.page = `${this.currentPage}`;
+      current.textContent = `${this.currentPage + 1}`;
+      current.classList.add(catalogStyle.active_page);
+      const nextPage: HTMLSpanElement = new Component('span', [
+        catalogStyle.number_page_container,
+      ]).getElement<HTMLSpanElement>();
+      nextPage.dataset.page = `${this.currentPage + 1}`;
+      nextPage.textContent = `${this.currentPage + 2}`;
+      this.numberPage.append(prevPage, current, nextPage);
+      const endPage: HTMLSpanElement = new Component('span', [
+        catalogStyle.number_page_container,
+      ]).getElement<HTMLSpanElement>();
+      endPage.dataset.page = `${countPages - 1}`;
+      endPage.textContent = `${countPages}`;
+      const dotEnd: HTMLSpanElement = new Component('span', ['dot_container']).getElement<HTMLSpanElement>();
+      dotEnd.textContent = '...';
+      this.numberPage.append(dotEnd, endPage);
+    } else if (this.currentPage < 4) {
+      for (let i = 0; i < 5; i++) {
+        const numberPage: HTMLSpanElement = new Component('span', [
+          catalogStyle.number_page_container,
+        ]).getElement<HTMLSpanElement>();
+        numberPage.dataset.page = i.toString();
+        numberPage.textContent = (i + 1).toString();
+        if (i === this.currentPage) {
+          numberPage.classList.add(catalogStyle.active_page);
+        }
+        this.numberPage.append(numberPage);
+      }
+      const dot: HTMLSpanElement = new Component('span', ['dot_container']).getElement<HTMLSpanElement>();
+      dot.textContent = '...';
+      const endPage: HTMLSpanElement = new Component('span', [
+        catalogStyle.number_page_container,
+      ]).getElement<HTMLSpanElement>();
+      endPage.dataset.page = `${countPages - 1}`;
+      endPage.textContent = `${countPages}`;
+      this.numberPage.append(dot, endPage);
+    } else if (this.currentPage > countPages - 6) {
+      const dot: HTMLSpanElement = new Component('span', ['dot_container']).getElement<HTMLSpanElement>();
+      dot.textContent = '...';
+      const startPage: HTMLSpanElement = new Component('span', [
+        catalogStyle.number_page_container,
+      ]).getElement<HTMLSpanElement>();
+      startPage.dataset.page = '0';
+      startPage.textContent = '1';
+      this.numberPage.append(startPage, dot);
+      for (let i = countPages - 5; i < countPages; i++) {
+        const numberPage: HTMLSpanElement = new Component('span', [
+          catalogStyle.number_page_container,
+        ]).getElement<HTMLSpanElement>();
+        numberPage.dataset.page = i.toString();
+        numberPage.textContent = (i + 1).toString();
+        if (i === this.currentPage) {
+          numberPage.classList.add(catalogStyle.active_page);
+        }
+        this.numberPage.append(numberPage);
+      }
+    }
+  }
+
+  clickPaginationNumberHandler(event: Event) {
+    const elem: HTMLSpanElement = <HTMLSpanElement>event.target;
+    if (elem.classList.contains(catalogStyle.number_page_container)) {
+      const page: string | undefined = elem.dataset.page;
+      this.currentPage = page !== undefined ? Number(page) : 0;
+      this.render();
     }
   }
 }

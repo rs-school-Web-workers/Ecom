@@ -1,4 +1,6 @@
 import * as catalogStyle from '../App/Page/CatalogPage/catalog.module.scss';
+import * as aboutUsStyles from '../App/Page/AboutUsPage/aboutus.module.scss';
+import * as basketPageStyles from '../App/Page/BasketPage/basket.module.scss';
 
 export const ContentClassesArrayTest = [
   'main-page',
@@ -23,9 +25,10 @@ export enum PagePathTest {
 export const ContentClassesHeaderArrayTest = [
   `${catalogStyle.catalog}`,
   'main-page',
+  `${aboutUsStyles.aboutUs}`,
   'login',
-  'registration',
   'main-page',
+  `${basketPageStyles.basket}`,
   'login',
 ];
 

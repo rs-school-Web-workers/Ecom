@@ -1,7 +1,7 @@
 import { Router } from './Router/Router';
 import { ID_ELEMENT, PageInfo, PagePath, SECTION_NAME } from './Router/types';
 import '../assets/css/normalize.css';
-import Header, { showLogoutButton, showUserProfileLink } from './components/header/Header';
+import Header, { showLoginButton, showLogoutButton, showUserProfileLink } from './components/header/Header';
 import Component from './utils/base-component';
 import { isNull } from './utils/base-methods';
 import Page from './Page/Page';
@@ -14,6 +14,8 @@ import { UserProfilePage } from './Page/UserProfile/UserProfile';
 import { CatalogPage } from './Page/CatalogPage/Catalog';
 import ProductPage from './Page/Product/Product';
 import * as style from './app.module.scss';
+import { AboutUsPage } from './Page/AboutUsPage/AboutUs';
+import { BasketPage } from './Page/BasketPage/Basket';
 
 export class App {
   router: Router;
@@ -30,6 +32,17 @@ export class App {
     } else {
       getAnonClient();
     }
+    /* (async () => {
+      let cartId = 'error-cart';
+      if (localStorage.getItem('token')) {
+        await autoLoginCLient();
+        await getCart().then((el) => (cartId = el!));
+      } else {
+        await getAnonClient();
+        await getCart().then((el) => (cartId = el!));
+      }
+      console.log(cartId);
+    })(); */
     this.container = document.body;
     this.container = new Component('div', [style.app]).getElement<HTMLDivElement>();
     document.body.append(this.container);
@@ -45,6 +58,7 @@ export class App {
     this.container.append(header, this.contentContainer);
     showLogoutButton();
     showUserProfileLink();
+    showLoginButton();
   }
 
   initPages() {
@@ -78,6 +92,20 @@ export class App {
             this.router.navigate(PagePath.MAIN);
             this.router.renderPageView(PagePath.MAIN);
           }
+        },
+      },
+      {
+        pagePath: PagePath.BASKET,
+        render: () => {
+          const basketPage = new BasketPage(this.router);
+          this.setPage(basketPage);
+        },
+      },
+      {
+        pagePath: PagePath.ABOUTUS,
+        render: () => {
+          const aboutUsPage = new AboutUsPage();
+          this.setPage(aboutUsPage);
         },
       },
       {
